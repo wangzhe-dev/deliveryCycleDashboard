@@ -60,6 +60,15 @@ export const constantRoutes = [
     viewType: 'component',
     meta: { title: '曲面分段计划', icon: '备件管理-蓝' },
   },
+  // 场地多天任务制作
+  {
+    path: '/venueForSeveralDays',
+    component: () => import('@/views/venueForSeveralDays/index.vue'),
+    name: 'VenueForSeveralDays',
+    hidden: false,
+    viewType: 'component',
+    meta: { title: '场地多天任务制作', icon: '备件管理-蓝' },
+  },
 ];
 
 export const dynamicRoutes = [];
