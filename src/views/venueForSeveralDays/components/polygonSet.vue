@@ -69,17 +69,17 @@
 </template>
 
 <script setup>
+import { ArrowLeft, ArrowRight, Check, Close, Delete } from '@element-plus/icons-vue';
 import {
-  ref,
-  reactive,
-  onMounted,
-  onBeforeUnmount,
-  watch,
-  defineProps,
   defineEmits,
   defineExpose,
+  defineProps,
+  onBeforeUnmount,
+  onMounted,
+  reactive,
+  ref,
+  watch,
 } from 'vue';
-import { Check, ArrowLeft, ArrowRight, Close, Delete } from '@element-plus/icons-vue';
 
 const emit = defineEmits(['save', 'pre', 'next', 'close', 'update:data']);
 const props = defineProps({
@@ -120,10 +120,12 @@ function scheduleRedraw() {
 
 /** ===== 颜色 ===== */
 const colors = reactive({
-  bg: '#ffffff',
-  text: '#333',
-  gridFine: '#e9eef5',
-  gridCoarse: '#d8dee6',
+  bgTop: '#f1f5f9',
+  bgBottom: '#e2e8f0',
+  bgStripe: 'rgba(15, 23, 42, 0.05)',
+  text: '#1f2937',
+  gridFine: '#d6dde6',
+  gridCoarse: '#b9c4d2',
   siteFill: '#409eff50',
   siteStroke: '#409eff',
   taskFillFallback: '#94a3b8',
@@ -199,12 +201,7 @@ function getPolyBounds(poly) {
 /** 包围盒是否有重叠（快速剪枝用） */
 function bboxOverlap(b1, b2) {
   if (!b1 || !b2) return false;
-  return !(
-    b1.maxX < b2.minX ||
-    b2.maxX < b1.minX ||
-    b1.maxY < b2.minY ||
-    b2.maxY < b1.minY
-  );
+  return !(b1.maxX < b2.minX || b2.maxX < b1.minX || b1.maxY < b2.minY || b2.maxY < b1.minY);
 }
 
 /** 外层包围盒是否完全包含内层（场地包含任务的快速检查） */
@@ -460,8 +457,7 @@ function pointInPolygon(pt, poly) {
     const yj = poly[j].y;
 
     const intersect =
-      yi > pt.y !== yj > pt.y &&
-      pt.x < ((xj - xi) * (pt.y - yi)) / (yj - yi + 1e-12) + xi;
+      yi > pt.y !== yj > pt.y && pt.x < ((xj - xi) * (pt.y - yi)) / (yj - yi + 1e-12) + xi;
 
     if (intersect) inside = !inside;
   }
@@ -628,10 +624,7 @@ function applyDragAtWorldPoint(w) {
     const dy = w.y - dragStartWorld.y;
     candTF = { dx: startTF.dx + dx, dy: startTF.dy + dy, theta: startTF.theta };
   } else if (mode.value === 'rotate') {
-    const a0 = Math.atan2(
-      dragStartWorld.y - rotateAnchor.y,
-      dragStartWorld.x - rotateAnchor.x,
-    );
+    const a0 = Math.atan2(dragStartWorld.y - rotateAnchor.y, dragStartWorld.x - rotateAnchor.x);
     const a1 = Math.atan2(w.y - rotateAnchor.y, w.x - rotateAnchor.x);
     const d = a1 - a0;
     candTF = { dx: startTF.dx, dy: startTF.dy, theta: startTF.theta + d };
@@ -905,8 +898,24 @@ function drawGrid() {
   clearAll();
 
   c.save();
-  c.fillStyle = colors.bg;
+  const grad = c.createLinearGradient(0, 0, 0, canvasH.value);
+  grad.addColorStop(0, colors.bgTop);
+  grad.addColorStop(1, colors.bgBottom);
+  c.fillStyle = grad;
   c.fillRect(0, 0, canvasW.value, canvasH.value);
+  c.restore();
+
+  // subtle diagonal texture
+  c.save();
+  c.strokeStyle = colors.bgStripe;
+  c.lineWidth = 1 / dpr.value;
+  c.beginPath();
+  const stripeGap = 60;
+  for (let x = -canvasH.value; x < canvasW.value + canvasH.value; x += stripeGap) {
+    c.moveTo(x, 0);
+    c.lineTo(x + canvasH.value, canvasH.value);
+  }
+  c.stroke();
   c.restore();
 
   const stepPx = gridUnitM.value * pxPerM.value;

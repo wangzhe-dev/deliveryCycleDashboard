@@ -3,9 +3,13 @@
     <!-- 顶部：右侧新增按钮 -->
     <div class="row-between header-row mb10">
       <div class="row-start" style="gap: 10px">
+        <el-button type="warning" :icon="Histogram" @click.stop="openGeo({})">新建场地</el-button>
         <el-button type="warning" :icon="Histogram" @click="goMultiDayBoard">
           场地多天任务制作
         </el-button>
+      </div>
+      <div class="row-end">
+        <el-button @click="goBack">返回</el-button>
       </div>
     </div>
 
@@ -395,6 +399,10 @@ const goMultiDayBoard = () => {
   router.push({
     name: 'VenueForSeveralDays',
   });
+};
+
+const goBack = () => {
+  router.go(-1);
 };
 
 const openGeo = async (row) => {

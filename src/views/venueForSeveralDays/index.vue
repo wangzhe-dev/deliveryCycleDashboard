@@ -64,7 +64,13 @@
             <el-checkbox v-model="showTaskName" size="small" style="margin-right: 10px !important">
               显示分段信息
             </el-checkbox>
-            <el-checkbox v-model="showGrid" size="small">显示网格</el-checkbox>
+            <el-checkbox v-model="showGrid" size="small" style="margin-right: 10px !important">
+              显示网格
+            </el-checkbox>
+            <el-button link type="primary" size="small" @click="goBack">
+              <el-icon class="mr4"><ArrowLeft /></el-icon>
+              返回上一级
+            </el-button>
           </div>
         </div>
         <div class="cards-container">
@@ -171,10 +177,11 @@
 </template>
 
 <script setup>
-import { Histogram, PieChart } from '@element-plus/icons-vue';
+import { ArrowLeft, Histogram, PieChart } from '@element-plus/icons-vue';
 import * as echarts from 'echarts';
 import { ElMessage } from 'element-plus';
 import { nextTick, onBeforeUnmount, onMounted, reactive, ref } from 'vue';
+import { useRouter } from 'vue-router';
 import polygonSet from './components/polygonSet.vue';
 import ResponsivePolygon from './components/ResponsivePolygon.vue';
 import SiteCanvas from './components/SiteCanvas.vue';
@@ -216,6 +223,7 @@ const showTaskName = ref(true);
 const ratioDialogVisible = ref(false);
 const ratioChartRef = ref(null);
 let ratioChart = null;
+const router = useRouter();
 
 /** ===== 统计弹窗 ===== */
 const statsDialogVisible = ref(false);
@@ -514,6 +522,10 @@ function openStatsDialog() {
   }
   statsDialogVisible.value = true;
   loadStatsData();
+}
+
+function goBack() {
+  router.back();
 }
 
 function onStatsViewTypeChange(type) {

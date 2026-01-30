@@ -65,7 +65,7 @@ export const constantRoutes = [
     path: '/venueForSeveralDays',
     component: () => import('@/views/venueForSeveralDays/index.vue'),
     name: 'VenueForSeveralDays',
-    hidden: false,
+    hidden: true,
     viewType: 'component',
     meta: { title: '场地多天任务制作', icon: '备件管理-蓝' },
   },
