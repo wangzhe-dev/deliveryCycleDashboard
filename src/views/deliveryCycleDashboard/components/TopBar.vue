@@ -49,13 +49,16 @@
     </div>
 
     <div class="topbar__right">
+      <el-button type="primary" size="large" :disabled="!canSaveMarks" @click="emit('save')">
+        保存组立标注信息
+      </el-button>
       <el-button
+        class="topbar__btn--danger"
         type="primary"
         size="large"
-        :disabled="!canSaveMarks"
-        @click="emit('save')"
+        @click="goBack"
       >
-        保存组立标注信息
+        返回
       </el-button>
     </div>
   </header>
@@ -73,12 +76,14 @@ const props = defineProps({
   canSaveMarks: { type: Boolean, default: false },
 });
 
-const emit = defineEmits([
-  'update:selected-ship',
-  'update:selected-part',
-  'flow-toggle',
-  'save',
-]);
+import { useRouter } from 'vue-router';
+
+const emit = defineEmits(['update:selected-ship', 'update:selected-part', 'flow-toggle', 'save']);
+
+const router = useRouter();
+const goBack = () => {
+  router.back();
+};
 </script>
 
 <style scoped>
@@ -95,7 +100,7 @@ const emit = defineEmits([
   background: rgba(255, 255, 255, 1);
   border-bottom: 1px solid rgba(37, 99, 235, 0.14);
   backdrop-filter: blur(10px);
-  border-radius: 20px 20px 0px 0px
+  border-radius: 20px 20px 0px 0px;
 }
 
 /* 顶部底部强调线（细、克制） */
@@ -106,7 +111,14 @@ const emit = defineEmits([
   right: 0;
   bottom: -1px;
   height: 3px;
-      background-image: linear-gradient(90deg, rgb(13, 124, 255), rgb(0, 194, 255), rgb(124, 77, 255), rgb(255, 45, 142), rgb(255, 176, 0));
+  background-image: linear-gradient(
+    90deg,
+    rgb(13, 124, 255),
+    rgb(0, 194, 255),
+    rgb(124, 77, 255),
+    rgb(255, 45, 142),
+    rgb(255, 176, 0)
+  );
   opacity: 0.9;
 }
 
@@ -164,6 +176,7 @@ const emit = defineEmits([
   display: flex;
   align-items: center;
   justify-content: flex-end;
+  gap: 10px;
 }
 
 /* ========== 流向 tabs：更“实”的 pill，无杂色 ========== */
@@ -186,7 +199,11 @@ const emit = defineEmits([
   color: rgba(15, 23, 42, 0.88);
   font-weight: 900;
   cursor: pointer;
-  transition: transform 0.08s ease, filter 0.12s ease, background 0.12s ease, border-color 0.12s ease;
+  transition:
+    transform 0.08s ease,
+    filter 0.12s ease,
+    background 0.12s ease,
+    border-color 0.12s ease;
 }
 .flow-tab:active {
   transform: translateY(1px);
@@ -213,10 +230,13 @@ const emit = defineEmits([
   background: rgba(255, 255, 255, 0.85);
   box-shadow: none;
   border: 1px solid rgba(37, 99, 235, 0.16);
-  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease;
 }
 .topbar :deep(.el-input__wrapper:hover) {
-  border-color: rgba(11, 92, 255, 0.30);
+  border-color: rgba(11, 92, 255, 0.3);
 }
 .topbar :deep(.el-input__wrapper.is-focus) {
   border-color: rgba(11, 92, 255, 0.55);
@@ -232,7 +252,7 @@ const emit = defineEmits([
 
 /* placeholder */
 .topbar :deep(.el-input__inner::placeholder) {
-  color: rgba(15, 23, 42, 0.40);
+  color: rgba(15, 23, 42, 0.4);
   font-weight: 800;
 }
 
@@ -254,6 +274,16 @@ const emit = defineEmits([
 }
 .topbar :deep(.el-button--primary.is-disabled) {
   box-shadow: none;
+}
+
+/* 返回按钮：同款样式，红色 */
+.topbar :deep(.topbar__btn--danger.el-button--primary) {
+  background: #dc2626;
+  border-color: #dc2626;
+  box-shadow: 0 14px 28px rgba(220, 38, 38, 0.18);
+}
+.topbar :deep(.topbar__btn--danger.el-button--primary:hover) {
+  filter: brightness(1.03);
 }
 
 /* 响应式：窄屏下自动换行更舒服 */

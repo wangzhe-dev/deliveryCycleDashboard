@@ -1649,9 +1649,33 @@ watch(
   width: 100%;
   border-radius: 12px;
   overflow: hidden;
-  background-size: 24px 24px;
-  background:     linear-gradient(160deg, rgba(255, 122, 217, 0.14) 0%, rgba(124, 220, 255, 0.14) 35%, rgba(167, 139, 250, 0.12) 70%),
-    linear-gradient(180deg, #eef3ff 0%, #e8efff 100%);
+  background:
+    radial-gradient(1000px 460px at 16% 8%, rgba(14, 116, 144, 0.06), transparent 62%),
+    radial-gradient(900px 420px at 86% 0%, rgba(30, 64, 175, 0.06), transparent 68%),
+    linear-gradient(180deg, #f7f5f1 0%, #f0ebe5 55%, #e8e1da 100%);
+  box-shadow:
+    0 12px 26px rgba(15, 23, 42, 0.12),
+    inset 0 0 40px rgba(15, 23, 42, 0.1);
+}
+.mv-root::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0)),
+    repeating-linear-gradient(0deg, rgba(120, 130, 140, 0.12) 0, rgba(120, 130, 140, 0.12) 1px, transparent 1px, transparent 120px),
+    repeating-linear-gradient(90deg, rgba(120, 130, 140, 0.1) 0, rgba(120, 130, 140, 0.1) 1px, transparent 1px, transparent 120px),
+    repeating-linear-gradient(135deg, rgba(120, 130, 140, 0.08) 0, rgba(120, 130, 140, 0.08) 1px, transparent 1px, transparent 180px);
+  opacity: 0.2;
+  pointer-events: none;
+}
+.mv-root::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(70% 70% at 50% 50%, transparent 0%, rgba(2, 6, 23, 0.08) 100%);
+  opacity: 0.12;
+  pointer-events: none;
 }
 .mv-root--flat-left {
   border-top-left-radius: 0;
@@ -1666,9 +1690,12 @@ watch(
   gap: 8px;
   padding: 6px;
   border-radius: 999px;
-  border: 1px solid rgba(229, 231, 235, 0.9);
-  background: rgba(255, 255, 255, 0.9);
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  background: linear-gradient(180deg, rgba(86, 94, 104, 0.75), rgba(62, 69, 78, 0.6));
+  backdrop-filter: blur(10px);
+  box-shadow:
+    0 10px 20px rgba(2, 6, 23, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
 }
 .mv-info-tab {
   height: 32px;
@@ -1676,15 +1703,18 @@ watch(
   border: none;
   border-radius: 999px;
   background: transparent;
-  color: #1f2937;
+  color: #ffffff;
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
+  text-shadow: 0 1px 2px rgba(2, 6, 23, 0.6);
 }
 .mv-info-tab.is-active {
-  background: linear-gradient(180deg, #2563eb 0%, #1d4ed8 100%);
+  background: linear-gradient(180deg, #2563eb 0%, #1e3a8a 100%);
   color: #ffffff;
-  box-shadow: 0 6px 12px rgba(37, 99, 235, 0.35);
+  box-shadow:
+    0 10px 20px rgba(30, 64, 175, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 .mv-host {
   position: absolute;
@@ -1707,22 +1737,22 @@ watch(
   max-width: 280px;
   padding: 8px 10px;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.96);
-  border: 1px solid #e5e7eb;
-  color: #111827;
+  background: rgba(15, 23, 42, 0.92);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  color: #ffffff;
   font-size: 12px;
   pointer-events: none;
-  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 10px 26px rgba(2, 6, 23, 0.35);
 }
 .mv-tip__t {
   display: block;
   font-size: 12px;
   font-weight: 700;
-  color: #111827;
+  color: #ffffff;
   margin-bottom: 2px;
 }
 .mv-tip__s {
-  color: #6b7280;
+  color: rgba(248, 250, 252, 0.72);
   font-size: 11px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1733,9 +1763,9 @@ watch(
 :deep(.mv-label) {
   padding: 4px 8px;
   border-radius: 10px;
-  border: 1px solid rgba(37, 99, 235, 0.35);
-  background: rgba(239, 246, 255, 0.92);
-  color: #1d4ed8;
+  border: 1px solid rgba(59, 130, 246, 0.45);
+  background: rgba(15, 23, 42, 0.72);
+  color: #ffffff;
   font-size: 12px;
   font-weight: 800;
   white-space: nowrap;
@@ -1758,16 +1788,14 @@ watch(
   font-weight: 500;
   letter-spacing: 0.2px;
   opacity: 0.85;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
+  color: rgba(248, 250, 252, 0.9);
+  text-shadow: 0 2px 6px rgba(2, 6, 23, 0.85);
   white-space: nowrap;
 }
 :deep(.mv-label--mesh.mv-label--mesh-outline) {
   text-shadow:
-    -1px -1px 0 #ffffff,
-    1px -1px 0 #ffffff,
-    -1px 1px 0 #ffffff,
-    1px 1px 0 #ffffff,
-    0 0 2px rgba(255, 255, 255, 0.9);
+    0 0 6px rgba(15, 23, 42, 0.9),
+    0 0 12px rgba(15, 23, 42, 0.6);
 }
 
 
@@ -1780,36 +1808,38 @@ watch(
   gap: 8px;
   padding: 8px 10px;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.96);
-  border: 1px solid rgba(37, 99, 235, 0.28);
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.12);
+  background: rgba(15, 23, 42, 0.92);
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  box-shadow: 0 12px 30px rgba(2, 6, 23, 0.4);
 }
 .mv-editor__input {
   width: 200px;
   height: 30px;
   border-radius: 10px;
-  border: 1px solid rgba(37, 99, 235, 0.28);
+  border: 1px solid rgba(59, 130, 246, 0.4);
   outline: none;
   padding: 0 10px;
   font-size: 12px;
-  color: #111827;
+  color: #ffffff;
+  background: rgba(2, 6, 23, 0.45);
 }
 .mv-editor__input:focus {
-  border-color: rgba(37, 99, 235, 0.65);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+  border-color: rgba(59, 130, 246, 0.7);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
 }
 .mv-editor__btn {
   height: 30px;
   border-radius: 10px;
-  border: 1px solid rgba(17, 24, 39, 0.12);
-  background: #fff;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  background: rgba(15, 23, 42, 0.65);
+  color: #ffffff;
   font-size: 12px;
   cursor: pointer;
 }
 .mv-editor__btn--ok {
-  border-color: rgba(37, 99, 235, 0.45);
-  background: rgba(37, 99, 235, 0.08);
-  color: #1d4ed8;
+  border-color: rgba(59, 130, 246, 0.6);
+  background: rgba(37, 99, 235, 0.22);
+  color: #ffffff;
   font-weight: 800;
 }
 
@@ -1821,21 +1851,22 @@ watch(
   z-index: 7;
   padding: 8px 10px;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.92);
-  border: 1px solid #e5e7eb;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.25);
   font-size: 12px;
-  color: #111827;
+  color: #ffffff;
 }
 .mv-toast--err {
-  color: #b91c1c;
-  border-color: rgba(185, 28, 28, 0.25);
+  color: #ffffff;
+  border-color: rgba(239, 68, 68, 0.35);
+  background: rgba(127, 29, 29, 0.7);
 }
 .mv-empty {
   position: absolute;
   inset: 0;
   display: grid;
   place-items: center;
-  color: #6b7280;
+  color: #ffffff;
   font-size: 12px;
   z-index: 6;
   text-align: center;

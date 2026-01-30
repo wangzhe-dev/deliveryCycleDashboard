@@ -399,32 +399,32 @@ function openExcel(url) {
 ====================== */
 .leftpanel {
   /* 主题变量 */
-  --lp-bg-1: var(--left-shell-bg, #eef3ff);
-  --lp-bg-2: var(--left-shell-bg, #e8efff);
+  --lp-bg-1: var(--left-shell-bg, #f6f2eb);
+  --lp-bg-2: var(--left-shell-bg, #eee7df);
   --lp-border: transparent;
 
-  --lp-text: #0b1220;
-  --lp-text-2: #8b6464;
-  --lp-title: #ff7a00;
+  --lp-text: #1f2933;
+  --lp-text-2: #6b7280;
+  --lp-title: #2b3440;
 
-  --lp-divider: rgba(59, 130, 246, 0.20);
+  --lp-divider: rgba(100, 116, 139, 0.22);
 
-  --lp-mark: #fde68a;
-  --lp-mark-rgb: 253, 230, 138;
+  --lp-mark: #d1b27c;
+  --lp-mark-rgb: 209, 178, 124;
 
-  --lp-card-1: rgba(247, 251, 255, 0.92);
-  --lp-card-2: rgba(236, 244, 255, 0.92);
-  --lp-card-h-1: rgba(241, 247, 255, 0.96);
-  --lp-card-h-2: rgba(227, 239, 255, 0.96);
+  --lp-card-1: rgba(251, 247, 241, 0.92);
+  --lp-card-2: rgba(241, 235, 228, 0.92);
+  --lp-card-h-1: rgba(246, 241, 234, 0.96);
+  --lp-card-h-2: rgba(235, 229, 221, 0.96);
 
-  --lp-hover-border: rgba(59, 130, 246, 0.22);
-  --lp-focus: rgba(59, 130, 246, 0.26);
+  --lp-hover-border: rgba(71, 85, 105, 0.22);
+  --lp-focus: rgba(71, 85, 105, 0.26);
 
-  --lp-active-1: #6aa3ff;
-  --lp-active-2: #2563eb;
+  --lp-active-1: #6d8aa3;
+  --lp-active-2: #3b5164;
 
-  --lp-accent-1: #c4b5fd;
-  --lp-accent-2: #7c3aed;
+  --lp-accent-1: #7a8a95;
+  --lp-accent-2: #3f4d58;
 
   --lp-shadow: none;
   --lp-inner: inset 0 1px 0 rgba(255, 255, 255, 0.55);

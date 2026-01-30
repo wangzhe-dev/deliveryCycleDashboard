@@ -148,49 +148,49 @@ defineEmits([
 /* ====== Blue Ultra（更亮更通透）+ 大屏：背景稍微深一点（降眩光） ====== */
 .leftbar {
   /* ✅ 背景稍深：从纯白改为“淡蓝灰渐变”，大屏更舒服 */
-  --lb-bg: var(--left-shell-bg, linear-gradient(180deg, #eef3ff 0%, #eddcff63 100%));
+  --lb-bg: var(--left-shell-bg, linear-gradient(180deg, #f6f2eb 0%, #eee7df 100%));
   --lb-border: transparent;
 
   /* 分隔线 & 点缀色 */
-  --lb-divider: #bfdbfe;
-  --lb-mark: #fde68a;
-  --lb-mark-rgb: 253, 230, 138;
+  --lb-divider: #d3d8de;
+  --lb-mark: #d1b27c;
+  --lb-mark-rgb: 209, 178, 124;
 
   /* 文本 */
-  --lb-text: #0b1220;
-  --lb-text-2: #64748b;
-  --lb-title: #1f2937;
-  --lb-ico-fg: #1f2937;
+  --lb-text: #1f2933;
+  --lb-text-2: #6b7280;
+  --lb-title: #2b3440;
+  --lb-ico-fg: #2f3a44;
 
   /* ✅ 卡片也跟着压一点亮度，但仍然通透 */
-  --lb-card-1: #f3f7ff;
-  --lb-card-2: #e6efff;
-  --lb-card-h-1: #edf5ff;
-  --lb-card-h-2: #dbeaff;
+  --lb-card-1: #fbf7f1;
+  --lb-card-2: #f1ebe4;
+  --lb-card-h-1: #f6f1ea;
+  --lb-card-h-2: #ebe5dd;
 
   /* hover / focus */
-  --lb-hover-border: rgba(59, 130, 246, 0.18);
-  --lb-focus: rgba(59, 130, 246, 0.22);
+  --lb-hover-border: rgba(71, 85, 105, 0.18);
+  --lb-focus: rgba(71, 85, 105, 0.25);
 
   /* Active：主色 */
-  --lb-active-1: #6aa3ff;
-  --lb-active-2: #1d4ed8;
-  --lb-active-border: rgba(37, 99, 235, 0.55);
-  --lb-active-shadow: rgba(37, 99, 235, 0.20);
-  --lb-active-inset: rgba(37, 99, 235, 0.10);
+  --lb-active-1: #6d8aa3;
+  --lb-active-2: #3b5164;
+  --lb-active-border: rgba(59, 81, 100, 0.55);
+  --lb-active-shadow: rgba(59, 81, 100, 0.22);
+  --lb-active-inset: rgba(59, 81, 100, 0.12);
 
   /* Active：工具组强调色 */
-  --lb-accent-1: #c4b5fd;
-  --lb-accent-2: #6d28d9;
-  --lb-accent-border: rgba(124, 58, 237, 0.55);
-  --lb-accent-shadow: rgba(124, 58, 237, 0.20);
-  --lb-accent-inset: rgba(124, 58, 237, 0.10);
+  --lb-accent-1: #7a8a95;
+  --lb-accent-2: #3f4d58;
+  --lb-accent-border: rgba(63, 77, 88, 0.55);
+  --lb-accent-shadow: rgba(63, 77, 88, 0.22);
+  --lb-accent-inset: rgba(63, 77, 88, 0.12);
 
   /* icon 渐变 */
-  --lb-ico-g1: rgba(253, 230, 138, 0.22);
-  --lb-ico-g2: rgba(147, 197, 253, 0.14);
-  --lb-ico-g3: rgba(255, 255, 255, 0.70);
-  --lb-ico-stroke: rgba(147, 197, 253, 0.18);
+  --lb-ico-g1: rgba(227, 218, 206, 0.6);
+  --lb-ico-g2: rgba(205, 216, 228, 0.35);
+  --lb-ico-g3: rgba(255, 255, 255, 0.85);
+  --lb-ico-stroke: rgba(148, 163, 184, 0.2);
 
   height: 100%;
   background: var(--lb-bg);

@@ -6,15 +6,12 @@
     <!-- ① 组立/零件树：50% -->
     <section class="right__tree right-card">
       <div class="tree-col tree-col--zl">
-        <div
-          class="tree-col__title"
-          style="background: linear-gradient(90deg, rgb(12 92 255), rgb(40 143 255))"
-        >
+        <div class="tree-col__title">
           <span>组立清单</span>
           <span class="tree-col__badge">{{ rightTreeLeft.length }}</span>
         </div>
 
-        <el-scrollbar height="100%" style="background: #409eff14">
+        <el-scrollbar height="100%" class="tree-scroll tree-scroll--zl">
           <div
             class="tree-item tree-item--zl"
             v-for="x in rightTreeLeft"
@@ -37,7 +34,7 @@
           <span class="tree-col__badge">{{ rightTreeRight.length }}</span>
         </div>
 
-        <el-scrollbar height="100%" style="background: #ffff006b">
+        <el-scrollbar height="100%" class="tree-scroll tree-scroll--part">
           <div
             class="tree-item tree-item--part"
             v-for="x in rightTreeRight"
@@ -56,11 +53,8 @@
     </section>
 
     <!-- ② 信息：25% -->
-    <section class="right__info right-card" style="background: #f1f7ff">
-      <div
-        class="tree-col__title"
-        style="background: linear-gradient(90deg, rgb(12 92 255), rgb(40 143 255))"
-      >
+    <section class="right__info right-card">
+      <div class="tree-col__title">
         <span>组立详情</span>
         <span class="tree-col__badge" style="padding: 0">
           <span
@@ -92,7 +86,9 @@
         </div>
 
         <div class="info-row info-row--span">
-          <span class="k mr10" style="text-align: right;">{{ selectedLeafCode ? '零件重量' : '组立重量' }}</span>
+          <span class="k mr10" style="text-align: right">
+            {{ selectedLeafCode ? '零件重量' : '组立重量' }}
+          </span>
           <span class="v">{{ fmt(selectedNode?.weight) }} kg</span>
         </div>
 
@@ -101,7 +97,7 @@
           <span class="v">{{ fmt(selectedNode?.part_length) }} mm</span>
         </div>
         <div v-if="selectedLeafCode" class="info-row info-row--span">
-          <span class="k mr10" style="text-align: right;">零件宽度</span>
+          <span class="k mr10" style="text-align: right">零件宽度</span>
           <span class="v">{{ fmt(selectedNode?.part_width) }} mm</span>
         </div>
       </div>
@@ -295,8 +291,8 @@
 </template>
 
 <script setup>
-import { watch } from 'vue';
 import { Delete, Location } from '@element-plus/icons-vue';
+import { watch } from 'vue';
 
 const props = defineProps({
   rightCollapsed: { type: Boolean, default: false },
@@ -346,21 +342,21 @@ watch(
 <style scoped>
 .right {
   /* ===== Token（右侧统一） ===== */
-  --bg: #ffffff;
-  --border: rgba(230, 234, 242, 1);
-  --divider: rgba(238, 242, 247, 1);
+  --bg: #f7f2eb;
+  --border: rgba(120, 130, 140, 0.22);
+  --divider: rgba(160, 170, 180, 0.22);
 
-  --text: #111827;
+  --text: #1f2933;
   --muted: #6b7280;
 
-  --primary: #2563eb;
-  --primary-weak: #eaf2ff;
-  --primary-hover: rgba(37, 99, 235, 0.08);
-  --primary-active: rgba(37, 99, 235, 0.12);
-  --focus: rgba(37, 99, 235, 0.25);
+  --primary: #4b6f92;
+  --primary-weak: #e8edf2;
+  --primary-hover: rgba(75, 111, 146, 0.08);
+  --primary-active: rgba(75, 111, 146, 0.14);
+  --focus: rgba(75, 111, 146, 0.28);
 
-  --gold: #f59e0b;
-  --gold-weak: #fff7e6;
+  --gold: #c8a96a;
+  --gold-weak: #f6efe2;
 
   --danger: #dc2626;
   --danger-weak: rgba(220, 38, 38, 0.1);
@@ -373,6 +369,7 @@ watch(
   margin: 0;
   transition: all 0.28s ease;
   position: relative;
+  border-radius: 12px;
 }
 
 .right--collapsed {
@@ -400,7 +397,7 @@ watch(
 
 .right-card {
   background: var(--bg);
-  border: 1px solid rgba(37, 99, 235, 0.14);
+  border: 1px solid var(--border);
   border-radius: 12px;
   overflow: hidden;
 }
@@ -417,8 +414,15 @@ watch(
   overflow: hidden;
 }
 
+.tree-scroll :deep(.el-scrollbar__wrap) {
+  background: #f3eee7;
+}
+.tree-scroll--part :deep(.el-scrollbar__wrap) {
+  background: #f0ebe4;
+}
+
 .tree-col + .tree-col {
-  border-left: 1px solid rgba(37, 99, 235, 0.1);
+  border-left: 1px solid var(--divider);
 }
 
 /* 标题：取消大色块，改成浅底 + 左色条 */
@@ -433,11 +437,11 @@ watch(
   height: 44px;
   font-weight: 900;
   font-size: 14px;
-  background: #1d4ed8;
+  background: linear-gradient(90deg, #6f7882, #8b949d);
   color: #ffffff;
   border-bottom: 1px solid var(--divider);
 }
-/* 
+/*
 .tree-col__title::before {
   content: '';
   position: absolute;
@@ -472,24 +476,24 @@ watch(
   font-size: 12px;
 
   color: #ffffff;
-  background: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.22);
   /* border: 1px solid rgba(255, 255, 255, 0.35); */
 }
 
 .tree-col--zl .tree-col__badge {
   color: #ffffff;
-  background: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.22);
   border-color: rgba(255, 255, 255, 0.35);
 }
 
 .tree-col--part .tree-col__badge {
   color: #ffffff;
-  background: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.22);
   border-color: rgba(255, 255, 255, 0.35);
 }
 
 .tree-col--part .tree-col__title {
-  background: #f59e0b;
+  background: linear-gradient(90deg, #76828d, #98a1aa);
   color: #ffffff;
 }
 
@@ -501,12 +505,13 @@ watch(
   border-radius: 999px;
   font-weight: 700;
   cursor: pointer;
-  background: rgba(255, 255, 255, 0.18);
-  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: #ffffff;
 }
 .hud-pill__tab.is-active {
   background: #ffffff;
-  color: #0b5cff;
+  color: #2b3440;
 }
 .hud-pill__sep {
   margin: 0 4px;
@@ -515,7 +520,7 @@ watch(
 
 .tree-item {
   padding: 9px 10px;
-  border-bottom: 1px solid rgba(37, 99, 235, 0.08);
+  border-bottom: 1px solid var(--divider);
   font-size: 13px;
   display: flex;
   align-items: center;
@@ -530,7 +535,7 @@ watch(
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #334155;
+  color: #2f3a44;
 }
 
 .tree-item__text {
@@ -569,13 +574,14 @@ watch(
 /* 空态 */
 .placeholder {
   padding: 14px;
-  color: #94a3b8;
+  color: #8a94a0;
   font-size: 12px;
 }
 
 /* ===== 信息面板 ===== */
 .right__info {
   /* padding: 10px 9px; */
+  background: #f4efe9;
   overflow: hidden;
 }
 
@@ -590,7 +596,7 @@ watch(
   grid-template-columns: 70px 1fr;
   font-size: 13px;
   align-items: center;
-  border: 1px solid #9cb8de29;
+  border: 1px solid rgba(160, 170, 180, 0.25);
   /* border-radius: 8px; */
   /* overflow: hidden; */
   /* background: #ffffff; */
@@ -601,7 +607,7 @@ watch(
 }
 
 .info-row .k {
-  color: rgba(15, 23, 42, 0.7);
+  color: rgba(43, 52, 64, 0.75);
   font-weight: 900;
   /* padding: 6px 8px; */
   /* background: #f8fafc; */
@@ -630,8 +636,8 @@ watch(
   margin: 8px 10px 0;
   padding: 4px;
   border-radius: 999px;
-  border: 1px solid rgba(37, 99, 235, 0.35) !important;
-  background: rgba(37, 99, 235, 0.1) !important;
+  border: 1px solid rgba(75, 111, 146, 0.35) !important;
+  background: rgba(75, 111, 146, 0.12) !important;
 }
 
 /* tabs：不再整块色 */
@@ -651,7 +657,7 @@ watch(
   cursor: pointer !important;
 
   background: transparent !important;
-  color: rgba(15, 23, 42, 0.78);
+  color: rgba(43, 52, 64, 0.78);
   transition:
     color 0.12s ease,
     background 0.12s ease,
@@ -668,8 +674,8 @@ watch(
 
 .right :deep(.hud-toggle__btn.is-active) {
   color: #ffffff !important;
-  background: #0b5cff !important;
-  box-shadow: 0 10px 18px rgba(11, 92, 255, 0.22);
+  background: #4b6f92 !important;
+  box-shadow: 0 10px 18px rgba(75, 111, 146, 0.22);
 }
 
 .hud-toggle__btn--measure,
@@ -689,9 +695,9 @@ watch(
   font-weight: 900;
   font-size: 11px;
 
-  color: rgba(15, 23, 42, 0.75);
-  background: rgba(15, 23, 42, 0.08);
-  border: 1px solid rgba(15, 23, 42, 0.12);
+  color: rgba(43, 52, 64, 0.75);
+  background: rgba(43, 52, 64, 0.08);
+  border: 1px solid rgba(43, 52, 64, 0.12);
 }
 
 .hud-toggle__btn.is-active .hud-toggle__badge {
@@ -737,11 +743,11 @@ watch(
 }
 .hud-item :deep(.el-input__wrapper) {
   box-shadow: none;
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(120, 130, 140, 0.3);
 }
 .hud-item :deep(.el-input__wrapper.is-focus) {
-  border-color: #0b5cff;
-  box-shadow: 0 0 0 3px rgba(11, 92, 255, 0.25);
+  border-color: #4b6f92;
+  box-shadow: 0 0 0 3px rgba(75, 111, 146, 0.22);
 }
 
 /* HUD 卡片：统一浅蓝底；NOTE 卡只做很淡黄边提示 */
@@ -749,15 +755,15 @@ watch(
   border-radius: 10px;
   padding: 10px 10px;
   margin-bottom: 10px;
-  background: #f5f9ff;
-  border: 2px solid #0b5cff;
-  box-shadow: 0 6px 14px rgba(11, 92, 255, 0.25);
+  background: #f7f2eb;
+  border: 1px solid rgba(120, 130, 140, 0.28);
+  box-shadow: 0 6px 14px rgba(60, 70, 80, 0.18);
 }
 
 .hud-item--n {
-  background: #fff6e5;
-  border: 1px solid #ff7a00;
-  box-shadow: 0 6px 14px rgba(255, 122, 0, 0.25);
+  background: #f3eee6;
+  border: 1px solid rgba(140, 120, 95, 0.28);
+  box-shadow: 0 6px 14px rgba(90, 75, 60, 0.18);
 }
 
 /* 表单区域排版保持你原来的，只调文本色一致 */
@@ -783,7 +789,7 @@ watch(
 
 .lab {
   font-weight: 900;
-  color: rgba(15, 23, 42, 0.85);
+  color: rgba(43, 52, 64, 0.85);
   text-align: right;
   width: 80px;
   font-size: 14px;
@@ -794,7 +800,7 @@ watch(
 }
 .hud-xyz__value {
   display: inline-block;
-  color: #0b1324;
+  color: #2b3440;
   font-weight: 700;
   padding: 0;
   border: 0;
@@ -837,12 +843,12 @@ watch(
 
 /* 定位：主蓝 */
 .hud-btn--b {
-  background: #0b5cff;
+  background: #4b6f92;
   color: #ffffff;
-  border-color: rgba(11, 92, 255, 0.6);
+  border-color: rgba(75, 111, 146, 0.6);
 }
 .hud-btn--b:hover {
-  background: #1d4ed8;
+  background: #3b5b78;
 }
 
 /* 删除：语义红 */

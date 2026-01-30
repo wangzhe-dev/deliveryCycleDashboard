@@ -29,7 +29,6 @@
       class="main"
       :class="{
         'main--right-collapsed': rightCollapsed,
-        'main--left-collapsed': leftCollapsed,
       }"
     >
       <!-- 左侧操作栏 -->
@@ -48,6 +47,7 @@
       />
 
       <!-- 左侧文件栏（保留） -->
+      <!--
       <section class="left-panel" :class="{ 'left-panel--collapsed': leftCollapsed }">
         <div class="left-panel__body">
           <LeftPanel
@@ -98,6 +98,7 @@
           />
         </div>
       </section>
+      -->
 
       <!-- 中间：模型 -->
       <section class="center">
@@ -114,7 +115,6 @@
             :colorIsolated="colorIsolated"
             :colorIsolatedOpacity="activeColorIsolatedOpacity"
             :baseOpacity="activeBaseOpacity"
-            :flat-left="leftCollapsed"
             :notePointScale="notePointScale"
             :noteLabelOffset="noteLabelOffset"
             :noteLineWidth="noteLineWidth"
@@ -147,9 +147,12 @@
           <button class="center__right-toggle" type="button" @click="toggleRightCollapsed">
             <span>{{ rightCollapsed ? '>>' : '<<' }}</span>
           </button>
+          <!-- 左侧文件栏隐藏时，先不显示左侧折叠按钮 -->
+          <!--
           <button class="center__left-toggle" type="button" @click="leftCollapsed = !leftCollapsed">
             <span>{{ leftCollapsed ? '<<' : '>>' }}</span>
           </button>
+          -->
         </div>
       </section>
 
@@ -1175,26 +1178,52 @@ onBeforeUnmount(() => {
 
 /* 主体：4列 */
 .main {
+  position: relative;
   display: grid;
-  grid-template-columns: 100px 340px 1fr 380px;
+  grid-template-columns: 100px 1fr 340px;
   gap: 5px;
   padding: 10px;
   overflow: hidden;
   transition: grid-template-columns 0.28s ease;
   --left-shell-bg:
-    linear-gradient(160deg, rgba(255, 122, 217, 0.14) 0%, rgba(124, 220, 255, 0.14) 35%, rgba(167, 139, 250, 0.12) 70%),
-    linear-gradient(180deg, #eef3ff 0%, #e8efff 100%);
-  background: #fff;
-  border-radius: 0px 0px 20px 20px;
+    linear-gradient(160deg, rgba(100, 116, 139, 0.12) 0%, rgba(148, 163, 184, 0.1) 35%, rgba(203, 213, 225, 0.1) 70%),
+    linear-gradient(180deg, #f6f2eb 0%, #eee7df 100%);
+  background: linear-gradient(180deg, #e6e7e5 0%, #dcddda 55%, #d1d2cf 100%);
+  border: 1px solid rgba(15, 23, 42, 0.18);
+  border-top: 0;
+  border-radius: 0 0 22px 22px;
+  box-shadow:
+    0 22px 60px rgba(6, 18, 38, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+.main::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(1000px 360px at 18% 0%, rgba(14, 116, 144, 0.18), transparent 55%),
+    radial-gradient(900px 300px at 88% 5%, rgba(30, 64, 175, 0.16), transparent 60%);
+  opacity: 0.8;
+  pointer-events: none;
+  z-index: 0;
+}
+.main::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(90deg, rgba(12, 24, 52, 0.04), rgba(12, 24, 52, 0.04) 1px, transparent 1px, transparent 140px),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0));
+  opacity: 0.5;
+  pointer-events: none;
+  z-index: 0;
+}
+.main > * {
+  position: relative;
+  z-index: 1;
 }
 .main--right-collapsed {
-  grid-template-columns: 90px 320px 1fr 0px;
-}
-.main--left-collapsed {
-  grid-template-columns: 90px 0px 1fr 360px;
-}
-.main--left-collapsed.main--right-collapsed {
-  grid-template-columns: 90px 0px 1fr 0px;
+  grid-template-columns: 100px 1fr 0px;
 }
 
 /* 中间 */
@@ -1202,18 +1231,50 @@ onBeforeUnmount(() => {
   position: relative;
   display: flex;
   flex-direction: column;
-  border-radius: 10px;
+  border-radius: 16px;
   overflow: hidden;
-}
-.main--left-collapsed .center {
-  margin-left: -10px;
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
+  background:
+    radial-gradient(120% 120% at 12% 8%, rgba(14, 116, 144, 0.22), transparent 42%),
+    radial-gradient(120% 120% at 88% 0%, rgba(30, 64, 175, 0.18), transparent 46%),
+    linear-gradient(180deg, rgba(24, 29, 36, 0.9), rgba(12, 16, 20, 0.95));
+  box-shadow:
+    0 16px 36px rgba(3, 7, 18, 0.35),
+    inset 0 0 46px rgba(15, 23, 42, 0.35);
 }
 .center__canvas {
   flex: 1;
   min-height: 0;
   position: relative;
+  background:
+    radial-gradient(120% 120% at 18% 10%, rgba(14, 116, 144, 0.18), transparent 48%),
+    linear-gradient(180deg, rgba(22, 27, 34, 0.65), rgba(10, 13, 18, 0.75));
+  overflow: hidden;
+}
+.center__canvas::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(120deg, rgba(255, 255, 255, 0.08), transparent 35%),
+    repeating-linear-gradient(0deg, rgba(148, 163, 184, 0.08) 0, rgba(148, 163, 184, 0.08) 1px, transparent 1px, transparent 120px),
+    repeating-linear-gradient(90deg, rgba(148, 163, 184, 0.06) 0, rgba(148, 163, 184, 0.06) 1px, transparent 1px, transparent 120px);
+  opacity: 0.35;
+  pointer-events: none;
+  z-index: 0;
+}
+.center__canvas::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(70% 70% at 50% 50%, transparent 0%, rgba(2, 6, 23, 0.6) 100%);
+  opacity: 0.4;
+  pointer-events: none;
+  z-index: 0;
+}
+.center__canvas > * {
+  position: relative;
+  z-index: 1;
 }
 .center__right-toggle {
   position: absolute;
@@ -1222,14 +1283,16 @@ onBeforeUnmount(() => {
   transform: translateY(-50%);
   height: 32px;
   width: 32px;
-  border-radius: 0;
-  border: 0;
-  background: rgba(255, 255, 255, 0.95);
-  color: #1d4ed8;
-  font-weight: 900;
+  border-radius: 8px 0 0 8px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: linear-gradient(180deg, rgba(248, 250, 252, 0.95), rgba(226, 232, 240, 0.9));
+  color: #0f172a;
+  font-weight: 800;
   cursor: pointer;
   z-index: 3;
-  box-shadow: none;
+  box-shadow:
+    0 6px 14px rgba(15, 23, 42, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
 }
 .center__right-toggle:active {
   transform: translateY(calc(-50% + 1px));
@@ -1241,14 +1304,16 @@ onBeforeUnmount(() => {
   transform: translateY(-50%);
   height: 32px;
   width: 32px;
-  border-radius: 0;
-  border: 0;
-  background: rgba(255, 255, 255, 0.95);
-  color: #1d4ed8;
-  font-weight: 900;
+  border-radius: 0 8px 8px 0;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: linear-gradient(180deg, rgba(248, 250, 252, 0.95), rgba(226, 232, 240, 0.9));
+  color: #0f172a;
+  font-weight: 800;
   cursor: pointer;
   z-index: 3;
-  box-shadow: none;
+  box-shadow:
+    0 6px 14px rgba(15, 23, 42, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
 }
 .center__left-toggle:active {
   transform: translateY(calc(-50% + 1px));
