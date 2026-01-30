@@ -57,7 +57,7 @@ export const constantRoutes = [
     name: 'DeliveryCycle3D',
     hidden: false,
     viewType: 'component',
-    meta: { title: '三维作业指导书', icon: '备件管理-蓝' },
+    meta: { title: '三维作业指导书', icon: '统计-蓝' },
   },
   // 曲面分段计划
   {
@@ -76,6 +76,16 @@ export const constantRoutes = [
     hidden: true,
     viewType: 'component',
     meta: { title: '场地多天任务制作', icon: '备件管理-蓝' },
+  },
+  {
+    path: '/bigScreen',
+    name: 'BigScreen',
+    hidden: false,
+    meta: {
+      title: '工厂监控大屏',
+      icon: '终端管理-蓝',
+      link: 'http://62.234.55.120/screen/',
+    },
   },
 ];
 
