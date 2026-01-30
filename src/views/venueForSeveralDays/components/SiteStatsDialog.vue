@@ -359,7 +359,7 @@ const getTurnoverColorClass = (row) => {
 
 /* 统计弹窗样式（浅色炫彩版），使用 flex 纵向布局 */
 .stats-wrap {
-  background: radial-gradient(circle at top left, #eff6ff, #ffffff 40%, #fdf2ff);
+  background: radial-gradient(circle at top left, #eff6ff, #ffffff 40%, #f2f2ff);
   color: #111827;
   border-radius: 18px;
   padding: 18px 22px 16px;
@@ -455,7 +455,7 @@ const getTurnoverColorClass = (row) => {
   transition: all 0.18s ease-out;
 }
 .stats-close-btn:hover {
-  background: #fee2e2;
+  background: #e2eefe;
   border-color: #f97316;
   color: #b91c1c;
 }
@@ -471,10 +471,10 @@ const getTurnoverColorClass = (row) => {
 /* 指标卡 */
 .stats-wrap .metric-card {
   position: relative;
-  background: linear-gradient(135deg, #eff6ff 0%, #eef2ff 45%, #fdf2ff 100%);
+  background: linear-gradient(135deg, #eff6ff 0%, #eef2ff 45%, #f2f6ff 100%);
   border-radius: 16px;
   padding: 12px 14px;
-  border: 1px solid rgba(129, 140, 248, 0.7);
+  border: 1px solid rgba(181, 188, 249, 0.7);
   box-shadow:
     0 10px 22px rgba(129, 140, 248, 0.25),
     0 0 0 1px rgba(255, 255, 255, 0.9) inset;
