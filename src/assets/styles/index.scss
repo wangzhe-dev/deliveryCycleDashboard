@@ -1,0 +1,430 @@
+@import './variables.module.scss';
+@import './mixin.scss';
+@import './transition.scss';
+@import './element-ui.scss';
+@import './sidebar.scss';
+@import './btn.scss';
+@import './common.scss';
+@import './gantt-style.scss';
+@font-face {
+  font-family: '阿里巴巴普惠体 2.0 55 Regular';
+  font-weight: 400;
+  src: url('//at.alicdn.com/wf/webfont/jb2VFF1uYOZQ/kAyNLi1YvKC2.woff2') format('woff2'),
+    url('//at.alicdn.com/wf/webfont/jb2VFF1uYOZQ/JIOQHXNXsKNp.woff') format('woff');
+  font-variation-settings: normal;
+  font-display: swap;
+}
+
+body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+    font-family: '阿里巴巴普惠体 2.0 55 Regular' !important;
+  // font-family: Helvetica Neue, Helvetica, PingFang SC, Hiragino Sans GB, Microsoft YaHei, Arial, sans-serif;
+}
+
+label {
+  font-weight: 700;
+}
+
+html {
+  height: 100%;
+  box-sizing: border-box;
+}
+
+#app {
+  height: 100%;
+}
+
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}
+
+.no-padding {
+  padding: 0px !important;
+}
+
+.padding-content {
+  padding: 4px 0;
+}
+
+a:focus,
+a:active {
+  outline: none;
+}
+
+a,
+a:focus,
+a:hover {
+  cursor: pointer;
+  color: inherit;
+  text-decoration: none;
+}
+
+div:focus {
+  outline: none;
+}
+
+.fr {
+  float: right;
+}
+
+.fl {
+  float: left;
+}
+
+.pr-5 {
+  padding-right: 5px;
+}
+
+.pl-5 {
+  padding-left: 5px;
+}
+
+.block {
+  display: block;
+}
+
+.pointer {
+  cursor: pointer;
+}
+
+.inlineBlock {
+  display: block;
+}
+
+.clearfix {
+  &:after {
+    visibility: hidden;
+    display: block;
+    font-size: 0;
+    content: " ";
+    clear: both;
+    height: 0;
+  }
+}
+
+aside {
+  background: #eef1f6;
+  padding: 8px 24px;
+  margin-bottom: 20px;
+  border-radius: 2px;
+  display: block;
+  line-height: 32px;
+  font-size: 16px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  color: #2c3e50;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  a {
+    color: #337ab7;
+    cursor: pointer;
+
+    &:hover {
+      color: rgb(32, 160, 255);
+    }
+  }
+}
+
+//main-container全局样式
+.app-container {
+  padding: 10px;
+
+
+
+  // 重置 form-item的下边距
+  .el-form-item--default {
+    margin-bottom: 14px;
+  }
+}
+
+.components-container {
+  margin: 30px 50px;
+  position: relative;
+}
+
+.pagination-container {
+  margin-top: 30px;
+}
+
+.text-center {
+  text-align: center
+}
+
+.sub-navbar {
+  height: 50px;
+  line-height: 50px;
+  position: relative;
+  width: 100%;
+  text-align: right;
+  padding-right: 20px;
+  transition: 600ms ease position;
+  background: linear-gradient(90deg, rgba(32, 182, 249, 1) 0%, rgba(32, 182, 249, 1) 0%, rgba(33, 120, 241, 1) 100%, rgba(33, 120, 241, 1) 100%);
+
+  .subtitle {
+    font-size: 20px;
+    color: #fff;
+  }
+
+  &.draft {
+    background: #d0d0d0;
+  }
+
+  &.deleted {
+    background: #d0d0d0;
+  }
+}
+
+.link-type,
+.link-type:focus {
+  color: #337ab7;
+  cursor: pointer;
+
+  &:hover {
+    color: rgb(32, 160, 255);
+  }
+}
+
+.filter-container {
+  padding-bottom: 10px;
+
+  .filter-item {
+    display: inline-block;
+    vertical-align: middle;
+    margin-bottom: 10px;
+  }
+}
+
+.card-row-t-box {
+  display: flex;
+  flex-wrap: nowrap;          // 不换行，超出就滚动
+  gap: 16px;
+  padding: 10px 0;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;   // 滚动吸附
+
+  // 隐藏 Chrome/Safari 滚动条，可按需删掉
+  &::-webkit-scrollbar { height: 6px; }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 3px;
+  }
+
+  .cardBox {
+    background: linear-gradient(180deg, #afd9fb 0%, #ffffff 100%);
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e9ebee;
+    border-radius: 6px;
+    scroll-snap-align: start;     // 吸附到卡片起点
+  }
+
+  .stats-item {
+    // 关键：避免被挤压，让横向滚动生效
+    flex: 0 0 auto;
+    // min-width: 200px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    padding: 5px 5px 5px 0;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    // margin-right: 20px;
+    color: #3f9eff;
+    font-weight: 500;
+    .icon { font-size: 1.25rem; margin-right: 8px; }
+    .title { min-width: 65px; }          // 防抖动
+  }
+
+  .divider {
+    width: 1px;
+    height: 15px;
+    background: #e5e7ec;
+    margin-right: 2px;
+  }
+
+  /************** 指标区域 **************/
+  .metric-list {
+    display: flex;
+    flex-wrap: wrap;  // 卡片内部可换行
+    gap: 12px 24px;   // 行间 12/列间 24
+  }
+
+  .metric {
+    display: flex;
+    align-items: center;
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 8px;
+      &.orange { background: #f38859; }
+      &.green  { background: #63a100; }
+      &.red    { background: #d9001c; }
+      &.fc4    { background: #5C6FC4; }
+      &.fdc    { background: #7FBFDC; }
+    }
+    .value {
+      margin: 0 4px 0 14px;
+      font-weight: 500;
+      font-size: clamp(16px, 1rem, 16px);
+      &.orange { color: #f38859; }
+      &.green  { color: #63a100; }
+      &.red    { color: #d9001c; }
+    }
+    .label{
+       font-weight: 500; font-size: clamp(16px, 1rem, 16px);
+    }
+    .unit { margin-left: 5px;font-weight: 500; font-size: clamp(16px, 1rem, 16px);  }
+  }
+
+  /************** 小屏专属调整 **************/
+  @media (max-width: 768px) {
+    gap: 12px;
+
+    .stats-item       { min-width: 220px; }
+    .metric-list      { gap: 8px 16px; }
+    .card-header      { margin-right: 12px; }
+    .divider          { margin-right: 12px; }
+    .label            { min-width: 56px; }
+  }
+}
+
+.app-container {
+  padding: 20px;
+}
+
+/* ====================================================================
+   Reusable: Cards Grid + Task Card + Status Pill
+   Usage: wrap cards with `.cards`, each item uses global `.card` as base.
+   This section avoids per-component duplication of the same styles.
+   ==================================================================== */
+
+/* Cards grid container */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px;
+}
+
+/* Card enhancements inside cards grid */
+.cards .card {
+  position: relative;
+  /* keep global .card as base; override few visuals */
+  border-radius: 12px;
+  padding: 12px 14px 10px;
+  border: 1px solid #e7ecf3;
+  box-shadow: 0 2px 6px rgba(0, 26, 77, 0.06);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Left accent bar */
+.cards .card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  border-radius: 4px;
+  background: #cfd7e6;
+}
+
+.cards .card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(0, 26, 77, 0.1);
+}
+
+/* Active card */
+.cards .card.is-active {
+  background: #f2f8ff;
+  border-color: #cfe2ff;
+}
+.cards .card.is-active::before { background: #3b82f6; }
+
+/* Header inside card */
+.cards .card .card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+/* ID style (scoped to cards to avoid global .id conflicts) */
+.cards .id {
+  color: #1f66ff;
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.2px;
+}
+
+/* Status pill */
+.status-pill {
+  font-size: 12px;
+  line-height: 22px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+.status-pill.st-ok   { color: #e9f7ef; background: #1e8e3e; border-color: #cbeed8; }
+.status-pill.st-wait { color: #fff6da; background: #b57b00; border-color: #ffe6a6; }
+.status-pill.st-done { color: #1e8e3e; background: #e9f7ef; border-color: #cbeed8; }
+.status-pill.st-hold { color: #0b76c5; background: #e6f4ff; border-color: #cfe9ff; }
+.status-pill.st-bad  { color: #d93025; background: #ffeceb; border-color: #ffd4d1; }
+
+/* Key-value layout inside card (scoped under .cards) */
+.cards .kv {
+  --label-w: 64px;
+  font-size: 13px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 16px;
+  row-gap: 6px;
+}
+.cards .kv .row {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  margin-bottom: 5px;
+}
+.cards .kv .label { flex: 0 0 var(--label-w); color: #2b2f36; }
+.cards .kv .val   {
+  flex: 1 1 auto;
+  min-width: 0;
+  color: #2b2f36;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+@media (max-width: 480px) {
+  .cards .kv { grid-template-columns: 1fr; }
+}
+
+/* Progress bar (scoped under .cards) */
+.cards .progress { margin-top: 8px; }
+.cards .track {
+  height: 8px;
+  background: #e9edf3;
+  border-radius: 999px;
+  overflow: hidden;
+}
+.cards .card.is-active .track { background: #d9e6ff; }
+.cards .bar {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #34d399, #10b981);
+  transition: width 0.3s ease;
+}

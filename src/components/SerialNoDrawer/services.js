@@ -1,0 +1,34 @@
+/*
+ * @Author: zhaijinsong
+ * @Date: 2023-08-22 13:58:51
+ * @LastEditors: zhaijinsong
+ * @LastEditTime: 2023-08-22 14:15:28
+ * @Description: 序列号主数据选择弹窗API
+ */
+import request from '@/utils/request';
+
+export const loadList = (query) => {
+  return request({
+    url: '/erpMaster/materialSerial/main/pageList',
+    method: 'post',
+    data: query
+  });
+};
+
+// 查询序列号
+export const findBySerialNumber = (query) => {
+  return request({
+    url: '/erpMaster/materialSerial/main/findBySerialNumber',
+    method: 'post',
+    data: query
+  });
+};
+
+// 批量增加序列号
+export const createSerialNumber = (query) => {
+  return request({
+    url: '/erpMaster/materialSerial/main/createSerialNumber',
+    method: 'post',
+    data: query
+  });
+};
