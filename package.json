@@ -1,12 +1,13 @@
 {
   "name": "jne",
   "version": "3.6.3",
-  "description": "鲸航科技管理系统",
-  "author": "鲸航科技",
+  "description": "个人项目",
+  "author": "wangzhe",
   "license": "MIT",
   "scripts": {
     "dev": "vite",
     "build:prod": "node --max_old_space_size=8192 node_modules/vite/bin/vite.js build",
+    "build:static": "node --max_old_space_size=8192 node_modules/vite/bin/vite.js build --mode static",
     "build:test": "vite build --mode test",
     "build:shipPro": "vite build --mode shipPro",
     "build:light": "vite build --mode light",
