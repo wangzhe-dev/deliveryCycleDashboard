@@ -29,16 +29,24 @@ export const constantRoutes = [
   {
     path: '',
     component: Layout,
-    redirect: '/index',
+    redirect: '/deliveryCycleDashboardNew',
     name: 'Index',
     meta: { title: '首页', icon: 'm-home' },
     children: [
       {
         path: '/index',
-        component: () => import('@/views/index'),
+        redirect: '/deliveryCycleDashboardNew',
         name: 'Index',
         viewType: 'component',
-        meta: { title: '首页', icon: 'm-home', affix: true },
+        meta: { title: '首页', icon: 'm-home' },
+      },
+      {
+        path: '/deliveryCycleDashboardNew',
+        component: () => import('@/views/deliveryCycleDashboardNew/index.vue'),
+        name: 'DeliveryCycleDashboardNew',
+        hidden: false,
+        viewType: 'component',
+        meta: { title: '曲面分段进度', icon: '生产分析-蓝', affix: true },
       },
     ],
   },
@@ -58,7 +66,7 @@ export const constantRoutes = [
     name: 'TaskList',
     hidden: false,
     viewType: 'component',
-    meta: { title: '曲面分段计划', icon: '备件管理-蓝' },
+    meta: { title: '曲面分段计划', icon: '排产建模-蓝' },
   },
   // 场地多天任务制作
   {

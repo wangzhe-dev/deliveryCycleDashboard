@@ -28,7 +28,9 @@ function getBreadcrumb() {
   const first = matched[0];
   // 判断是否为首页
   if (!isDashboard(first)) {
-    matched = [{ path: '/index', meta: { title: '首页' } }].concat(matched);
+    matched = [{ path: '/deliveryCycleDashboardNew', meta: { title: '曲面分段进度' } }].concat(
+      matched,
+    );
   }
 
   levelList.value = matched
@@ -40,7 +42,7 @@ function isDashboard(route) {
   if (!name) {
     return false;
   }
-  return name.trim() === 'Index';
+  return name.trim() === 'DeliveryCycleDashboardNew' || name.trim() === 'Index';
 }
 function handleLink(item) {
   const { redirect, path } = item;

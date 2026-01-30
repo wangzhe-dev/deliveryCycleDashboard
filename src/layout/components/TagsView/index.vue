@@ -100,6 +100,7 @@ function isAffix(tag) {
 function isFirstView() {
   try {
     return (
+      selectedTag.value.fullPath === '/deliveryCycleDashboardNew' ||
       selectedTag.value.fullPath === '/index' ||
       selectedTag.value.fullPath === visitedViews.value[1].fullPath
     );
@@ -264,7 +265,7 @@ function handleScroll() {
     // background: linear-gradient(135deg, #4a90e2, #89f7fe);
     // background: linear-gradient(90deg, #1e4e8c, #3a7bd5);
     box-shadow: 0 2px 6px rgba(30, 78, 140, 0.6);
-    background: linear-gradient(90deg, #f7b101 35%, #f9950000 150%);
+    background: linear-gradient(90deg, #72b0fb 35%, #f9950000 150%);
     .tags-view-item {
       display: inline-block;
       position: relative;
@@ -273,9 +274,9 @@ function handleScroll() {
       line-height: 34px;
       overflow: hidden;
       // border: 1px solid #d8dce5;
-      color: #f96f43;
+      color: #241c19;
       // background: #ffe5c6;
-      background: #e1c66e;
+      background: #f0f0f1;
       padding: 0 8px;
       font-size: 14px;
       border-left: 1px solid #c9c9c9;
