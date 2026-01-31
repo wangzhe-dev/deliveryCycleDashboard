@@ -67,47 +67,90 @@
           </div>
         </div>
 
-        <div>
-          <div class="card mb10">
-            <div class="card-title">
-              <span class="fs16 fw">整体装配进度</span>
-            </div>
-            <div class="big">{{ kpi.overallProgress }}%</div>
-            <div class="bar">
-              <div class="fill" :style="{ width: kpi.overallProgress + '%' }"></div>
-            </div>
-            <div class="stats">
-              <span>已安装: {{ kpi.installedCount }} 个</span>
-              <span>剩余: {{ kpi.remainingCount }} 个</span>
+        <!-- ✅ 右侧面板：窄版紧凑设计 -->
+        <div class="side-panel">
+          <!-- 整体进度：环形指标 -->
+          <div class="sp-card sp-progress">
+            <div class="sp-ring-row">
+              <div class="sp-ring">
+                <svg viewBox="0 0 80 80">
+                  <circle cx="40" cy="40" r="34" fill="none" stroke="var(--border)" stroke-width="5" />
+                  <circle
+                    cx="40" cy="40" r="34" fill="none"
+                    stroke="url(#ringGrad)" stroke-width="5"
+                    stroke-linecap="round"
+                    :stroke-dasharray="2 * Math.PI * 34"
+                    :stroke-dashoffset="2 * Math.PI * 34 * (1 - kpi.overallProgress / 100)"
+                    transform="rotate(-90 40 40)"
+                  />
+                  <defs>
+                    <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stop-color="var(--aurora-a)" />
+                      <stop offset="100%" stop-color="var(--aurora-c)" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+                <span class="sp-ring-val">{{ kpi.overallProgress }}%</span>
+              </div>
+              <div class="sp-ring-info">
+                <div class="sp-label">整体装配</div>
+                <div class="sp-counts">
+                  <div class="sp-count-item">
+                    <span class="sp-count-dot done"></span>
+                    <span>{{ kpi.installedCount }}</span>
+                    <span class="sp-count-unit">已装</span>
+                  </div>
+                  <div class="sp-count-item">
+                    <span class="sp-count-dot rest"></span>
+                    <span>{{ kpi.remainingCount }}</span>
+                    <span class="sp-count-unit">剩余</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div class="grid2">
-            <div v-for="z in manufacturingZoneCards" :key="z.key" class="mini">
-              <div class="mini-top">
-                <span class="tag" :class="z.cls">{{ z.tag }}</span>
-                <span class="fs14">{{ z.name }}</span>
-              </div>
-              <div class="mini-val">{{ kpi.zones[z.key] }}%</div>
-              <div class="mini-bar">
+          <!-- 区域进度列表 -->
+          <div class="sp-card sp-zones">
+            <div class="sp-label mb6">区域进度</div>
+            <div
+              v-for="z in manufacturingZoneCards" :key="z.key"
+              class="sp-zone-row"
+            >
+              <span class="sp-zone-dot" :class="z.cls"></span>
+              <span class="sp-zone-name">{{ z.name }}</span>
+              <span class="sp-zone-val">{{ kpi.zones[z.key] }}%</span>
+              <div class="sp-zone-bar">
                 <i :class="z.cls" :style="{ width: kpi.zones[z.key] + '%' }"></i>
               </div>
             </div>
           </div>
 
-          <div class="card">
-            <div class="card-title">
-              <span class="fs16 fw">选中总段</span>
-              <div v-if="selected" class="sel-line">
-                <b>{{ selected.id }}</b>
+          <!-- 选中分段 -->
+          <div class="sp-card sp-selected">
+            <div class="sp-label">选中总段</div>
+            <template v-if="selected">
+              <div class="sp-sel-id">{{ selected.id }}</div>
+              <div class="sp-sel-grid">
+                <div class="sp-sel-item">
+                  <span class="sp-sel-k">区域</span>
+                  <span class="sp-sel-v">{{ getZoneName(selected.zone) }}</span>
+                </div>
+                <div class="sp-sel-item">
+                  <span class="sp-sel-k">进度</span>
+                  <span class="sp-sel-v accent">{{ Math.round(selected.progress) }}%</span>
+                </div>
+                <div class="sp-sel-item">
+                  <span class="sp-sel-k">状态</span>
+                  <span class="sp-sel-v" :class="{
+                    'st-done': selected.progress >= 80,
+                    'st-wip': selected.progress >= 20 && selected.progress < 80,
+                    'st-idle': selected.progress < 20,
+                  }">{{ getStatusText(selected.progress) }}</span>
+                </div>
               </div>
-            </div>
-            <div v-if="selected" class="sel">
-              <div class="sel-line">区域：{{ getZoneName(selected.zone) }}</div>
-              <div class="sel-line">进度：{{ Math.round(selected.progress) }}%</div>
-              <div class="sel-line">状态：{{ getStatusText(selected.progress) }}</div>
-            </div>
-            <div v-else class="sel"></div>
+            </template>
+            <div v-else class="sp-sel-empty">点击模型选择分段</div>
           </div>
         </div>
       </div>
@@ -196,10 +239,16 @@ const milestones = reactive([
 ]);
 
 // ===================== 主题 =====================
-const theme = ref('aurora'); // 'aurora' | 'deep'
-const themeClass = computed(() => (theme.value === 'aurora' ? 'theme-aurora' : 'theme-deep'));
+const theme = ref('stellar'); // 'aurora' | 'deep' | 'stellar'
+const themeClass = computed(() => {
+  if (theme.value === 'aurora') return 'theme-aurora';
+  if (theme.value === 'deep') return 'theme-deep';
+  return 'theme-stellar';
+});
 function toggleTheme() {
-  theme.value = theme.value === 'aurora' ? 'deep' : 'aurora';
+  const themes = ['aurora', 'deep', 'stellar'];
+  const i = themes.indexOf(theme.value);
+  theme.value = themes[(i + 1) % themes.length];
 }
 
 // ===================== 颜色常量（完成=绿色） =====================
@@ -251,7 +300,26 @@ const COLORS_DEEP = {
   },
 };
 
-let COLORS = COLORS_DEEP;
+// ✅ 深灰主题：深底亮块，工业质感
+const COLORS_STELLAR = {
+  ZONE: {
+    FORE: '#6BA4C4',          // 雾蓝
+    FORE_MID: '#5AAE8E',      // 翠绿
+    MID: '#5AAE8E',            // 翠绿
+    ENGINE: '#C9A962',         // 暖金
+    AFT: '#D47272',            // 柔红
+    SUPERSTRUCTURE: '#9A9DAA', // 银灰
+    DEFAULT: '#8A8880',        // 中灰
+  },
+  STATUS: {
+    MISSING: '#D47272',        // 柔红
+    IN_PROGRESS_LIGHT: '#4A4A50', // 深灰底
+    IN_PROGRESS_DEEP: '#C9A962',  // 暖金
+    DONE_GREEN: '#5AAE8E',        // 翠绿
+  },
+};
+
+let COLORS = COLORS_STELLAR;
 
 // ===================== 阈值/发光/尺度 =====================
 const THRESHOLDS = {
@@ -260,9 +328,9 @@ const THRESHOLDS = {
 };
 
 const EMISSIVE = {
-  BASE: 0.05,
-  HOVER_BOOST: 0.16,
-  HOVER_MAX: 0.26,
+  BASE: 0.08,
+  HOVER_BOOST: 0.25,
+  HOVER_MAX: 0.4,
 };
 
 // ===================== 状态推演（3个月） =====================
@@ -461,8 +529,16 @@ onBeforeUnmount(() => {
 
 // 主题切换：更新背景 + 重新上色
 watch(theme, (t) => {
-  //   COLORS = t === 'aurora' ? COLORS_AURORA : COLORS_DEEP;
-  if (scene) scene.background = new THREE.Color(t === 'aurora' ? 0xf4f7ff : 0x081428);
+  if (t === 'aurora') {
+    COLORS = COLORS_AURORA;
+    if (scene) scene.background = new THREE.Color(0xf4f7ff);
+  } else if (t === 'deep') {
+    COLORS = COLORS_DEEP;
+    if (scene) scene.background = new THREE.Color(0x081428);
+  } else {
+    COLORS = COLORS_STELLAR;
+    if (scene) scene.background = new THREE.Color(0x32323A);
+  }
   updateViewAppearance();
 });
 
@@ -473,13 +549,22 @@ function initThree() {
   if (!canvas || !wrap) return;
 
   scene = new THREE.Scene();
-  scene.background = new THREE.Color(0xf4f7ff);
+  scene.background = new THREE.Color(0x32323A);
+  scene.fog = new THREE.FogExp2(0x32323A, 0.006);
 
   camera = new THREE.PerspectiveCamera(45, 1, 0.1, 3000);
 
   renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
   renderer.setClearAlpha(0);
+
+  // ✅ 色调映射：让颜色更丰富、更电影感
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.2;
+
+  // ✅ 启用阴影
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
   // 兼容不同 three 版本
   if ('outputColorSpace' in renderer) renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -502,28 +587,79 @@ function initThree() {
 
 function buildScene() {
   addLights();
+  createEnvironment();
   createWaterPlane();
   createAllSegments();
   applySimulation(simIndex.value);
 
-  // ✅ 默认更大一点：tight 越小越“近”
+  // ✅ 默认更大一点：tight 越小越"近"
   frameAll(0.8);
 
   updateViewAppearance();
 }
 
+// ✅ 程序化环境贴图：提供微妙的反射，增加真实感
+function createEnvironment() {
+  const pmremGenerator = new THREE.PMREMGenerator(renderer);
+  pmremGenerator.compileEquirectangularShader();
+
+  // 暖灰色环境贴图：模拟漫射天光
+  const envScene = new THREE.Scene();
+  const skyGeo = new THREE.SphereGeometry(100, 32, 16);
+  const skyMat = new THREE.MeshBasicMaterial({
+    color: 0x2A2A30,
+    side: THREE.BackSide,
+  });
+  envScene.add(new THREE.Mesh(skyGeo, skyMat));
+
+  envScene.add(new THREE.AmbientLight(0x404048, 0.5));
+  const envLight = new THREE.DirectionalLight(0xfff4e6, 0.6);
+  envLight.position.set(1, 0.8, 1);
+  envScene.add(envLight);
+
+  const envMap = pmremGenerator.fromScene(envScene, 0.04).texture;
+  scene.environment = envMap;
+  pmremGenerator.dispose();
+}
+
 // ===================== 灯光/水面 =====================
 function addLights() {
-  const main = new THREE.DirectionalLight(0xffffff, 0.95);
-  main.position.set(60, 140, 80); // 确保光源位置合理
+  // ✅ 主光：暖白，带阴影
+  const main = new THREE.DirectionalLight(0xfff4e6, 1.1);
+  main.position.set(60, 140, 80);
+  main.castShadow = true;
+  main.shadow.mapSize.set(1024, 1024);
+  main.shadow.camera.near = 1;
+  main.shadow.camera.far = 500;
+  main.shadow.camera.left = -20;
+  main.shadow.camera.right = 20;
+  main.shadow.camera.top = 20;
+  main.shadow.camera.bottom = -20;
+  main.shadow.bias = -0.001;
   scene.add(main);
 
-  const ambient = new THREE.AmbientLight(0xffffff, 0.65); // 环境光强度调整
+  // ✅ 环境光：中性灰
+  const ambient = new THREE.AmbientLight(0x909098, 0.5);
   scene.add(ambient);
 
-  const fill = new THREE.DirectionalLight(0xdbeafe, 0.45);
-  fill.position.set(-80, 100, -60); // 添加补充光源，避免阴影过深
+  // ✅ 补光：中性偏暖
+  const fill = new THREE.DirectionalLight(0xA0A0A8, 0.35);
+  fill.position.set(-80, 80, -60);
   scene.add(fill);
+
+  // ✅ 底光：暖棕，模拟地面反射
+  const bottom = new THREE.DirectionalLight(0x9E7B38, 0.1);
+  bottom.position.set(0, -50, 0);
+  scene.add(bottom);
+
+  // ✅ 轮廓光 (rim light)：冷调对比
+  const rim = new THREE.DirectionalLight(0x8EAAB8, 0.35);
+  rim.position.set(-40, 60, -100);
+  scene.add(rim);
+
+  // ✅ 半球光：天光暖白 + 地面暖棕
+  const hemi = new THREE.HemisphereLight(0x505058, 0x2A2520, 0.3);
+  scene.add(hemi);
 }
 
 function createWaterPlane() {
@@ -531,20 +667,33 @@ function createWaterPlane() {
   const L = SHIP.length * scale;
   const B = SHIP.width * scale;
 
-  const geometry = new THREE.PlaneGeometry(L * 1.6, B * 2.2);
-  const material = new THREE.MeshPhongMaterial({
-    color: 0x93c5fd,
+  // ✅ 主水面：暖灰半透明 + 微弱反射
+  const geometry = new THREE.PlaneGeometry(L * 2, B * 3);
+  const material = new THREE.MeshStandardMaterial({
+    color: 0x28282E,
     transparent: true,
-    opacity: 0.18,
+    opacity: 0.25,
     side: THREE.DoubleSide,
     depthWrite: false,
+    metalness: 0.4,
+    roughness: 0.35,
+    envMapIntensity: 0.3,
   });
 
   const water = new THREE.Mesh(geometry, material);
   water.rotation.x = -Math.PI / 2;
   water.position.y = -SHIP.height * scale * 0.3;
+  water.receiveShadow = true;
   water.renderOrder = -10;
   scene.add(water);
+
+  // ✅ 地面网格线：工业感
+  const gridSize = Math.max(L, B) * 2.5;
+  const gridHelper = new THREE.GridHelper(gridSize, 40, 0x4A4A52, 0x3A3A42);
+  gridHelper.position.y = -SHIP.height * scale * 0.3 - 0.01;
+  gridHelper.material.transparent = true;
+  gridHelper.material.opacity = 0.55;
+  scene.add(gridHelper);
 }
 
 // ===================== 稳定随机（保证刷新不乱跳） =====================
@@ -629,22 +778,26 @@ function createAllSegments() {
     const mZoneKey = getManufacturingZoneKey(cfg);
     const zoneColor = COLORS.ZONE[mZoneKey] || COLORS.ZONE[cfg.zone] || COLORS.ZONE.DEFAULT;
 
-    const baseMat = new THREE.MeshPhongMaterial({
+    // ✅ PBR 材质：金属质感 + 粗糙度，更真实的光照反应
+    const baseMat = new THREE.MeshStandardMaterial({
       color: zoneColor,
       emissive: zoneColor,
       emissiveIntensity: EMISSIVE.BASE,
-      shininess: 40,
+      metalness: 0.3,
+      roughness: 0.45,
       transparent: !MATERIAL_FLAGS.opaque,
       opacity: MATERIAL_FLAGS.opacity,
       depthTest: true,
       depthWrite: true,
+      envMapIntensity: 0.6,
     });
 
-    const fillMat = new THREE.MeshPhongMaterial({
+    const fillMat = new THREE.MeshStandardMaterial({
       color: COLORS.STATUS.IN_PROGRESS_DEEP,
       emissive: COLORS.STATUS.IN_PROGRESS_DEEP,
       emissiveIntensity: EMISSIVE.BASE,
-      shininess: 40,
+      metalness: 0.35,
+      roughness: 0.35,
       transparent: !MATERIAL_FLAGS.opaque,
       opacity: MATERIAL_FLAGS.opacity,
       depthTest: true,
@@ -652,11 +805,18 @@ function createAllSegments() {
       polygonOffset: true,
       polygonOffsetFactor: -1,
       polygonOffsetUnits: -1,
+      envMapIntensity: 0.6,
     });
 
     const baseMesh = new THREE.Mesh(baseGeo, baseMat);
     const fillMesh = new THREE.Mesh(fillGeo, fillMat);
     fillMesh.visible = false;
+
+    // ✅ 阴影
+    baseMesh.castShadow = true;
+    baseMesh.receiveShadow = true;
+    fillMesh.castShadow = true;
+    fillMesh.receiveShadow = true;
 
     baseMesh.userData.__group = group;
     fillMesh.userData.__group = group;
@@ -664,8 +824,20 @@ function createAllSegments() {
     baseMesh.renderOrder = 1;
     fillMesh.renderOrder = 2;
 
+    // ✅ 线框描边：让分段边界更清晰
+    const edgeGeo = new THREE.EdgesGeometry(baseGeo, 15);
+    const edgeMat = new THREE.LineBasicMaterial({
+      color: 0x3A3530,
+      transparent: true,
+      opacity: 0.12,
+      depthTest: true,
+    });
+    const edgeLine = new THREE.LineSegments(edgeGeo, edgeMat);
+    edgeLine.renderOrder = 3;
+
     group.add(baseMesh);
     group.add(fillMesh);
+    group.add(edgeLine);
 
     group.userData = {
       id,
@@ -1198,6 +1370,115 @@ defineExpose({
     linear-gradient(180deg, var(--bg-0) 0%, var(--bg-1) 100%);
 }
 
+/* ====== 白底 + 深灰3D 主题（默认） ====== */
+.theme-stellar {
+  --bg-0: #F5F5F7;
+  --bg-1: #EEEEF0;
+
+  --card-bg: rgba(255, 255, 255, 0.82);
+  --card-bg-strong: rgba(255, 255, 255, 0.92);
+  --border: rgba(0, 0, 0, 0.06);
+
+  --text-0: #1D1D1F;
+  --text-1: #48484A;
+  --text-2: rgba(72, 72, 74, 0.7);
+
+  --aurora-a: #9E7B38;
+  --aurora-b: #4A8BA8;
+  --aurora-c: #3D8E6E;
+  --aurora-d: #9E7B38;
+
+  --ok: #34A06C;
+  --warn: #B8922E;
+  --bad: #C45050;
+
+  --shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  --shadow-soft: 0 1px 6px rgba(0, 0, 0, 0.04);
+
+  --grad-aurora: linear-gradient(
+    120deg,
+    rgba(158, 123, 56, 0.25),
+    rgba(74, 139, 168, 0.18),
+    rgba(61, 142, 110, 0.15),
+    rgba(158, 123, 56, 0.1)
+  );
+
+  --grad-aurora-strong: linear-gradient(
+    120deg,
+    rgba(158, 123, 56, 1),
+    rgba(74, 139, 168, 0.8),
+    rgba(61, 142, 110, 0.75),
+    rgba(158, 123, 56, 0.85)
+  );
+
+  --mz-fore: #4A8BA8;
+  --mz-foreMid: #3D8E6E;
+  --mz-mid: #34A06C;
+  --mz-engine: #B8922E;
+  --mz-aft: #C45050;
+  --mz-super: #7A7E8A;
+
+  background: linear-gradient(180deg, var(--bg-0) 0%, var(--bg-1) 100%);
+}
+.theme-stellar .btn {
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  color: var(--text-1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+.theme-stellar .btn.active {
+  background: #fff;
+  border-color: rgba(158, 123, 56, 0.4);
+  color: #9E7B38;
+  box-shadow: 0 1px 6px rgba(158, 123, 56, 0.12);
+}
+.theme-stellar .sp-card,
+.theme-stellar .card,
+.theme-stellar .mini {
+  background: #fff;
+  border-color: rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+.theme-stellar .viewer-container {
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
+}
+.theme-stellar .viewer-header {
+  background: rgba(255, 255, 255, 0.8);
+}
+.theme-stellar .sim-bar {
+  background: rgba(255, 255, 255, 0.85);
+}
+.theme-stellar .canvas-wrap {
+  background: transparent;
+}
+.theme-stellar .viewer-hint {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(0, 0, 0, 0.06);
+  color: #8A8A8E;
+}
+.theme-stellar .bar,
+.theme-stellar .mini-bar,
+.theme-stellar .sp-zone-bar {
+  background: rgba(0, 0, 0, 0.05);
+}
+.theme-stellar .sp-zone-row {
+  border-bottom-color: rgba(0, 0, 0, 0.04);
+}
+.theme-stellar .sim-slider {
+  accent-color: #9E7B38;
+}
+.theme-stellar .sim-primary {
+  background: #fff;
+}
+.theme-stellar .sim-primary::before {
+  background: linear-gradient(120deg, rgba(158, 123, 56, 0.08), rgba(74, 139, 168, 0.05));
+}
+.theme-stellar .loading {
+  background: rgba(245, 245, 247, 0.9);
+  color: #1D1D1F;
+}
+
 /* ====== 深海蓝炫彩主题 ====== */
 .theme-deep {
   --bg-0: #0e141b;
@@ -1522,7 +1803,7 @@ defineExpose({
 ========================================================= */
 .main-content {
   display: grid;
-  grid-template-columns: 1fr 380px;
+  grid-template-columns: 1fr 260px;
   gap: 14px;
   min-height: 600px;
 }
@@ -2080,6 +2361,229 @@ canvas:active {
 }
 .theme-deep .empty {
   color: rgba(226, 232, 240, 0.55);
+}
+
+/* =========================================================
+   Side Panel（右侧窄面板）
+========================================================= */
+.side-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  height: 610px;
+  overflow: hidden;
+}
+.side-panel::-webkit-scrollbar {
+  width: 4px;
+}
+.side-panel::-webkit-scrollbar-thumb {
+  background: rgba(120, 100, 75, 0.2);
+  border-radius: 99px;
+}
+
+.sp-card {
+  border-radius: 12px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(10px);
+  flex-shrink: 0;
+}
+
+/* 整体进度 + 选中分段：固定高度 */
+.sp-progress { flex-shrink: 0; }
+.sp-selected { flex-shrink: 0; }
+
+/* 区域进度：自适应撑满剩余空间 */
+.sp-zones {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+.sp-zones::-webkit-scrollbar { width: 3px; }
+.sp-zones::-webkit-scrollbar-thumb {
+  background: rgba(120, 100, 75, 0.2);
+  border-radius: 99px;
+}
+
+.sp-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--text-2);
+}
+.mb6 { margin-bottom: 6px; }
+
+/* --- 环形进度 --- */
+.sp-ring-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.sp-ring {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  flex-shrink: 0;
+}
+.sp-ring svg {
+  width: 100%;
+  height: 100%;
+}
+.sp-ring-val {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  font-weight: 900;
+  color: var(--text-0);
+}
+.sp-ring-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.sp-counts {
+  display: flex;
+  gap: 12px;
+}
+.sp-count-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-0);
+}
+.sp-count-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+.sp-count-dot.done { background: var(--ok); }
+.sp-count-dot.rest { background: var(--border); }
+.sp-count-unit {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--text-2);
+}
+
+/* --- 区域进度列表 --- */
+.sp-zone-row {
+  display: grid;
+  grid-template-columns: 8px 1fr 36px 50px;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(120, 100, 75, 0.06);
+}
+.sp-zone-row:last-child { border-bottom: none; }
+
+.sp-zone-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 3px;
+}
+.sp-zone-dot.fore { background: var(--mz-fore); }
+.sp-zone-dot.foreMid { background: var(--mz-foreMid); }
+.sp-zone-dot.mid { background: var(--mz-mid); }
+.sp-zone-dot.engine { background: var(--mz-engine); }
+.sp-zone-dot.aft { background: var(--mz-aft); }
+.sp-zone-dot.super { background: var(--mz-super); }
+
+.sp-zone-name {
+  font-size: 12px;
+  color: var(--text-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sp-zone-val {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-0);
+  text-align: right;
+}
+.sp-zone-bar {
+  height: 4px;
+  border-radius: 99px;
+  background: rgba(120, 100, 75, 0.1);
+  overflow: hidden;
+}
+.sp-zone-bar i {
+  display: block;
+  height: 100%;
+  border-radius: 99px;
+}
+.sp-zone-bar i.fore {
+  background: var(--mz-fore);
+}
+.sp-zone-bar i.foreMid {
+  background: var(--mz-foreMid);
+}
+.sp-zone-bar i.mid {
+  background: var(--mz-mid);
+}
+.sp-zone-bar i.engine {
+  background: var(--mz-engine);
+}
+.sp-zone-bar i.aft {
+  background: var(--mz-aft);
+}
+.sp-zone-bar i.super {
+  background: var(--mz-super);
+}
+
+/* --- 选中分段 --- */
+.sp-sel-id {
+  margin-top: 6px;
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--text-0);
+  letter-spacing: 0.5px;
+}
+.sp-sel-grid {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.sp-sel-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+}
+.sp-sel-k {
+  color: var(--text-2);
+}
+.sp-sel-v {
+  font-weight: 600;
+  color: var(--text-0);
+}
+.sp-sel-v.accent {
+  color: var(--warn);
+}
+.sp-sel-v.st-done {
+  color: var(--ok);
+}
+.sp-sel-v.st-wip {
+  color: var(--warn);
+}
+.sp-sel-v.st-idle {
+  color: var(--bad);
+}
+.sp-sel-empty {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--text-2);
+  opacity: 0.7;
 }
 
 /* =========================================================

@@ -7,12 +7,7 @@
 
     <!-- 上面：大里程碑卡片（简化版，保持你之前喜欢的感觉） -->
     <div class="mt-ms-row">
-      <div
-        v-for="(m, idx) in msWithIcons"
-        :key="m.key || idx"
-        class="mt-ms-card"
-        :class="m.status"
-      >
+      <div v-for="(m, idx) in msWithIcons" :key="m.key || idx" class="mt-ms-card" :class="m.status">
         <!-- 右上角小勾 -->
         <div class="mt-ms-status">
           <span v-if="m.status === 'done'">✓</span>
@@ -51,12 +46,7 @@
 
     <!-- 下面：4 个 KPI 卡片（重点仿你截图这块） -->
     <div class="mt-kpi-strip">
-      <div
-        v-for="k in kpiList"
-        :key="k.key"
-        class="mt-kpi-card"
-        :class="`mt-kpi-${k.key}`"
-      >
+      <div v-for="k in kpiList" :key="k.key" class="mt-kpi-card" :class="`mt-kpi-${k.key}`">
         <!-- 上半：圆形图标 + 文本 -->
         <div class="mt-kpi-top">
           <div class="mt-kpi-icon-circle">
@@ -184,7 +174,8 @@ const kpiList = computed(() => {
   background: linear-gradient(180deg, #e0f4ff, #c3e6ff);
 }
 .mt-ms-card.current {
-  background: radial-gradient(circle at 0% 0%, #fff4df, transparent 55%),
+  background:
+    radial-gradient(circle at 0% 0%, #fff4df, transparent 55%),
     linear-gradient(180deg, #ffe8c2, #ffd18c);
 }
 .mt-ms-card.todo {
@@ -217,9 +208,9 @@ const kpiList = computed(() => {
 .mt-ms-illust {
   height: 64px;
   border-radius: 14px;
-  background: radial-gradient(circle at 50% 0%, #ffffffcc, transparent 65%),
-    radial-gradient(circle at 0% 100%, #bef3ff, transparent 60%),
-    rgba(255, 255, 255, 0.76);
+  background:
+    radial-gradient(circle at 50% 0%, #ffffffcc, transparent 65%),
+    radial-gradient(circle at 0% 100%, #bef3ff, transparent 60%), rgba(255, 255, 255, 0.76);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -227,14 +218,14 @@ const kpiList = computed(() => {
   margin-bottom: 8px;
 }
 .mt-ms-card.current .mt-ms-illust {
-  background: radial-gradient(circle at 50% 0%, #ffffffdd, transparent 65%),
-    radial-gradient(circle at 0% 100%, #ffe2b8, transparent 60%),
-    rgba(255, 255, 255, 0.9);
+  background:
+    radial-gradient(circle at 50% 0%, #ffffffdd, transparent 65%),
+    radial-gradient(circle at 0% 100%, #ffe2b8, transparent 60%), rgba(255, 255, 255, 0.9);
 }
 .mt-ms-card.todo .mt-ms-illust {
-  background: radial-gradient(circle at 50% 0%, #ffffffdd, transparent 65%),
-    radial-gradient(circle at 0% 100%, #e0ebff, transparent 60%),
-    rgba(255, 255, 255, 0.92);
+  background:
+    radial-gradient(circle at 50% 0%, #ffffffdd, transparent 65%),
+    radial-gradient(circle at 0% 100%, #e0ebff, transparent 60%), rgba(255, 255, 255, 0.92);
 }
 .mt-ms-icon {
   font-size: 30px;
@@ -379,11 +370,7 @@ const kpiList = computed(() => {
 .mt-kpi-divider {
   margin-top: 8px;
   height: 1px;
-  background: linear-gradient(
-    90deg,
-    rgba(148, 163, 184, 0.35),
-    rgba(148, 163, 184, 0.12)
-  );
+  background: linear-gradient(90deg, rgba(148, 163, 184, 0.35), rgba(148, 163, 184, 0.12));
 }
 
 /* 下半：大数字 + 单位，整体缩小一档 */
