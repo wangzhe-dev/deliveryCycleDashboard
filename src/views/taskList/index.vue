@@ -1,16 +1,18 @@
 <template>
-  <div class="h-full p20">
+  <div class="h-full p20" :class="{ 'is-fullscreen': isFullscreen }">
     <!-- 顶部：右侧新增按钮 -->
     <div class="row-between header-row mb10">
       <div class="row-start" style="gap: 10px">
-        <el-button type="warning" :icon="Histogram" @click.stop="openGeo({})">新建场地</el-button>
-        <el-button type="warning" :icon="Histogram" @click="goMultiDayBoard">
+        <!-- <el-button type="warning" :icon="Histogram" @click.stop="openGeo({})">新建场地</el-button> -->
+        <el-button type="success" :icon="Histogram" @click="goMultiDayBoard">
           场地多天任务制作
         </el-button>
       </div>
-      <div class="row-end">
-        <el-button @click="goBack">返回</el-button>
-      </div>
+      <!-- <div class="row-end">
+        <el-button :icon="FullScreen" @click="toggleFullscreen">
+          {{ isFullscreen ? '退出全屏' : '全屏' }}
+        </el-button>
+      </div> -->
     </div>
 
     <!-- 看板视图：无分页，自动充满高度 -->
@@ -401,8 +403,9 @@ const goMultiDayBoard = () => {
   });
 };
 
-const goBack = () => {
-  router.go(-1);
+const isFullscreen = ref(false);
+const toggleFullscreen = () => {
+  isFullscreen.value = !isFullscreen.value;
 };
 
 const openGeo = async (row) => {
@@ -815,5 +818,16 @@ onMounted(() => {
 
 :deep(.task-tooltip .tooltip-row) {
   white-space: nowrap;
+}
+
+/* 全屏模式 */
+.is-fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+  background: #fff;
 }
 </style>

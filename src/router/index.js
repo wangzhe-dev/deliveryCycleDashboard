@@ -59,14 +59,36 @@ export const constantRoutes = [
     viewType: 'component',
     meta: { title: '三维作业指导书', icon: '统计-蓝' },
   },
+
+  // 场地编辑器
+  {
+    path: '/polygonEditor',
+    component: Layout,
+    hidden: false,
+    meta: { title: '场地编辑器', icon: '排产建模-蓝' },
+    children: [
+      {
+        path: '',
+        component: () => import('@/views/polygonEditorPage/index.vue'),
+        name: 'PolygonEditorPage',
+        meta: { title: '场地编辑器', icon: '生产执行-蓝' },
+      },
+    ],
+  },
   // 曲面分段计划
   {
     path: '/taskList',
-    component: () => import('@/views/taskList/index.vue'),
-    name: 'TaskList',
+    component: Layout,
     hidden: false,
-    viewType: 'component',
     meta: { title: '曲面分段计划', icon: '排产建模-蓝' },
+    children: [
+      {
+        path: '',
+        component: () => import('@/views/taskList/index.vue'),
+        name: 'TaskList',
+        meta: { title: '曲面分段计划', icon: '排产建模-蓝' },
+      },
+    ],
   },
   // 场地多天任务制作
   {
