@@ -53,12 +53,11 @@
         保存组立标注信息
       </el-button>
       <el-button
-        class="topbar__btn--danger"
         type="primary"
         size="large"
-        @click="goBack"
+        @click="toggleFullscreen"
       >
-        返回
+        {{ isFullscreen ? '退出全屏' : '全屏' }}
       </el-button>
     </div>
   </header>
@@ -76,13 +75,21 @@ const props = defineProps({
   canSaveMarks: { type: Boolean, default: false },
 });
 
-import { useRouter } from 'vue-router';
+import { ref } from 'vue';
 
 const emit = defineEmits(['update:selected-ship', 'update:selected-part', 'flow-toggle', 'save']);
 
-const router = useRouter();
-const goBack = () => {
-  router.back();
+const isFullscreen = ref(false);
+const toggleFullscreen = () => {
+  const stage = document.querySelector('.viewer-stage');
+  if (!stage) return;
+  isFullscreen.value = !isFullscreen.value;
+  if (isFullscreen.value) {
+    stage.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;width:100%;height:100%;';
+  } else {
+    stage.style.cssText = '';
+  }
+  window.dispatchEvent(new Event('resize'));
 };
 </script>
 

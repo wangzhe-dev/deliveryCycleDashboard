@@ -1,5 +1,5 @@
 <template>
-  <div class="viewer-stage">
+  <div class="viewer-stage" ref="stageRef">
     <div
       class="viewer-page"
       :style="{
@@ -8,46 +8,46 @@
         '--page-scale': pageScale,
       }"
     >
-    <!-- 顶部栏 -->
-    <TopBar
-      :title="title"
-      :ship-options="shipOptions"
-      :bom-list="bomList"
-      :flow-options="flowOptions"
-      :selected-ship="selectedShip"
-      :selected-part="selectedPart"
-      :selected-flow="selectedFlow"
-      :can-save-marks="canSaveMarks"
-      @update:selected-ship="selectedShip = $event"
-      @update:selected-part="selectedPart = $event"
-      @flow-toggle="toggleFlow"
-      @save="saveMarksToAssembly"
-    />
-
-    <!-- 主体 -->
-    <main
-      class="main"
-      :class="{
-        'main--right-collapsed': rightCollapsed,
-      }"
-    >
-      <!-- 左侧操作栏 -->
-      <LeftBarV2
-        :mode="mode"
-        :explodeOn="explodeOn"
-        :toolMode="toolMode"
-        :colorIsolated="colorIsolated"
-        @set-mode="handleSetMode"
-        @set-tool="handleSetTool"
-        @toggle-explode="toggleExplode"
-        @toggle-param="toggleParam"
-        @fit-view="fitView"
-        @toggle-color-isolation="toggleColorIsolation"
-        @clear-marks="handleClearAllMarks"
+      <!-- 顶部栏 -->
+      <TopBar
+        :title="title"
+        :ship-options="shipOptions"
+        :bom-list="bomList"
+        :flow-options="flowOptions"
+        :selected-ship="selectedShip"
+        :selected-part="selectedPart"
+        :selected-flow="selectedFlow"
+        :can-save-marks="canSaveMarks"
+        @update:selected-ship="selectedShip = $event"
+        @update:selected-part="selectedPart = $event"
+        @flow-toggle="toggleFlow"
+        @save="saveMarksToAssembly"
       />
 
-      <!-- 左侧文件栏（保留） -->
-      <!--
+      <!-- 主体 -->
+      <main
+        class="main"
+        :class="{
+          'main--right-collapsed': rightCollapsed,
+        }"
+      >
+        <!-- 左侧操作栏 -->
+        <LeftBarV2
+          :mode="mode"
+          :explodeOn="explodeOn"
+          :toolMode="toolMode"
+          :colorIsolated="colorIsolated"
+          @set-mode="handleSetMode"
+          @set-tool="handleSetTool"
+          @toggle-explode="toggleExplode"
+          @toggle-param="toggleParam"
+          @fit-view="fitView"
+          @toggle-color-isolation="toggleColorIsolation"
+          @clear-marks="handleClearAllMarks"
+        />
+
+        <!-- 左侧文件栏（保留） -->
+        <!--
       <section class="left-panel" :class="{ 'left-panel--collapsed': leftCollapsed }">
         <div class="left-panel__body">
           <LeftPanel
@@ -100,107 +100,105 @@
       </section>
       -->
 
-      <!-- 中间：模型 -->
-      <section class="center">
-        <div class="center__canvas">
-          <ThreeModelViewer
-            ref="viewerRef"
-            :modelUrl="modelUrl"
-            :mode="mode"
-            :explode="explodeOn"
-            :toolMode="toolMode"
-            :selectedCode="selectedNodeCode"
-            :explodeFactor="explodeFactor"
-            :activeGroupFilter="activeGroupFilter"
-            :colorIsolated="colorIsolated"
-            :colorIsolatedOpacity="activeColorIsolatedOpacity"
-            :baseOpacity="activeBaseOpacity"
-            :notePointScale="notePointScale"
-            :noteLabelOffset="noteLabelOffset"
-            :noteLineWidth="noteLineWidth"
-            :measurePointScale="measurePointScale"
-            :measureLineWidth="measureLineWidth"
-            :notePointColor="notePointColor"
-            :noteLabelColor="noteLabelColor"
-            :measurePointColor="measurePointColor"
-            :measureLineColor="measureLineColor"
-            :measureLabelColor="measureLabelColor"
-            :showCenterMarks="showCenterMarks"
-            :centerColor="centerColor"
-            :centerAxisWidth="centerAxisWidth"
-            :knownCodes="knownCodes"
-            v-model:showMeshLabels="showMeshLabels"
-            :meshLabelColor="meshLabelColor"
-            :meshLabelSize="meshLabelSize"
-            :meshLabelMap="meshLabelMap"
-            :showLeftDims="!isPartModel || !!activeGroupFilter"
-            :showLeftBaseline="!!activeGroupFilter"
-            :partNameMapList="mockData"
-            v-model:markFilter="markFilter"
-            @picked="handleModelPicked"
-            @note-added="onNoteAdded"
-            @note-updated="onNoteUpdated"
-            @measure="onMeasure"
-            @measure-updated="onMeasureUpdated"
-            @model-loaded="handleModelLoaded"
-          />
-          <button class="center__right-toggle" type="button" @click="toggleRightCollapsed">
-            <span>{{ rightCollapsed ? '>>' : '<<' }}</span>
-          </button>
-          <!-- 左侧文件栏隐藏时，先不显示左侧折叠按钮 -->
-          <!--
+        <!-- 中间：模型 -->
+        <section class="center">
+          <div class="center__canvas">
+            <ThreeModelViewer
+              ref="viewerRef"
+              :modelUrl="modelUrl"
+              :mode="mode"
+              :explode="explodeOn"
+              :toolMode="toolMode"
+              :selectedCode="selectedNodeCode"
+              :explodeFactor="explodeFactor"
+              :activeGroupFilter="activeGroupFilter"
+              :colorIsolated="colorIsolated"
+              :colorIsolatedOpacity="activeColorIsolatedOpacity"
+              :baseOpacity="activeBaseOpacity"
+              :notePointScale="notePointScale"
+              :noteLabelOffset="noteLabelOffset"
+              :noteLineWidth="noteLineWidth"
+              :measurePointScale="measurePointScale"
+              :measureLineWidth="measureLineWidth"
+              :notePointColor="notePointColor"
+              :noteLabelColor="noteLabelColor"
+              :measurePointColor="measurePointColor"
+              :measureLineColor="measureLineColor"
+              :measureLabelColor="measureLabelColor"
+              :showCenterMarks="showCenterMarks"
+              :centerColor="centerColor"
+              :centerAxisWidth="centerAxisWidth"
+              :knownCodes="knownCodes"
+              v-model:showMeshLabels="showMeshLabels"
+              :meshLabelColor="meshLabelColor"
+              :meshLabelSize="meshLabelSize"
+              :meshLabelMap="meshLabelMap"
+              :showLeftDims="!isPartModel || !!activeGroupFilter"
+              :showLeftBaseline="!!activeGroupFilter"
+              :partNameMapList="mockData"
+              v-model:markFilter="markFilter"
+              @picked="handleModelPicked"
+              @note-added="onNoteAdded"
+              @note-updated="onNoteUpdated"
+              @measure="onMeasure"
+              @measure-updated="onMeasureUpdated"
+              @model-loaded="handleModelLoaded"
+            />
+            <button class="center__right-toggle" type="button" @click="toggleRightCollapsed">
+              <span>{{ rightCollapsed ? '>>' : '<<' }}</span>
+            </button>
+            <!-- 左侧文件栏隐藏时，先不显示左侧折叠按钮 -->
+            <!--
           <button class="center__left-toggle" type="button" @click="leftCollapsed = !leftCollapsed">
             <span>{{ leftCollapsed ? '<<' : '>>' }}</span>
           </button>
-          -->
-        </div>
-      </section>
+          --></div>
+        </section>
 
-      <RightPanelV2
-        :right-collapsed="rightCollapsed"
-        :right-tree-left="rightTreeLeft"
-        :right-tree-right="rightTreeRight"
-        :selected-left-code="selectedLeftCode"
-        :selected-leaf-code="selectedLeafCode"
-        :selected-node="rightInfoNode"
-        :hud-tab="hudTab"
-        :measure-list="measureList"
-        :note-list="noteList"
-        :fmt="fmt"
-        :fmt-text="fmtText"
-        :get-measure-display-text="getMeasureDisplayText"
-        :get-delta-val="getDeltaVal"
-        :show-detail-panels="!isPartModel || !!activeGroupFilter"
-        :on-toggle-collapse="toggleRightCollapsed"
-        :on-left-node-click="onLeftNodeClick"
-        :on-right-node-click="onRightNodeClick"
-        :on-hud-tab-change="setHudTab"
-        :on-measure-text-change="handleMeasureTextChange"
-        :on-measure-point-delta-change="handleMeasurePointDeltaChange"
-        :on-locate-measure="locateMeasure"
-        :on-remove-measure="removeMeasure"
-        :on-note-text-change="handleNoteTextChange"
-        :on-note-delta-change="handleNoteDeltaChange"
-        :on-locate-note="locateNote"
-        :on-remove-note="removeNote"
-      />
-    </main>
+        <RightPanelV2
+          :right-collapsed="rightCollapsed"
+          :right-tree-left="rightTreeLeft"
+          :right-tree-right="rightTreeRight"
+          :selected-left-code="selectedLeftCode"
+          :selected-leaf-code="selectedLeafCode"
+          :selected-node="rightInfoNode"
+          :hud-tab="hudTab"
+          :measure-list="measureList"
+          :note-list="noteList"
+          :fmt="fmt"
+          :fmt-text="fmtText"
+          :get-measure-display-text="getMeasureDisplayText"
+          :get-delta-val="getDeltaVal"
+          :show-detail-panels="!isPartModel || !!activeGroupFilter"
+          :on-toggle-collapse="toggleRightCollapsed"
+          :on-left-node-click="onLeftNodeClick"
+          :on-right-node-click="onRightNodeClick"
+          :on-hud-tab-change="setHudTab"
+          :on-measure-text-change="handleMeasureTextChange"
+          :on-measure-point-delta-change="handleMeasurePointDeltaChange"
+          :on-locate-measure="locateMeasure"
+          :on-remove-measure="removeMeasure"
+          :on-note-text-change="handleNoteTextChange"
+          :on-note-delta-change="handleNoteDeltaChange"
+          :on-locate-note="locateNote"
+          :on-remove-note="removeNote"
+        />
+      </main>
     </div>
   </div>
 </template>
 
 <script setup>
-import { onBeforeUnmount, onMounted, computed, ref, watch, nextTick } from 'vue';
-import TopBar from './components/TopBar.vue';
+import { showError, showSuccess } from '@/utils/utils';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import LeftBarV2 from './components/LeftBarV2.vue';
-import LeftPanel from './components/LeftPanel.vue';
+import { M101P } from './components/M101P.js';
+import { M102P } from './components/M102P.js';
+import { M315P } from './components/M315P.js';
 import RightPanelV2 from './components/RightPanelV2.vue';
 import ThreeModelViewer from './components/ThreeModelViewer.vue';
-import { M102P } from './components/M102P.js';
-import { M101P } from './components/M101P.js';
-import { M315P } from './components/M315P.js';
+import TopBar from './components/TopBar.vue';
 import { fetchMaster3dByCode, updateMaster3dJson } from './services.js';
-import { showSuccess, showError } from '@/utils/utils';
 
 const title = ref('三维作业指导书');
 const searchText = ref('');
@@ -209,9 +207,11 @@ const leftTab = ref('PART');
 const DESIGN_WIDTH = 1920;
 const DESIGN_HEIGHT = 1080;
 const pageScale = ref(1);
+const stageRef = ref(null);
 const updatePageScale = () => {
-  const w = window.innerWidth || DESIGN_WIDTH;
-  const h = window.innerHeight || DESIGN_HEIGHT;
+  const el = stageRef.value;
+  const w = el ? el.clientWidth : window.innerWidth || DESIGN_WIDTH;
+  const h = el ? el.clientHeight : window.innerHeight || DESIGN_HEIGHT;
   const scale = Math.min(w / DESIGN_WIDTH, h / DESIGN_HEIGHT, 1);
   pageScale.value = Number.isFinite(scale) ? scale : 1;
 };
@@ -316,8 +316,8 @@ const hudTab = ref('MEASURE'); // MEASURE | NOTE
 /** 列表（用于右下展示 + 编辑） */
 const noteList = ref([]); // [{ id, seq, code, position, text, labelOffset }]
 const measureList = ref([]); // [{ id, seq, distance, a,b, aCode,bCode, text }]
-const canSaveMarks = computed(() =>
-  !!selectedLeftCode.value || getLevelUnderSelectedPart(selectedNodeCode.value) === '组立',
+const canSaveMarks = computed(
+  () => !!selectedLeftCode.value || getLevelUnderSelectedPart(selectedNodeCode.value) === '组立',
 );
 
 const fmt = (v) => (typeof v === 'number' && !Number.isNaN(v) ? v.toFixed(2) : '-');
@@ -492,9 +492,13 @@ const rightInfoNode = computed(() => {
     const code = String(selectedLeafCode.value || '').trim();
     const list = mockData.value || [];
     const hit =
-      list.find((it) => String(it?.joint_part_partname || '').trim() === code)
-      || list.find((it) => String(it?.materials_code || '').trim() === code)
-      || list.find((it) => String(it?.materials_code || '').trim().endsWith(`-${code}`));
+      list.find((it) => String(it?.joint_part_partname || '').trim() === code) ||
+      list.find((it) => String(it?.materials_code || '').trim() === code) ||
+      list.find((it) =>
+        String(it?.materials_code || '')
+          .trim()
+          .endsWith(`-${code}`),
+      );
     return hit || findNodeByCode(bomList.value, selectedLeafCode.value) || null;
   }
   if (selectedLeftCode.value) {
@@ -508,9 +512,9 @@ const rightInfoNode = computed(() => {
       const key = idx > 0 ? name.slice(0, idx) : name;
       if (key !== groupKey) return acc;
       const uniqKey =
-        String(it?.joint_part_partname_tb || '').trim()
-        || String(it?.joint_part_partname || '').trim()
-        || String(it?.materials_code || '').trim();
+        String(it?.joint_part_partname_tb || '').trim() ||
+        String(it?.joint_part_partname || '').trim() ||
+        String(it?.materials_code || '').trim();
       if (uniqKey && seen.has(uniqKey)) return acc;
       if (uniqKey) seen.add(uniqKey);
       const w = typeof it?.weight === 'number' && !Number.isNaN(it.weight) ? it.weight : 0;
@@ -570,9 +574,9 @@ function onLeftNodeClick(code) {
   refreshRightTreeForLeft();
   const prevModelUrl = modelUrl.value;
   const modelNode =
-    findNodeByCode(bomList.value, code)
-    || findNodeByCode(bomList.value, selectedPart.value)
-    || null;
+    findNodeByCode(bomList.value, code) ||
+    findNodeByCode(bomList.value, selectedPart.value) ||
+    null;
   // console.log('[3D] 组立点击-模型数据', modelNode);
   activeGroupFilter.value = code;
   viewerRef.value?.dumpMeshAndGroupByCode?.(code);
@@ -696,10 +700,10 @@ function extractPayloadFromResponse(res) {
     }
   }
   if (raw && typeof raw === 'object') return raw;
-  if (res?.data && typeof res.data === 'object' && (res.data.notes || res.data.measures)) return res.data;
+  if (res?.data && typeof res.data === 'object' && (res.data.notes || res.data.measures))
+    return res.data;
   return null;
 }
-
 
 async function saveMarksToAssembly() {
   const code = getSelectedAssemblyCode();
@@ -1130,21 +1134,29 @@ onBeforeUnmount(() => {
   if (timer) window.clearInterval(timer);
 });
 
+let _stageRo = null;
 onMounted(() => {
   updatePageScale();
   window.addEventListener('resize', updatePageScale);
+  if (stageRef.value) {
+    _stageRo = new ResizeObserver(updatePageScale);
+    _stageRo.observe(stageRef.value);
+  }
 });
 onBeforeUnmount(() => {
   window.removeEventListener('resize', updatePageScale);
+  if (_stageRo) {
+    _stageRo.disconnect();
+    _stageRo = null;
+  }
 });
 </script>
 
 <style scoped>
 .viewer-stage {
-  height: 100vh;
-  width: 100vw;
+  height: 100%;
+  width: 100%;
   position: relative;
-  background: #000;
   overflow: hidden;
 }
 
@@ -1156,7 +1168,6 @@ onBeforeUnmount(() => {
   left: 50%;
   display: grid;
   grid-template-rows: 70px 1fr;
-  background: #000;
   overflow: hidden;
   padding: 5px;
   transform: translate(-50%, -50%) scale(var(--page-scale));
@@ -1186,7 +1197,12 @@ onBeforeUnmount(() => {
   overflow: hidden;
   transition: grid-template-columns 0.28s ease;
   --left-shell-bg:
-    linear-gradient(160deg, rgba(100, 116, 139, 0.12) 0%, rgba(148, 163, 184, 0.1) 35%, rgba(203, 213, 225, 0.1) 70%),
+    linear-gradient(
+      160deg,
+      rgba(100, 116, 139, 0.12) 0%,
+      rgba(148, 163, 184, 0.1) 35%,
+      rgba(203, 213, 225, 0.1) 70%
+    ),
     linear-gradient(180deg, #f6f2eb 0%, #eee7df 100%);
   background: linear-gradient(180deg, #e6e7e5 0%, #dcddda 55%, #d1d2cf 100%);
   border: 1px solid rgba(15, 23, 42, 0.18);
@@ -1212,7 +1228,13 @@ onBeforeUnmount(() => {
   position: absolute;
   inset: 0;
   background:
-    repeating-linear-gradient(90deg, rgba(12, 24, 52, 0.04), rgba(12, 24, 52, 0.04) 1px, transparent 1px, transparent 140px),
+    repeating-linear-gradient(
+      90deg,
+      rgba(12, 24, 52, 0.04),
+      rgba(12, 24, 52, 0.04) 1px,
+      transparent 1px,
+      transparent 140px
+    ),
     linear-gradient(180deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0));
   opacity: 0.5;
   pointer-events: none;
@@ -1256,8 +1278,20 @@ onBeforeUnmount(() => {
   inset: 0;
   background:
     linear-gradient(120deg, rgba(255, 255, 255, 0.08), transparent 35%),
-    repeating-linear-gradient(0deg, rgba(148, 163, 184, 0.08) 0, rgba(148, 163, 184, 0.08) 1px, transparent 1px, transparent 120px),
-    repeating-linear-gradient(90deg, rgba(148, 163, 184, 0.06) 0, rgba(148, 163, 184, 0.06) 1px, transparent 1px, transparent 120px);
+    repeating-linear-gradient(
+      0deg,
+      rgba(148, 163, 184, 0.08) 0,
+      rgba(148, 163, 184, 0.08) 1px,
+      transparent 1px,
+      transparent 120px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(148, 163, 184, 0.06) 0,
+      rgba(148, 163, 184, 0.06) 1px,
+      transparent 1px,
+      transparent 120px
+    );
   opacity: 0.35;
   pointer-events: none;
   z-index: 0;
@@ -1266,8 +1300,7 @@ onBeforeUnmount(() => {
   content: '';
   position: absolute;
   inset: 0;
-  background:
-    radial-gradient(70% 70% at 50% 50%, transparent 0%, rgba(2, 6, 23, 0.6) 100%);
+  background: radial-gradient(70% 70% at 50% 50%, transparent 0%, rgba(2, 6, 23, 0.6) 100%);
   opacity: 0.4;
   pointer-events: none;
   z-index: 0;

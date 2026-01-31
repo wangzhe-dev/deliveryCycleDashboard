@@ -255,10 +255,13 @@ const visibleMenuList = computed(() => {
     if (item.children && item.children.length === 1 && !item.alwaysShow) {
       const child = item.children[0];
       // 使用子路由的信息，但保留父路由的 name
+      // 解析子路由的完整路径（子 path 为空时取父 path）
+      const childPath = child.path ? resolvePath(child.path, item.path) : item.path;
       result.push({
         ...child,
         name: item.name || child.name,
-        path: child.path,
+        path: childPath || item.path,
+        redirect: item.redirect || child.redirect,
         meta: child.meta || item.meta,
       });
     } else {
@@ -283,6 +286,23 @@ const currentFirstMenuName = computed(() => {
   }
 
   const normalizedPath = getNormalPath(activePath);
+
+  // 先在 visibleMenuList 中直接匹配（处理折叠后的单子路由情况）
+  for (const item of visibleMenuList.value) {
+    const itemPath = getNormalPath(item.path);
+    if (itemPath && (normalizedPath === itemPath || normalizedPath.startsWith(`${itemPath}/`))) {
+      return item.name;
+    }
+    // 检查 redirect
+    if (item.redirect) {
+      const redirectPath = getNormalPath(item.redirect);
+      if (normalizedPath === redirectPath) {
+        return item.name;
+      }
+    }
+  }
+
+  // 再在原始路由树中递归查找
   return findFirstMenuName(visibleMenuList.value, normalizedPath);
 });
 
@@ -521,6 +541,7 @@ const handleMenuClick = (item) => {
   if (item.meta?.link) {
     // 外部链接
     window.open(item.meta.link, '_blank');
+    closePopover();
     return;
   }
 
@@ -532,6 +553,15 @@ const handleMenuClick = (item) => {
     if (!targetPath) {
       targetPath = getNormalPath(item.path);
     }
+
+    // 如果路径为空或根路径，尝试用 redirect
+    if (!targetPath || targetPath === '/') {
+      const originalRoute = sidebarRouters.value.find((r) => r.name === item.name);
+      if (originalRoute?.redirect) {
+        targetPath = originalRoute.redirect;
+      }
+    }
+
     // 跳转路由
     router.push(targetPath).catch((err) => {
       console.error('路由跳转失败:', err, '目标路径:', targetPath);

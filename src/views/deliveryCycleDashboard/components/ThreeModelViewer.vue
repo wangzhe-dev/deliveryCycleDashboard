@@ -78,11 +78,21 @@
 </template>
 
 <script setup>
-import { onBeforeUnmount, onMounted, reactive, ref, watch, computed, nextTick, shallowRef, markRaw } from 'vue';
 import * as THREE from 'three';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
+import {
+  computed,
+  markRaw,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  reactive,
+  ref,
+  shallowRef,
+  watch,
+} from 'vue';
 import OrientationMini from './OrientationMini.vue';
 import { createBaselineDims } from './ThreeModelViewer.baseline.js';
 import { createExplodeSelection } from './ThreeModelViewer.explode.js';
@@ -203,14 +213,30 @@ const getRaycaster = () => raycaster;
 const getPointer = () => pointer;
 const getRafId = () => rafId;
 
-const setRenderer = (v) => { renderer = v; };
-const setLabelRenderer = (v) => { labelRenderer = v; };
-const setScene = (v) => { scene = v; };
-const setCamera = (v) => { camera = v; };
-const setControls = (v) => { controls = v; };
-const setRaycaster = (v) => { raycaster = v; };
-const setPointer = (v) => { pointer = v; };
-const setRafId = (v) => { rafId = v; };
+const setRenderer = (v) => {
+  renderer = v;
+};
+const setLabelRenderer = (v) => {
+  labelRenderer = v;
+};
+const setScene = (v) => {
+  scene = v;
+};
+const setCamera = (v) => {
+  camera = v;
+};
+const setControls = (v) => {
+  controls = v;
+};
+const setRaycaster = (v) => {
+  raycaster = v;
+};
+const setPointer = (v) => {
+  pointer = v;
+};
+const setRafId = (v) => {
+  rafId = v;
+};
 
 const meshState = new Map(); // uuid -> snapshot
 const meshByUuid = new Map(); // uuid -> mesh
@@ -226,11 +252,17 @@ const noteIndexRef = ref(0);
 let resizeObserver = null;
 
 const getMeasurePending = () => measurePendingRef.value;
-const setMeasurePending = (v) => { measurePendingRef.value = v; };
+const setMeasurePending = (v) => {
+  measurePendingRef.value = v;
+};
 const getMeasureIndex = () => measureIndexRef.value;
-const setMeasureIndex = (v) => { measureIndexRef.value = v; };
+const setMeasureIndex = (v) => {
+  measureIndexRef.value = v;
+};
 const getNoteIndex = () => noteIndexRef.value;
-const setNoteIndex = (v) => { noteIndexRef.value = v; };
+const setNoteIndex = (v) => {
+  noteIndexRef.value = v;
+};
 
 const markIdSeq = ref(1);
 const markStore = new Map(); // id -> item
@@ -620,7 +652,10 @@ function getHitboxSize(scale) {
   return Math.max(markSizeBase * 7 * scale, 0.02);
 }
 function getDragThreshold() {
-  return Math.max(0.01, markSizeBase * 10 * Math.max(getNotePointScale(), getMeasurePointScale(), 1));
+  return Math.max(
+    0.01,
+    markSizeBase * 10 * Math.max(getNotePointScale(), getMeasurePointScale(), 1),
+  );
 }
 
 let cachedPartNameList = null;
@@ -631,7 +666,8 @@ function getPartNameMap() {
   cachedPartNameList = list;
   cachedPartNameMap = new Map();
   list.forEach((it) => {
-    const key = typeof it?.joint_part_partname_tb === 'string' ? it.joint_part_partname_tb.trim() : '';
+    const key =
+      typeof it?.joint_part_partname_tb === 'string' ? it.joint_part_partname_tb.trim() : '';
     const val = typeof it?.joint_part_partname === 'string' ? it.joint_part_partname.trim() : '';
     if (key) cachedPartNameMap.set(key, val);
   });
@@ -789,7 +825,9 @@ function resolveNoteLabelOffset(it) {
 }
 
 function getModelExt(url) {
-  const clean = String(url || '').split('#')[0].split('?')[0];
+  const clean = String(url || '')
+    .split('#')[0]
+    .split('?')[0];
   const idx = clean.lastIndexOf('.');
   return idx >= 0 ? clean.slice(idx + 1).toLowerCase() : '';
 }
@@ -1003,7 +1041,10 @@ function openMarkEditorById(id, ev, axis) {
       marksApi.updateNoteMeta(id, { text: String(newText ?? '') });
     };
   } else if (it.type === 'measure') {
-    const current = it.customText && String(it.customText).trim() ? it.customText : it.label?.element?.textContent || '';
+    const current =
+      it.customText && String(it.customText).trim()
+        ? it.customText
+        : it.label?.element?.textContent || '';
     editor.value = current;
     editingApplyFn = (newText) => {
       marksApi.updateMeasureMeta(id, { text: newText });
@@ -1059,7 +1100,9 @@ function cancelEdit() {
 /** ---------- 视图 ---------- */
 function fitView() {
   if (!rootGroup || !camera || !controls) return;
-  const box = props.activeGroupFilter ? getVisibleMeshBox(rootGroup) : new THREE.Box3().setFromObject(rootGroup);
+  const box = props.activeGroupFilter
+    ? getVisibleMeshBox(rootGroup)
+    : new THREE.Box3().setFromObject(rootGroup);
   if (!box) return;
   fitBox(box);
 }
@@ -1133,7 +1176,7 @@ function getMeshesWorldBox(meshes) {
 function getSceneCenterAndRadius() {
   const obj = rootGroup || scene;
   const box = props.activeGroupFilter
-    ? (getVisibleMeshBox(rootGroup) || new THREE.Box3().setFromObject(obj))
+    ? getVisibleMeshBox(rootGroup) || new THREE.Box3().setFromObject(obj)
     : new THREE.Box3().setFromObject(obj);
   const size = new THREE.Vector3();
   const center = new THREE.Vector3();
@@ -1331,7 +1374,8 @@ async function loadModel(url) {
       if (!obj.isMesh) return;
 
       if (obj.material) {
-        if (Array.isArray(obj.material)) obj.material = obj.material.map((m) => (m?.clone ? m.clone() : m));
+        if (Array.isArray(obj.material))
+          obj.material = obj.material.map((m) => (m?.clone ? m.clone() : m));
         else if (obj.material.clone) obj.material = obj.material.clone();
       }
 
@@ -1390,8 +1434,10 @@ function dumpMeshList(group) {
   const lines = [];
   const mapEntries = [];
   (props.partNameMapList || []).forEach((it) => {
-    const name = typeof it?.joint_part_partname_tb === 'string' ? it.joint_part_partname_tb.trim() : '';
-    const partName = typeof it?.joint_part_partname === 'string' ? it.joint_part_partname.trim() : '';
+    const name =
+      typeof it?.joint_part_partname_tb === 'string' ? it.joint_part_partname_tb.trim() : '';
+    const partName =
+      typeof it?.joint_part_partname === 'string' ? it.joint_part_partname.trim() : '';
     if (name) mapEntries.push({ name, partName });
   });
   mapEntries.sort((a, b) => b.name.length - a.name.length);
@@ -1578,7 +1624,13 @@ watch(
 );
 
 watch(
-  () => [props.notePointScale, props.noteLabelOffset, props.measurePointScale, props.measureLineWidth, props.leftDimsArrowSize],
+  () => [
+    props.notePointScale,
+    props.noteLabelOffset,
+    props.measurePointScale,
+    props.measureLineWidth,
+    props.leftDimsArrowSize,
+  ],
   () => {
     marksApi.applyMarkSizing();
     callUpdateBoundMarks();
@@ -1637,7 +1689,13 @@ watch(
   () => markLeftDimsDirty(),
 );
 watch(
-  () => [props.leftDimsUnitScale, props.leftDimsDatumX, props.leftDimsMaxCount, props.leftDimsMinSizeRatio, props.leftDimsAnchor],
+  () => [
+    props.leftDimsUnitScale,
+    props.leftDimsDatumX,
+    props.leftDimsMaxCount,
+    props.leftDimsMinSizeRatio,
+    props.leftDimsAnchor,
+  ],
   () => markLeftDimsDirty(),
 );
 </script>
@@ -1649,13 +1707,13 @@ watch(
   width: 100%;
   border-radius: 12px;
   overflow: hidden;
-  background:
+  /* background:
     radial-gradient(1000px 460px at 16% 8%, rgba(14, 116, 144, 0.06), transparent 62%),
     radial-gradient(900px 420px at 86% 0%, rgba(30, 64, 175, 0.06), transparent 68%),
-    linear-gradient(180deg, #f7f5f1 0%, #f0ebe5 55%, #e8e1da 100%);
-  box-shadow:
+    linear-gradient(180deg, #f7f5f1 0%, #f0ebe5 55%, #e8e1da 100%); */
+  /* box-shadow:
     0 12px 26px rgba(15, 23, 42, 0.12),
-    inset 0 0 40px rgba(15, 23, 42, 0.1);
+    inset 0 0 40px rgba(15, 23, 42, 0.1); */
 }
 .mv-root::before {
   content: '';
@@ -1663,9 +1721,27 @@ watch(
   inset: 0;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0)),
-    repeating-linear-gradient(0deg, rgba(120, 130, 140, 0.12) 0, rgba(120, 130, 140, 0.12) 1px, transparent 1px, transparent 120px),
-    repeating-linear-gradient(90deg, rgba(120, 130, 140, 0.1) 0, rgba(120, 130, 140, 0.1) 1px, transparent 1px, transparent 120px),
-    repeating-linear-gradient(135deg, rgba(120, 130, 140, 0.08) 0, rgba(120, 130, 140, 0.08) 1px, transparent 1px, transparent 180px);
+    repeating-linear-gradient(
+      0deg,
+      rgba(120, 130, 140, 0.12) 0,
+      rgba(120, 130, 140, 0.12) 1px,
+      transparent 1px,
+      transparent 120px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(120, 130, 140, 0.1) 0,
+      rgba(120, 130, 140, 0.1) 1px,
+      transparent 1px,
+      transparent 120px
+    ),
+    repeating-linear-gradient(
+      135deg,
+      rgba(120, 130, 140, 0.08) 0,
+      rgba(120, 130, 140, 0.08) 1px,
+      transparent 1px,
+      transparent 180px
+    );
   opacity: 0.2;
   pointer-events: none;
 }
@@ -1797,7 +1873,6 @@ watch(
     0 0 6px rgba(15, 23, 42, 0.9),
     0 0 12px rgba(15, 23, 42, 0.6);
 }
-
 
 /* ✅ 编辑器 */
 .mv-editor {

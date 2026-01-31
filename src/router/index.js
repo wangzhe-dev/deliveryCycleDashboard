@@ -53,11 +53,17 @@ export const constantRoutes = [
   // 三维作业指导书
   {
     path: '/deliveryCycleDashboard/3D',
-    component: () => import('@/views/deliveryCycleDashboard/3D.vue'),
-    name: 'DeliveryCycle3D',
+    component: Layout,
     hidden: false,
-    viewType: 'component',
     meta: { title: '三维作业指导书', icon: '统计-蓝' },
+    children: [
+      {
+        path: '',
+        component: () => import('@/views/deliveryCycleDashboard/3D.vue'),
+        name: 'DeliveryCycle3D',
+        meta: { title: '三维作业指导书', icon: '统计-蓝' },
+      },
+    ],
   },
 
   // 场地编辑器
