@@ -40,7 +40,12 @@ export function createRenderer(ctx) {
 
   function initThree() {
     const scene = new THREE.Scene();
-    scene.background = null;
+
+    /* ── 深蓝夜景背景 ── */
+    scene.background = new THREE.Color(0x0a1628);
+
+    /* ── 深蓝雾：远处自然消隐，不糊近景 ── */
+    scene.fog = new THREE.FogExp2(0x0a1628, 0.0012);
 
     const w = hostRef.value.clientWidth || 800;
     const h = hostRef.value.clientHeight || 500;
@@ -48,10 +53,16 @@ export function createRenderer(ctx) {
     const camera = new THREE.PerspectiveCamera(55, w / h, 0.1, 500000);
     camera.position.set(2.2, 1.8, 2.6);
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.setSize(w, h);
-    renderer.setClearColor(0x000000, 0);
+    renderer.setClearColor(0x0a1628, 1);
+
+    /* ── 色调映射 + 曝光：让高光不过曝、暗部不死黑 ── */
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.05;
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+
     hostRef.value.appendChild(renderer.domElement);
 
     const labelRenderer = new CSS2DRenderer();
@@ -69,11 +80,32 @@ export function createRenderer(ctx) {
     controls.addEventListener('change', syncOrientCube);
     syncOrientCube();
 
-    scene.add(new THREE.AmbientLight(0xffffff, 0.85));
-    scene.add(new THREE.HemisphereLight(0xffffff, 0xbad7ff, 0.35));
-    const dir = new THREE.DirectionalLight(0xffffff, 0.9);
-    dir.position.set(3, 5, 4);
+    /* ── 深蓝夜景灯光组 ── */
+    // 环境光：冷蓝基底
+    scene.add(new THREE.AmbientLight(0x8ec5fc, 0.45));
+    // 半球光：天蓝 + 地面深靛
+    scene.add(new THREE.HemisphereLight(0x7db4e6, 0x1a2744, 0.5));
+    // 主方向光：微暖白，偏高偏侧
+    const dir = new THREE.DirectionalLight(0xe8edf5, 1.1);
+    dir.position.set(3, 6, 4);
     scene.add(dir);
+    // 补光：冷蓝从对侧托底
+    const fill = new THREE.DirectionalLight(0x4a8eda, 0.35);
+    fill.position.set(-4, 2, -3);
+    scene.add(fill);
+    // 底部微光：防止底面全黑
+    const bottom = new THREE.DirectionalLight(0x2a4a7f, 0.18);
+    bottom.position.set(0, -4, 0);
+    scene.add(bottom);
+
+    /* ── 地面网格（深蓝调）── 加载模型后会自动调整 y 位置 */
+    const grid = new THREE.GridHelper(200, 120, 0x1e3a5f, 0x162d4a);
+    grid.material.opacity = 0.85;
+    grid.material.transparent = true;
+    grid.material.depthWrite = false;
+    grid.name = '__groundGrid';
+    grid.position.y = -0.01;
+    scene.add(grid);
 
     const raycaster = new THREE.Raycaster();
     raycaster.params.Line.threshold = 0.02;
@@ -173,7 +205,8 @@ export function createRenderer(ctx) {
 
     if (renderer) {
       renderer.dispose && renderer.dispose();
-      if (renderer.domElement?.parentNode) renderer.domElement.parentNode.removeChild(renderer.domElement);
+      if (renderer.domElement?.parentNode)
+        renderer.domElement.parentNode.removeChild(renderer.domElement);
     }
     if (labelRenderer?.domElement?.parentNode) {
       labelRenderer.domElement.parentNode.removeChild(labelRenderer.domElement);

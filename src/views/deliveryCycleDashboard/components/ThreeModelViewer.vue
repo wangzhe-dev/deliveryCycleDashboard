@@ -81,6 +81,7 @@
 import * as THREE from 'three';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 import {
   computed,
@@ -321,9 +322,9 @@ function setInfoTab(tab) {
 }
 
 /** 颜色 */
-const HIGHLIGHT_SELECTED = 0xb08a3a; // 选中暗黄
-// ✅ 模型默认淡蓝（基色）
-const BASE_TINT = 0x6fb5ff;
+const HIGHLIGHT_SELECTED = 0xd4a84b; // 选中亮金（深蓝底上高对比）
+// ✅ 模型默认：深蓝夜景下偏亮的钢蓝
+const BASE_TINT = 0x5a9fd4;
 
 /** ✅ 点击选中：用 uuid 管理（不靠 code 匹配） */
 let selectedUuids = new Set();
@@ -1365,6 +1366,9 @@ async function loadModel(url) {
       rootGroup = await loader.loadAsync(url);
     } else {
       const loader = new GLTFLoader();
+      const dracoLoader = new DRACOLoader();
+      dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.7/');
+      loader.setDRACOLoader(dracoLoader);
       const gltf = await loader.loadAsync(url);
       rootGroup = gltf.scene || new THREE.Group();
     }
@@ -1413,6 +1417,17 @@ async function loadModel(url) {
     marksApi.applyMarkColors();
 
     dumpMeshList(rootGroup);
+
+    /* ── 网格对齐模型底部 + XZ 居中 ── */
+    if (scene) {
+      const grid = scene.getObjectByName('__groundGrid');
+      if (grid) {
+        const rootBox = new THREE.Box3().setFromObject(rootGroup);
+        const center = new THREE.Vector3();
+        rootBox.getCenter(center);
+        grid.position.set(center.x, rootBox.min.y - 0.01, center.z);
+      }
+    }
 
     fitView();
     applyAll();
@@ -1707,50 +1722,25 @@ watch(
   width: 100%;
   border-radius: 12px;
   overflow: hidden;
-  /* background:
-    radial-gradient(1000px 460px at 16% 8%, rgba(14, 116, 144, 0.06), transparent 62%),
-    radial-gradient(900px 420px at 86% 0%, rgba(30, 64, 175, 0.06), transparent 68%),
-    linear-gradient(180deg, #f7f5f1 0%, #f0ebe5 55%, #e8e1da 100%); */
-  /* box-shadow:
-    0 12px 26px rgba(15, 23, 42, 0.12),
-    inset 0 0 40px rgba(15, 23, 42, 0.1); */
+  background: linear-gradient(180deg, #0a1628 0%, #0d1f3c 50%, #0a1628 100%);
+  box-shadow:
+    0 12px 36px rgba(0, 0, 0, 0.5),
+    inset 0 0 60px rgba(10, 22, 40, 0.4);
 }
 .mv-root::before {
   content: '';
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0)),
-    repeating-linear-gradient(
-      0deg,
-      rgba(120, 130, 140, 0.12) 0,
-      rgba(120, 130, 140, 0.12) 1px,
-      transparent 1px,
-      transparent 120px
-    ),
-    repeating-linear-gradient(
-      90deg,
-      rgba(120, 130, 140, 0.1) 0,
-      rgba(120, 130, 140, 0.1) 1px,
-      transparent 1px,
-      transparent 120px
-    ),
-    repeating-linear-gradient(
-      135deg,
-      rgba(120, 130, 140, 0.08) 0,
-      rgba(120, 130, 140, 0.08) 1px,
-      transparent 1px,
-      transparent 180px
-    );
-  opacity: 0.2;
+    radial-gradient(ellipse 80% 60% at 30% 15%, rgba(56, 130, 220, 0.06), transparent 70%),
+    radial-gradient(ellipse 60% 50% at 75% 10%, rgba(30, 64, 175, 0.05), transparent 65%);
   pointer-events: none;
 }
 .mv-root::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(70% 70% at 50% 50%, transparent 0%, rgba(2, 6, 23, 0.08) 100%);
-  opacity: 0.12;
+  background: radial-gradient(70% 70% at 50% 50%, transparent 0%, rgba(2, 6, 23, 0.25) 100%);
   pointer-events: none;
 }
 .mv-root--flat-left {
@@ -1766,12 +1756,12 @@ watch(
   gap: 8px;
   padding: 6px;
   border-radius: 999px;
-  border: 1px solid rgba(148, 163, 184, 0.3);
-  background: linear-gradient(180deg, rgba(86, 94, 104, 0.75), rgba(62, 69, 78, 0.6));
-  backdrop-filter: blur(10px);
+  border: 1px solid rgba(56, 130, 220, 0.2);
+  background: linear-gradient(180deg, rgba(10, 22, 40, 0.85), rgba(13, 31, 60, 0.75));
+  backdrop-filter: blur(12px);
   box-shadow:
-    0 10px 20px rgba(2, 6, 23, 0.22),
-    inset 0 1px 0 rgba(255, 255, 255, 0.16);
+    0 10px 24px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(56, 130, 220, 0.12);
 }
 .mv-info-tab {
   height: 32px;
@@ -1779,18 +1769,22 @@ watch(
   border: none;
   border-radius: 999px;
   background: transparent;
-  color: #ffffff;
+  color: rgba(180, 210, 255, 0.8);
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
-  text-shadow: 0 1px 2px rgba(2, 6, 23, 0.6);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  transition: color 0.2s;
+}
+.mv-info-tab:hover {
+  color: #ffffff;
 }
 .mv-info-tab.is-active {
-  background: linear-gradient(180deg, #2563eb 0%, #1e3a8a 100%);
+  background: linear-gradient(180deg, #1d4ed8 0%, #1e3a8a 100%);
   color: #ffffff;
   box-shadow:
-    0 10px 20px rgba(30, 64, 175, 0.45),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    0 6px 18px rgba(29, 78, 216, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 .mv-host {
   position: absolute;
@@ -1813,12 +1807,12 @@ watch(
   max-width: 280px;
   padding: 8px 10px;
   border-radius: 10px;
-  background: rgba(15, 23, 42, 0.92);
-  border: 1px solid rgba(148, 163, 184, 0.25);
-  color: #ffffff;
+  background: rgba(8, 16, 32, 0.95);
+  border: 1px solid rgba(56, 130, 220, 0.25);
+  color: #e0ecff;
   font-size: 12px;
   pointer-events: none;
-  box-shadow: 0 10px 26px rgba(2, 6, 23, 0.35);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.5);
 }
 .mv-tip__t {
   display: block;
@@ -1839,9 +1833,9 @@ watch(
 :deep(.mv-label) {
   padding: 4px 8px;
   border-radius: 10px;
-  border: 1px solid rgba(59, 130, 246, 0.45);
-  background: rgba(15, 23, 42, 0.72);
-  color: #ffffff;
+  border: 1px solid rgba(56, 130, 220, 0.35);
+  background: rgba(8, 16, 32, 0.8);
+  color: #c8deff;
   font-size: 12px;
   font-weight: 800;
   white-space: nowrap;
@@ -1850,11 +1844,11 @@ watch(
 :deep(.mv-label--axis) {
   padding: 1px 4px;
   border-radius: 6px;
-  background: #2563eb;
-  color: #ffffff;
+  background: #1d4ed8;
+  color: #e0ecff;
   font-weight: 900;
   font-size: 11px;
-  border: 1px solid rgba(37, 99, 235, 0.7);
+  border: 1px solid rgba(29, 78, 216, 0.7);
 }
 :deep(.mv-label--mesh) {
   background: transparent;
@@ -1883,38 +1877,38 @@ watch(
   gap: 8px;
   padding: 8px 10px;
   border-radius: 12px;
-  background: rgba(15, 23, 42, 0.92);
-  border: 1px solid rgba(59, 130, 246, 0.35);
-  box-shadow: 0 12px 30px rgba(2, 6, 23, 0.4);
+  background: rgba(8, 16, 32, 0.95);
+  border: 1px solid rgba(56, 130, 220, 0.3);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
 }
 .mv-editor__input {
   width: 200px;
   height: 30px;
   border-radius: 10px;
-  border: 1px solid rgba(59, 130, 246, 0.4);
+  border: 1px solid rgba(56, 130, 220, 0.3);
   outline: none;
   padding: 0 10px;
   font-size: 12px;
-  color: #ffffff;
-  background: rgba(2, 6, 23, 0.45);
+  color: #e0ecff;
+  background: rgba(10, 22, 40, 0.6);
 }
 .mv-editor__input:focus {
-  border-color: rgba(59, 130, 246, 0.7);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
+  border-color: rgba(56, 130, 220, 0.6);
+  box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.2);
 }
 .mv-editor__btn {
   height: 30px;
   border-radius: 10px;
-  border: 1px solid rgba(148, 163, 184, 0.25);
-  background: rgba(15, 23, 42, 0.65);
-  color: #ffffff;
+  border: 1px solid rgba(56, 130, 220, 0.2);
+  background: rgba(10, 22, 40, 0.7);
+  color: #c8deff;
   font-size: 12px;
   cursor: pointer;
 }
 .mv-editor__btn--ok {
-  border-color: rgba(59, 130, 246, 0.6);
-  background: rgba(37, 99, 235, 0.22);
-  color: #ffffff;
+  border-color: rgba(29, 78, 216, 0.6);
+  background: rgba(29, 78, 216, 0.25);
+  color: #e0ecff;
   font-weight: 800;
 }
 
@@ -1926,22 +1920,22 @@ watch(
   z-index: 7;
   padding: 8px 10px;
   border-radius: 10px;
-  background: rgba(15, 23, 42, 0.9);
-  border: 1px solid rgba(148, 163, 184, 0.25);
+  background: rgba(8, 16, 32, 0.92);
+  border: 1px solid rgba(56, 130, 220, 0.2);
   font-size: 12px;
-  color: #ffffff;
+  color: #c8deff;
 }
 .mv-toast--err {
-  color: #ffffff;
-  border-color: rgba(239, 68, 68, 0.35);
-  background: rgba(127, 29, 29, 0.7);
+  color: #fca5a5;
+  border-color: rgba(220, 56, 56, 0.35);
+  background: rgba(60, 10, 10, 0.85);
 }
 .mv-empty {
   position: absolute;
   inset: 0;
   display: grid;
   place-items: center;
-  color: #ffffff;
+  color: rgba(180, 210, 255, 0.6);
   font-size: 12px;
   z-index: 6;
   text-align: center;

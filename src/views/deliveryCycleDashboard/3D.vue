@@ -801,7 +801,7 @@ function goNextPart() {
 /** 模型 URL */
 const modelUrl = ref('');
 const getPartModelUrl = () =>
-  selectedPart.value ? `/models/${selectedShip.value}/${selectedPart.value}.gltf` : '';
+  selectedPart.value ? `/models/${selectedShip.value}/${selectedPart.value}.glb` : '';
 const normalizeChildModelUrl = (url) => {
   if (!url) return '';
   if (import.meta.env.DEV) return url;
