@@ -5,9 +5,7 @@
         <div class="viewer-container">
           <div class="viewer-header">
             <div class="viewer-toolbar">
-              <div class="viewer-title row-start">
-                {{ shipTitle }} 船体装配视图
-              </div>
+              <div class="viewer-title row-start">{{ shipTitle }} 船体装配视图</div>
               <div class="view-controls">
                 <button
                   class="btn"
@@ -114,21 +112,16 @@
         </div>
       </div>
 
-    <!-- 里程碑时间线 + 4个指标（新组件） -->
-<ShipMilestonePanel
-  class="mb20"
-  :milestones="milestones"
-  :extra-kpi="extraKpi"
-/>
+      <!-- 里程碑时间线 + 4个指标（新组件） -->
+      <ShipMilestonePanel class="mb20" :milestones="milestones" :extra-kpi="extraKpi" />
     </div>
   </div>
 </template>
 
-
 <script setup>
-import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
 import { SEGMENT_LAYOUT } from './segmentLayout.js';
 import ShipMilestonePanel from './ShipMilestonePanel.vue';
 const MANUFACTURING_ZONES = {
@@ -533,7 +526,6 @@ function addLights() {
   scene.add(fill);
 }
 
-
 function createWaterPlane() {
   const scale = SHIP.scale;
   const L = SHIP.length * scale;
@@ -579,8 +571,10 @@ function genProgressSnapshot(segmentId) {
   const roll = rnd();
 
   let base;
-  if (roll < 0.12) base = rnd() * 15; // 未开始
-  else if (roll < 0.55) base = 20 + rnd() * 55; // 进行中
+  if (roll < 0.12)
+    base = rnd() * 15; // 未开始
+  else if (roll < 0.55)
+    base = 20 + rnd() * 55; // 进行中
   else base = 80 + rnd() * 20; // 完成
 
   if (segmentId.startsWith('B')) base += 6;
@@ -736,8 +730,6 @@ function setGroupEmissive(group, intensity) {
   group.userData.baseEmissiveIntensity = intensity; // 记录原始的发光强度
 }
 
-
-
 function applyZoneView(group) {
   const { zone, mZoneKey, baseMesh, fillMesh } = group.userData;
   const c = COLORS.ZONE[mZoneKey] || COLORS.ZONE[zone] || COLORS.ZONE.DEFAULT;
@@ -760,7 +752,6 @@ function applyMissingView(group) {
   baseMesh.material.emissive.set(COLORS.STATUS.MISSING);
   setGroupEmissive(group, EMISSIVE.BASE); // 统一发光强度
 }
-
 
 // ✅ progress：未开工红；进行中浅黄底+深黄填充；完成绿色
 function applyProgressView(group) {
@@ -800,7 +791,6 @@ function applyProgressView(group) {
     setGroupEmissive(group, EMISSIVE.BASE);
   }
 }
-
 
 function setView(v) {
   currentView.value = v;
@@ -938,7 +928,7 @@ function onMouseMove(e) {
   const hit = raycaster.intersectObjects(getPickables(), false);
   if (!hit.length) {
     tooltip.show = false;
-    clearHover();  // 鼠标移开时清除高亮
+    clearHover(); // 鼠标移开时清除高亮
     return;
   }
 
@@ -947,15 +937,15 @@ function onMouseMove(e) {
   if (!group) return;
 
   if (group !== lastHoveredGroup) {
-    clearHover();  // 清除上一个高亮
+    clearHover(); // 清除上一个高亮
     lastHoveredGroup = group;
     setGroupEmissive(
       group,
       Math.min(
         EMISSIVE.HOVER_MAX,
         (group.userData.baseEmissiveIntensity || EMISSIVE.BASE) + EMISSIVE.HOVER_BOOST,
-      )
-    );  // 鼠标悬停时增加发光强度
+      ),
+    ); // 鼠标悬停时增加发光强度
   }
 
   const d = group.userData;
@@ -985,7 +975,6 @@ function onMouseMove(e) {
   tooltip.y = y;
 }
 
-
 function onMouseLeave() {
   tooltip.show = false;
   clearHover();
@@ -996,12 +985,11 @@ function clearHover() {
     // 恢复原始发光强度
     setGroupEmissive(
       lastHoveredGroup,
-      lastHoveredGroup.userData.baseEmissiveIntensity || EMISSIVE.BASE
+      lastHoveredGroup.userData.baseEmissiveIntensity || EMISSIVE.BASE,
     );
     lastHoveredGroup = null;
   }
 }
-
 
 function onClick() {
   if (!lastHoveredGroup) return;
@@ -1328,7 +1316,10 @@ defineExpose({
   background: rgba(255, 255, 255, 0.16);
   color: var(--text-1);
   cursor: pointer;
-  transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+  transition:
+    transform 0.16s ease,
+    border-color 0.16s ease,
+    box-shadow 0.16s ease;
   box-shadow: 0 10px 22px rgba(15, 23, 42, 0.08);
   backdrop-filter: blur(10px);
 }
@@ -1437,7 +1428,7 @@ defineExpose({
   background: rgba(255, 255, 255, 0.86);
   box-shadow: var(--shadow-soft);
   backdrop-filter: blur(10px);
-  flex:1
+  flex: 1;
 }
 .theme-deep .milestone {
   background: rgba(10, 20, 40, 0.55);
@@ -1598,7 +1589,10 @@ defineExpose({
   background: rgba(255, 255, 255, 0.78);
   color: var(--text-1);
   cursor: pointer;
-  transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+  transition:
+    transform 0.16s ease,
+    border-color 0.16s ease,
+    box-shadow 0.16s ease;
   box-shadow: 1px 2px 3px rgb(15 23 42 / 19%);
   backdrop-filter: blur(10px);
 }
@@ -1843,7 +1837,9 @@ canvas:active {
   box-shadow: 0 18px 40px rgba(15, 23, 42, 0.14);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.12s, transform 0.12s;
+  transition:
+    opacity 0.12s,
+    transform 0.12s;
   transform: translateY(4px);
   z-index: 9999;
   backdrop-filter: blur(12px);
