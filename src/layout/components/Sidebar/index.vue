@@ -731,7 +731,7 @@ onBeforeUnmount(() => {
     }
 
     &:hover {
-      background-color: $base-sub-menu-hover;
+      background-color: rgba(6, 121, 220, 0.08);
 
       .arrow-icon {
         color: #0679dc;
@@ -740,12 +740,21 @@ onBeforeUnmount(() => {
     }
 
     &.active {
-      background-color: $base-sub-menu-hover;
-      color: #333;
-      border-left-color: #0679dc;
+      background: linear-gradient(90deg, #1e3a5f 0%, #2a5a8f 100%);
+      color: #fff;
+      border-left-color: #3b7dcc;
+
+      .menu-icon {
+        color: #fff;
+      }
+
+      .menu-title {
+        font-weight: 700;
+        color: #fff;
+      }
 
       .arrow-icon {
-        color: #0679dc;
+        color: rgba(255, 255, 255, 0.7);
       }
     }
   }

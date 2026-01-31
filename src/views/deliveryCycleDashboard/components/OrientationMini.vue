@@ -27,8 +27,8 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import * as THREE from 'three';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 
 const props = defineProps({
   axes: {
@@ -70,26 +70,48 @@ const wrapStyle = computed(() => ({
   width: px(props.width),
 }));
 
-function emitAxis(a) { emit('axis-click', a); }
-function emitCube() { emit('cube-click'); }
+function emitAxis(a) {
+  emit('axis-click', a);
+}
+function emitCube() {
+  emit('cube-click');
+}
 
 // BoxGeometry materialIndex：0:+X 1:-X 2:+Y 3:-Y 4:+Z 5:-Z
 const PRESET = {
   three: {
     labels: ['STBD', 'PORT', 'UP', 'DOWN', 'FORE', 'AFT'],
     map: {
-      up: 2, down: 3, top: 2, bottom: 3,
-      fore: 4, aft: 5, front: 4, back: 5,
-      port: 1, starboard: 0, left: 1, right: 0,
+      up: 2,
+      down: 3,
+      top: 2,
+      bottom: 3,
+      fore: 4,
+      aft: 5,
+      front: 4,
+      back: 5,
+      port: 1,
+      starboard: 0,
+      left: 1,
+      right: 0,
     },
   },
   ship: {
     // Up=+Z，Fore=+X，Port=+Y
     labels: ['FORE', 'AFT', 'PORT', 'STBD', 'UP', 'DOWN'],
     map: {
-      up: 4, down: 5, top: 4, bottom: 5,
-      fore: 0, aft: 1, front: 0, back: 1,
-      port: 2, starboard: 3, left: 2, right: 3,
+      up: 4,
+      down: 5,
+      top: 4,
+      bottom: 5,
+      fore: 0,
+      aft: 1,
+      front: 0,
+      back: 1,
+      port: 2,
+      starboard: 3,
+      left: 2,
+      right: 3,
     },
   },
 };
@@ -127,7 +149,8 @@ const normalTint = new THREE.Color('#ffffff');
 
 function makeFaceTexture(text, bg, fg) {
   const c = document.createElement('canvas');
-  c.width = 256; c.height = 256;
+  c.width = 256;
+  c.height = 256;
   const ctx = c.getContext('2d');
 
   ctx.fillStyle = bg;
@@ -255,13 +278,34 @@ function buildCenterMarks(targetScene) {
   centerGroup = new THREE.Group();
   centerGroup.userData.__centerMarks = true;
 
-  const matX = new THREE.MeshBasicMaterial({ color: 0xef4444, depthTest: false, depthWrite: false });
-  const matY = new THREE.MeshBasicMaterial({ color: 0x22c55e, depthTest: false, depthWrite: false });
-  const matZ = new THREE.MeshBasicMaterial({ color: 0x3b82f6, depthTest: false, depthWrite: false });
+  const matX = new THREE.MeshBasicMaterial({
+    color: 0xef4444,
+    depthTest: false,
+    depthWrite: false,
+  });
+  const matY = new THREE.MeshBasicMaterial({
+    color: 0x22c55e,
+    depthTest: false,
+    depthWrite: false,
+  });
+  const matZ = new THREE.MeshBasicMaterial({
+    color: 0x3b82f6,
+    depthTest: false,
+    depthWrite: false,
+  });
 
-  const x = new THREE.Mesh(new THREE.CylinderGeometry(axisRad, axisRad, axisLen, 10, 1, true), matX);
-  const y = new THREE.Mesh(new THREE.CylinderGeometry(axisRad, axisRad, axisLen, 10, 1, true), matY);
-  const z = new THREE.Mesh(new THREE.CylinderGeometry(axisRad, axisRad, axisLen, 10, 1, true), matZ);
+  const x = new THREE.Mesh(
+    new THREE.CylinderGeometry(axisRad, axisRad, axisLen, 10, 1, true),
+    matX,
+  );
+  const y = new THREE.Mesh(
+    new THREE.CylinderGeometry(axisRad, axisRad, axisLen, 10, 1, true),
+    matY,
+  );
+  const z = new THREE.Mesh(
+    new THREE.CylinderGeometry(axisRad, axisRad, axisLen, 10, 1, true),
+    matZ,
+  );
 
   const xArrow = new THREE.Mesh(new THREE.ConeGeometry(axisRad * 2.2, arrowLen, 10, 1), matX);
   const yArrow = new THREE.Mesh(new THREE.ConeGeometry(axisRad * 2.2, arrowLen, 10, 1), matY);
@@ -291,8 +335,16 @@ function buildCenterMarks(targetScene) {
   centerAxes = { x, y, z, xArrow, yArrow, zArrow, xLabel, yLabel, zLabel };
   centerGroup.add(x, y, z, xArrow, yArrow, zArrow, xLabel, yLabel, zLabel);
 
-  const ballMat = new THREE.MeshBasicMaterial({ color: 0x000000, depthTest: false, depthWrite: false });
-  const ballOutlineMat = new THREE.MeshBasicMaterial({ color: 0x000000, depthTest: false, depthWrite: false });
+  const ballMat = new THREE.MeshBasicMaterial({
+    color: 0x000000,
+    depthTest: false,
+    depthWrite: false,
+  });
+  const ballOutlineMat = new THREE.MeshBasicMaterial({
+    color: 0x000000,
+    depthTest: false,
+    depthWrite: false,
+  });
   const ballR = Math.max(axisRad * 1.8, 0.05);
   centerBall = new THREE.Mesh(new THREE.SphereGeometry(ballR, 12, 12), ballMat);
   centerGroup.add(centerBall);
@@ -374,7 +426,12 @@ function makeAxisLabel(text, color) {
   const tex = new THREE.CanvasTexture(c);
   tex.minFilter = THREE.LinearFilter;
   tex.magFilter = THREE.LinearFilter;
-  const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false, depthWrite: false });
+  const mat = new THREE.SpriteMaterial({
+    map: tex,
+    transparent: true,
+    depthTest: false,
+    depthWrite: false,
+  });
   const sprite = new THREE.Sprite(mat);
   sprite.scale.setScalar(0.36);
   return sprite;
@@ -407,7 +464,10 @@ function resizeCenterToHost() {
 function applyQuaternion(q) {
   if (!q) return;
 
-  let x = 0, y = 0, z = 0, w = 1;
+  let x = 0,
+    y = 0,
+    z = 0,
+    w = 1;
   if (Array.isArray(q) && q.length >= 4) [x, y, z, w] = q;
   else if (q && typeof q === 'object') {
     x = q.x ?? q._x ?? 0;
@@ -439,14 +499,17 @@ function applyHighlight(axisKey) {
 function tick() {
   rafId = requestAnimationFrame(tick);
   if (renderer && scene && camera) renderer.render(scene, camera);
-  if (centerRenderer && centerScene && centerCamera) centerRenderer.render(centerScene, centerCamera);
+  if (centerRenderer && centerScene && centerCamera)
+    centerRenderer.render(centerScene, centerCamera);
 }
 
 function disposeMini() {
   cancelAnimationFrame(rafId);
   rafId = 0;
 
-  try { ro?.disconnect?.(); } catch (e) {}
+  try {
+    ro?.disconnect?.();
+  } catch (e) {}
   ro = null;
 
   if (renderer?.domElement) renderer.domElement.removeEventListener('pointerdown', onPickFace);
@@ -472,7 +535,9 @@ function disposeMini() {
 }
 
 function disposeCenterMini() {
-  try { centerRo?.disconnect?.(); } catch (e) {}
+  try {
+    centerRo?.disconnect?.();
+  } catch (e) {}
   centerRo = null;
 
   try {
@@ -525,25 +590,44 @@ function onPickFace(ev) {
   const key = pickKeyByFaceIndex(mi);
   if (!key) return;
 
-  const axisObj =
-    (props.axes || []).find((a) => a?.key === key) ||
-    { key, label: key, title: key };
+  const axisObj = (props.axes || []).find((a) => a?.key === key) || { key, label: key, title: key };
 
   emit('axis-click', axisObj);
 }
 
-function setQuaternion(q) { applyQuaternion(q); }
+function setQuaternion(q) {
+  applyQuaternion(q);
+}
 defineExpose({ setQuaternion });
 
-watch(() => props.quaternion, (q) => applyQuaternion(q), { deep: true, immediate: true });
-watch(() => props.activeAxis, (k) => applyHighlight(k), { immediate: true });
-watch(() => props.showCenterMarks, () => applyCenterVisibility(), { immediate: true });
-watch(() => [props.centerColor, props.centerAxisWidth], () => applyCenterStyle(), { immediate: true });
+watch(
+  () => props.quaternion,
+  (q) => applyQuaternion(q),
+  { deep: true, immediate: true },
+);
+watch(
+  () => props.activeAxis,
+  (k) => applyHighlight(k),
+  { immediate: true },
+);
+watch(
+  () => props.showCenterMarks,
+  () => applyCenterVisibility(),
+  { immediate: true },
+);
+watch(
+  () => [props.centerColor, props.centerAxisWidth],
+  () => applyCenterStyle(),
+  { immediate: true },
+);
 
-watch(() => props.preset, () => {
-  disposeMini();
-  requestAnimationFrame(() => buildMini());
-});
+watch(
+  () => props.preset,
+  () => {
+    disposeMini();
+    requestAnimationFrame(() => buildMini());
+  },
+);
 
 onMounted(buildMini);
 onMounted(buildCenterMini);
@@ -616,6 +700,7 @@ onBeforeUnmount(() => {
 }
 
 .txt {
+  color: #d5dae1 !important;
   font-weight: 600;
 }
 
@@ -629,7 +714,7 @@ onBeforeUnmount(() => {
   height: 90px;
   box-sizing: border-box;
   padding: 6px;
-  border: 1px dashed #cbd5e1;
+  border: 1px dashed rgba(148, 163, 184, 0.4);
   border-radius: 10px;
   background: transparent;
   cursor: pointer;
@@ -639,7 +724,7 @@ onBeforeUnmount(() => {
 }
 
 .mini-box:hover {
-  background: #f8fafc;
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .mini-host {
@@ -656,9 +741,9 @@ onBeforeUnmount(() => {
   bottom: 2px;
   font-size: 11px;
   font-weight: 800;
-  color: #111827;
+  color: #e2e8f0;
   text-align: center;
   pointer-events: none;
-  opacity: 0.75;
+  opacity: 0.85;
 }
 </style>
