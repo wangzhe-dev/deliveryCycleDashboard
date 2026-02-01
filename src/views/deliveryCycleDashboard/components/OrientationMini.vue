@@ -194,10 +194,10 @@ function buildMini() {
   faceMats.length = 0;
 
   const labels = presetCfg.value.labels || PRESET.ship.labels;
-  const bgs = ['#1d4ed8', '#334155', '#1d4ed8', '#334155', '#1d4ed8', '#334155'];
+  const bgs = ['#e2e5eb', '#d1d5db', '#e2e5eb', '#d1d5db', '#e2e5eb', '#d1d5db'];
 
   for (let i = 0; i < 6; i++) {
-    const tex = makeFaceTexture(labels[i], bgs[i], '#e2e8f0');
+    const tex = makeFaceTexture(labels[i], bgs[i], '#1f2937');
     const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true });
     mat.color.copy(normalTint);
     faceMats.push(mat);
@@ -215,7 +215,7 @@ function buildMini() {
   // 原理：一个略大一点的盒子，只渲染背面 + 透明度，让边缘看起来更粗更明显
   const frameGeo = new THREE.BoxGeometry(1, 1, 1);
   const frameMat = new THREE.MeshBasicMaterial({
-    color: 0x94a3b8,
+    color: 0x9ca3af,
     transparent: true,
     opacity: 0.9,
     side: THREE.BackSide,
@@ -700,7 +700,7 @@ onBeforeUnmount(() => {
 }
 
 .txt {
-  color: #d5dae1 !important;
+  color: #1f2937 !important;
   font-weight: 600;
 }
 
@@ -741,7 +741,7 @@ onBeforeUnmount(() => {
   bottom: 2px;
   font-size: 11px;
   font-weight: 800;
-  color: #e2e8f0;
+  color: #374151;
   text-align: center;
   pointer-events: none;
   opacity: 0.85;

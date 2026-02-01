@@ -282,18 +282,18 @@ function exitFullscreen() {
 
 /** ===== 颜色变量（统一管理） ===== */
 const colors = reactive({
-  bgTop: '#0e1624',
-  bgBottom: '#0b1220',
-  bgStripe: 'rgba(111, 168, 255, 0.03)',
-  text: '#cbd5e1',
-  labelStroke: 'rgba(11, 18, 32, 0.90)',
-  gridFine: 'rgba(117, 128, 147, 0.18)',
-  gridCoarse: 'rgba(117, 128, 147, 0.34)',
-  polygonStroke: '#6fa8ff',
-  polygonFill: '#6fa8ff',
-  fogCenter: 'rgba(30, 58, 138, 0.10)',
-  fogEdge: 'rgba(0, 0, 0, 0.42)',
-  fogHorizon: 'rgba(14, 22, 36, 0.14)',
+  bgTop: '#f7f8fa',
+  bgBottom: '#eef0f3',
+  bgStripe: 'rgba(100, 116, 139, 0.04)',
+  text: '#475569',
+  labelStroke: 'rgba(255, 255, 255, 0.80)',
+  gridFine: 'rgba(100, 116, 139, 0.15)',
+  gridCoarse: 'rgba(100, 116, 139, 0.30)',
+  polygonStroke: '#3b82f6',
+  polygonFill: '#3b82f6',
+  fogCenter: 'rgba(255, 255, 255, 0.08)',
+  fogEdge: 'rgba(180, 185, 195, 0.25)',
+  fogHorizon: 'rgba(220, 224, 230, 0.10)',
 });
 
 /** ===== 画布 / DPR / 尺寸 ===== */
@@ -798,7 +798,7 @@ function drawHandle(p, hover = false, selected = false) {
   const x = p.x * pxPerM.value,
     y = p.y * pxPerM.value;
   c.beginPath();
-  c.fillStyle = selected ? '#10b981' : hover ? '#ef4444' : '#e2e8f0';
+  c.fillStyle = selected ? '#10b981' : hover ? '#ef4444' : '#1a1a1a';
   c.arc(x, y, r, 0, Math.PI * 2);
   c.fill();
 }

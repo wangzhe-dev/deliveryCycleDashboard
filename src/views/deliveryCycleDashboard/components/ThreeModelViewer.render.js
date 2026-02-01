@@ -42,10 +42,10 @@ export function createRenderer(ctx) {
     const scene = new THREE.Scene();
 
     /* ── 深蓝夜景背景 ── */
-    scene.background = new THREE.Color(0x0a1628);
+    scene.background = new THREE.Color(0xf8f9fb);
 
-    /* ── 深蓝雾：远处自然消隐，不糊近景 ── */
-    scene.fog = new THREE.FogExp2(0x0a1628, 0.0012);
+    /* ── 浅灰雾：远处自然消隐，不糊近景 ── */
+    scene.fog = new THREE.FogExp2(0xf8f9fb, 0.0012);
 
     const w = hostRef.value.clientWidth || 800;
     const h = hostRef.value.clientHeight || 500;
@@ -56,7 +56,7 @@ export function createRenderer(ctx) {
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.setSize(w, h);
-    renderer.setClearColor(0x0a1628, 1);
+    renderer.setClearColor(0xf8f9fb, 1);
 
     /* ── 色调映射 + 曝光：让高光不过曝、暗部不死黑 ── */
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -98,13 +98,14 @@ export function createRenderer(ctx) {
     bottom.position.set(0, -4, 0);
     scene.add(bottom);
 
-    /* ── 地面网格（深蓝调）── 加载模型后会自动调整 y 位置 */
-    const grid = new THREE.GridHelper(200, 120, 0x1e3a5f, 0x162d4a);
-    grid.material.opacity = 0.85;
+    /* ── 地面网格（已隐藏） ── */
+    const grid = new THREE.GridHelper(200, 120, 0x9ca3af, 0xbfc5cd);
+    grid.material.opacity = 0;
     grid.material.transparent = true;
     grid.material.depthWrite = false;
     grid.name = '__groundGrid';
     grid.position.y = -0.01;
+    grid.visible = false;
     scene.add(grid);
 
     const raycaster = new THREE.Raycaster();

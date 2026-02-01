@@ -276,31 +276,31 @@ const dialogTitle = computed(() => props.title || '多边形编辑');
 
 /** ===== 颜色变量（统一管理） ===== */
 const colors = reactive({
-  // === 3D 同款深蓝夜景底色（接近 0x0e1624 / 0x081428 那种干净深蓝） ===
-  bgTop: '#0e1624',
-  bgBottom: '#0b1220',
+  // === 浅灰底色 ===
+  bgTop: '#f7f8fa',
+  bgBottom: '#eef0f3',
 
-  // 细微斜纹：用“蓝白很淡”的方式，不要灰雾感
-  bgStripe: 'rgba(111, 168, 255, 0.03)',
+  // 细微斜纹
+  bgStripe: 'rgba(100, 116, 139, 0.04)',
 
-  // 坐标/标注文字：浅蓝灰，夜景下更清晰
-  text: '#cbd5e1',
+  // 坐标/标注文字：深色，浅底下更清晰
+  text: '#475569',
 
-  // 文字描边：用深底描边（提升可读性，不会发白糊）
-  labelStroke: 'rgba(11, 18, 32, 0.90)',
+  // 文字描边
+  labelStroke: 'rgba(255, 255, 255, 0.80)',
 
-  // 网格线：同 3D 的 grid 思路（细线更淡、粗线更明显但不刺眼）
-  gridFine: 'rgba(117, 128, 147, 0.18)', // 约 #758093 的低透明
-  gridCoarse: 'rgba(117, 128, 147, 0.34)', // 粗网格
+  // 网格线
+  gridFine: 'rgba(100, 116, 139, 0.15)',
+  gridCoarse: 'rgba(100, 116, 139, 0.30)',
 
-  // 多边形：用 3D rim light 的蓝，边更锐利、对比更强
-  polygonStroke: '#6fa8ff',
-  polygonFill: '#6fa8ff',
+  // 多边形
+  polygonStroke: '#3b82f6',
+  polygonFill: '#3b82f6',
 
-  // ✅ 新增：雾感/层次（不糊）
-  fogCenter: 'rgba(30, 58, 138, 0.10)', // 中心轻轻提亮（偏蓝）
-  fogEdge: 'rgba(0, 0, 0, 0.42)', // 边缘暗角（空间深度）
-  fogHorizon: 'rgba(14, 22, 36, 0.14)', // 顶部/远处轻雾层
+  // 雾感/层次
+  fogCenter: 'rgba(255, 255, 255, 0.08)',
+  fogEdge: 'rgba(180, 185, 195, 0.25)',
+  fogHorizon: 'rgba(220, 224, 230, 0.10)',
 });
 
 /** ===== 画布 / DPR / 尺寸 ===== */
@@ -908,7 +908,7 @@ function drawHandle(p, hover = false, selected = false) {
   const x = p.x * pxPerM.value,
     y = p.y * pxPerM.value;
   c.beginPath();
-  c.fillStyle = selected ? '#10b981' : hover ? '#ef4444' : '#e2e8f0';
+  c.fillStyle = selected ? '#10b981' : hover ? '#ef4444' : '#1a1a1a';
   c.arc(x, y, r, 0, Math.PI * 2);
   c.fill();
 }

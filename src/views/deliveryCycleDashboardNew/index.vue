@@ -2,7 +2,7 @@
   <div class="page" :class="themeClass" style="overflow: auto">
     <div class="dashboard">
       <div class="main-content mb20">
-        <div class="viewer-container">
+        <div ref="viewerContainerRef" class="viewer-container">
           <div class="viewer-header">
             <div class="viewer-toolbar">
               <div class="viewer-title row-start">{{ shipTitle }} 船体装配视图</div>
@@ -14,13 +14,13 @@
                 >
                   船体概览
                 </button>
-                <button
+                <!-- <button
                   class="btn"
                   :class="{ active: currentView === 'missing' }"
                   @click="setView('missing')"
                 >
                   未开工分段
-                </button>
+                </button> -->
                 <button
                   class="btn"
                   :class="{ active: currentView === 'progress' }"
@@ -32,9 +32,54 @@
             </div>
           </div>
 
+          <button
+            class="fullscreen-btn"
+            @click="toggleFullscreen"
+            :title="isFullscreen ? '退出全屏' : '全屏'"
+          >
+            {{ isFullscreen ? '⮌' : '⛶' }}
+          </button>
           <div ref="canvasWrapRef" class="canvas-wrap" @contextmenu.prevent>
             <canvas ref="canvasRef"></canvas>
             <div class="viewer-hint">左键旋转 · 右键平移 · 滚轮缩放</div>
+
+            <!-- 全屏时左上角：整体进度 -->
+            <div class="fs-progress-overlay" v-if="isFullscreen">
+              <div class="sp-ring-row">
+                <div class="sp-ring">
+                  <svg viewBox="0 0 80 80">
+                    <circle cx="40" cy="40" r="34" fill="none" stroke="var(--border)" stroke-width="5" />
+                    <circle cx="40" cy="40" r="34" fill="none" stroke="url(#ringGradFs)" stroke-width="5"
+                      stroke-linecap="round"
+                      :stroke-dasharray="2 * Math.PI * 34"
+                      :stroke-dashoffset="2 * Math.PI * 34 * (1 - kpi.overallProgress / 100)"
+                      transform="rotate(-90 40 40)" />
+                    <defs>
+                      <linearGradient id="ringGradFs" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stop-color="var(--aurora-a)" />
+                        <stop offset="100%" stop-color="var(--aurora-c)" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                  <span class="sp-ring-val">{{ kpi.overallProgress }}%</span>
+                </div>
+                <div class="sp-ring-info">
+                  <div class="sp-label">整体装配</div>
+                  <div class="sp-counts">
+                    <div class="sp-count-item">
+                      <span class="sp-count-dot done"></span>
+                      <span>{{ kpi.installedCount }}</span>
+                      <span class="sp-count-unit">已装</span>
+                    </div>
+                    <div class="sp-count-item">
+                      <span class="sp-count-dot rest"></span>
+                      <span>{{ kpi.remainingCount }}</span>
+                      <span class="sp-count-unit">剩余</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
 
             <div class="loading" v-if="loading">
               <div class="spinner"></div>
@@ -421,6 +466,7 @@ watch(simIndex, (v) => applySimulation(v));
 function toggleSimPlay() {
   simPlaying.value = !simPlaying.value;
   if (simPlaying.value) {
+    setView('progress');
     if (simTimer) window.clearInterval(simTimer);
     simTimer = window.setInterval(() => {
       if (simIndex.value >= SIM.days) simIndex.value = 0;
@@ -454,6 +500,7 @@ const MATERIAL_FLAGS = {
 // ===================== Vue 状态 =====================
 const canvasRef = ref(null);
 const canvasWrapRef = ref(null);
+const viewerContainerRef = ref(null);
 
 const loading = ref(true);
 const currentView = ref('complete'); // complete | missing | progress
@@ -541,8 +588,8 @@ function initThree() {
   scene = new THREE.Scene();
 
   // ✅ 方案A：深蓝夜景
-  scene.background = new THREE.Color(0x0e1624);
-  scene.fog = new THREE.Fog(0x162235, 1, 2); // near/far 由 updateFogAfterFrame 动态改
+  scene.background = new THREE.Color(0xd9dce2);
+  scene.fog = new THREE.Fog(0xd9dce2, 1, 2); // near/far 由 updateFogAfterFrame 动态改
 
   camera = new THREE.PerspectiveCamera(45, 1, 0.1, 3000);
 
@@ -944,6 +991,13 @@ function applyProgressView(group) {
 
 function setView(v) {
   currentView.value = v;
+  if (v === 'complete' && simPlaying.value) {
+    simPlaying.value = false;
+    if (simTimer) window.clearInterval(simTimer);
+    simTimer = 0;
+    simIndex.value = 0;
+    applySimulation(0);
+  }
   updateViewAppearance();
 }
 
@@ -1020,6 +1074,24 @@ function resetView() {
   frameAll(0.8);
 }
 
+const isFullscreen = ref(false);
+function toggleFullscreen() {
+  const el = viewerContainerRef.value;
+  if (!el) return;
+  if (!document.fullscreenElement) {
+    el.requestFullscreen().then(() => {
+      isFullscreen.value = true;
+    });
+  } else {
+    document.exitFullscreen().then(() => {
+      isFullscreen.value = false;
+    });
+  }
+}
+function onFullscreenChange() {
+  isFullscreen.value = !!document.fullscreenElement;
+}
+
 // ===================== 交互（hover/click） =====================
 function bindEvents() {
   window.addEventListener('keydown', onKeyDown);
@@ -1029,9 +1101,11 @@ function bindEvents() {
   el.addEventListener('mousemove', onMouseMove, { passive: true });
   el.addEventListener('mouseleave', onMouseLeave, { passive: true });
   el.addEventListener('click', onClick);
+  document.addEventListener('fullscreenchange', onFullscreenChange);
 }
 
 function unbindEvents() {
+  document.removeEventListener('fullscreenchange', onFullscreenChange);
   window.removeEventListener('keydown', onKeyDown);
   const el = canvasWrapRef.value;
 
@@ -1049,8 +1123,7 @@ function unbindEvents() {
 
 function onKeyDown(e) {
   if (e.key === '1') setView('complete');
-  if (e.key === '2') setView('missing');
-  if (e.key === '3') setView('progress');
+  if (e.key === '2') setView('progress');
   if (e.key === 'r' || e.key === 'R' || e.key === '0') resetView();
   if (e.key === '+' || e.key === '=') zoomIn();
   if (e.key === '-' || e.key === '_') zoomOut();
@@ -1234,6 +1307,7 @@ defineExpose({
   extraKpi,
   canvasRef,
   canvasWrapRef,
+  viewerContainerRef,
   loading,
   currentView,
   selected,
@@ -1244,6 +1318,8 @@ defineExpose({
   zoomIn,
   zoomOut,
   resetView,
+  isFullscreen,
+  toggleFullscreen,
   theme,
   toggleTheme,
 });
@@ -1773,6 +1849,7 @@ defineExpose({
 }
 
 .viewer-container {
+  position: relative;
   border-radius: 14px;
   background: var(--card-bg-strong);
   border: 1px solid var(--border);
@@ -2020,6 +2097,44 @@ canvas {
   height: 100%;
   display: block;
   cursor: grab;
+}
+.fullscreen-btn {
+  position: absolute;
+  top: 70px;
+  right: 8px;
+  z-index: 10;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.35);
+  color: #fff;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+.fullscreen-btn:hover {
+  opacity: 1;
+}
+.fs-progress-overlay {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 10;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(12px);
+  pointer-events: none;
+}
+.theme-deep .fs-progress-overlay {
+  background: rgba(10, 20, 40, 0.75);
 }
 canvas:active {
   cursor: grabbing;

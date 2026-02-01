@@ -1722,26 +1722,8 @@ watch(
   width: 100%;
   border-radius: 12px;
   overflow: hidden;
-  background: linear-gradient(180deg, #0a1628 0%, #0d1f3c 50%, #0a1628 100%);
-  box-shadow:
-    0 12px 36px rgba(0, 0, 0, 0.5),
-    inset 0 0 60px rgba(10, 22, 40, 0.4);
-}
-.mv-root::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse 80% 60% at 30% 15%, rgba(56, 130, 220, 0.06), transparent 70%),
-    radial-gradient(ellipse 60% 50% at 75% 10%, rgba(30, 64, 175, 0.05), transparent 65%);
-  pointer-events: none;
-}
-.mv-root::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(70% 70% at 50% 50%, transparent 0%, rgba(2, 6, 23, 0.25) 100%);
-  pointer-events: none;
+  background: #f8f9fb;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.08);
 }
 .mv-root--flat-left {
   border-top-left-radius: 0;
@@ -1753,15 +1735,15 @@ watch(
   left: 12px;
   z-index: 9;
   display: inline-flex;
-  gap: 8px;
-  padding: 6px;
+  gap: 6px;
+  padding: 5px;
   border-radius: 999px;
-  border: 1px solid rgba(56, 130, 220, 0.2);
-  background: linear-gradient(180deg, rgba(10, 22, 40, 0.85), rgba(13, 31, 60, 0.75));
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.88);
   backdrop-filter: blur(12px);
   box-shadow:
-    0 10px 24px rgba(0, 0, 0, 0.4),
-    inset 0 1px 0 rgba(56, 130, 220, 0.12);
+    0 4px 16px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 .mv-info-tab {
   height: 32px;
@@ -1769,22 +1751,23 @@ watch(
   border: none;
   border-radius: 999px;
   background: transparent;
-  color: rgba(180, 210, 255, 0.8);
+  color: #64748b;
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-  transition: color 0.2s;
+  text-shadow: none;
+  transition: color 0.2s, background 0.2s;
 }
 .mv-info-tab:hover {
-  color: #ffffff;
+  color: #1e293b;
+  background: rgba(0, 0, 0, 0.04);
 }
 .mv-info-tab.is-active {
-  background: linear-gradient(180deg, #1d4ed8 0%, #1e3a8a 100%);
+  background: linear-gradient(180deg, #d4722a 0%, #b5622a 100%);
   color: #ffffff;
   box-shadow:
-    0 6px 18px rgba(29, 78, 216, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    0 4px 12px rgba(181, 98, 42, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 .mv-host {
   position: absolute;
@@ -1833,9 +1816,9 @@ watch(
 :deep(.mv-label) {
   padding: 4px 8px;
   border-radius: 10px;
-  border: 1px solid rgba(56, 130, 220, 0.35);
-  background: rgba(8, 16, 32, 0.8);
-  color: #c8deff;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.9);
+  color: #1e293b;
   font-size: 12px;
   font-weight: 800;
   white-space: nowrap;
@@ -1844,11 +1827,11 @@ watch(
 :deep(.mv-label--axis) {
   padding: 1px 4px;
   border-radius: 6px;
-  background: #1d4ed8;
-  color: #e0ecff;
+  background: #2563eb;
+  color: #ffffff;
   font-weight: 900;
   font-size: 11px;
-  border: 1px solid rgba(29, 78, 216, 0.7);
+  border: 1px solid rgba(37, 99, 235, 0.5);
 }
 :deep(.mv-label--mesh) {
   background: transparent;
@@ -1858,14 +1841,14 @@ watch(
   font-weight: 500;
   letter-spacing: 0.2px;
   opacity: 0.85;
-  color: rgba(248, 250, 252, 0.9);
-  text-shadow: 0 2px 6px rgba(2, 6, 23, 0.85);
+  color: rgba(30, 41, 59, 0.9);
+  text-shadow: 0 1px 3px rgba(255, 255, 255, 0.8);
   white-space: nowrap;
 }
 :deep(.mv-label--mesh.mv-label--mesh-outline) {
   text-shadow:
-    0 0 6px rgba(15, 23, 42, 0.9),
-    0 0 12px rgba(15, 23, 42, 0.6);
+    0 0 4px rgba(255, 255, 255, 0.9),
+    0 0 8px rgba(255, 255, 255, 0.6);
 }
 
 /* ✅ 编辑器 */

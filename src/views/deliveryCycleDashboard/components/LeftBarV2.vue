@@ -44,7 +44,6 @@
       </div>
 
       <div class="stack">
-
         <button
           class="btn btn--accent"
           :class="{ active: explodeOn }"
@@ -104,7 +103,6 @@
           <span class="txt">标注工具</span>
         </button>
 
-
         <button class="btn" @click="$emit('fit-view')" type="button">
           <span class="ico ico--md" aria-hidden="true">
             <svg-icon icon-class="3D-auto" />
@@ -148,13 +146,13 @@ defineEmits([
 /* ====== Blue Ultra（更亮更通透）+ 大屏：背景稍微深一点（降眩光） ====== */
 .leftbar {
   /* ✅ 背景稍深：从纯白改为“淡蓝灰渐变”，大屏更舒服 */
-  --lb-bg: var(--left-shell-bg, linear-gradient(180deg, #f6f2eb 0%, #eee7df 100%));
+  --lb-bg: var(--left-shell-bg, linear-gradient(180deg, #ffffff 0%, #fbfaf8 100%));
   --lb-border: transparent;
 
-  /* 分隔线 & 点缀色 */
+  /* 分隔线 & 点缀色（爱马仕橙） */
   --lb-divider: #d3d8de;
-  --lb-mark: #d1b27c;
-  --lb-mark-rgb: 209, 178, 124;
+  --lb-mark: #d4722a;
+  --lb-mark-rgb: 212, 114, 42;
 
   /* 文本 */
   --lb-text: #1f2933;
@@ -172,19 +170,19 @@ defineEmits([
   --lb-hover-border: rgba(71, 85, 105, 0.18);
   --lb-focus: rgba(71, 85, 105, 0.25);
 
-  /* Active：主色 */
-  --lb-active-1: #6d8aa3;
-  --lb-active-2: #3b5164;
-  --lb-active-border: rgba(59, 81, 100, 0.55);
-  --lb-active-shadow: rgba(59, 81, 100, 0.22);
-  --lb-active-inset: rgba(59, 81, 100, 0.12);
+  /* Active：主色（温暖橙棕） */
+  --lb-active-1: #e08a3e;
+  --lb-active-2: #b5622a;
+  --lb-active-border: rgba(181, 98, 42, 0.6);
+  --lb-active-shadow: rgba(181, 98, 42, 0.2);
+  --lb-active-inset: rgba(181, 98, 42, 0.12);
 
-  /* Active：工具组强调色 */
-  --lb-accent-1: #7a8a95;
-  --lb-accent-2: #3f4d58;
-  --lb-accent-border: rgba(63, 77, 88, 0.55);
-  --lb-accent-shadow: rgba(63, 77, 88, 0.22);
-  --lb-accent-inset: rgba(63, 77, 88, 0.12);
+  /* Active：工具组强调色（稍深的橙） */
+  --lb-accent-1: #cf7e35;
+  --lb-accent-2: #a85a24;
+  --lb-accent-border: rgba(168, 90, 36, 0.6);
+  --lb-accent-shadow: rgba(168, 90, 36, 0.2);
+  --lb-accent-inset: rgba(168, 90, 36, 0.12);
 
   /* icon 渐变 */
   --lb-ico-g1: rgba(227, 218, 206, 0.6);
@@ -246,7 +244,7 @@ defineEmits([
 .btn {
   position: relative;
   width: 100%;
-  border: 1px solid rgba(15, 23, 42, 0.10);
+  border: 1px solid rgba(15, 23, 42, 0.1);
   background: linear-gradient(180deg, var(--lb-card-1) 0%, var(--lb-card-2) 100%);
   border-radius: 12px;
   cursor: pointer;
@@ -259,7 +257,11 @@ defineEmits([
   gap: 6px;
 
   box-shadow: 0 10px 22px rgba(15, 23, 42, 0.06);
-  transition: background 0.12s ease, transform 0.06s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+  transition:
+    background 0.12s ease,
+    transform 0.06s ease,
+    box-shadow 0.12s ease,
+    border-color 0.12s ease;
 }
 
 .btn:hover {
@@ -353,7 +355,9 @@ defineEmits([
   height: 8px;
   border-radius: 999px;
   background: var(--lb-mark);
-  box-shadow: 0 0 0 3px rgba(var(--lb-mark-rgb), 0.18), 0 0 14px rgba(var(--lb-mark-rgb), 0.25);
+  box-shadow:
+    0 0 0 3px rgba(var(--lb-mark-rgb), 0.18),
+    0 0 14px rgba(var(--lb-mark-rgb), 0.25);
   pointer-events: none;
 }
 
