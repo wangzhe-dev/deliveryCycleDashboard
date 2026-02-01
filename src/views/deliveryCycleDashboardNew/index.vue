@@ -48,12 +48,26 @@
               <div class="sp-ring-row">
                 <div class="sp-ring">
                   <svg viewBox="0 0 80 80">
-                    <circle cx="40" cy="40" r="34" fill="none" stroke="var(--border)" stroke-width="5" />
-                    <circle cx="40" cy="40" r="34" fill="none" stroke="url(#ringGradFs)" stroke-width="5"
+                    <circle
+                      cx="40"
+                      cy="40"
+                      r="34"
+                      fill="none"
+                      stroke="var(--border)"
+                      stroke-width="5"
+                    />
+                    <circle
+                      cx="40"
+                      cy="40"
+                      r="34"
+                      fill="none"
+                      stroke="url(#ringGradFs)"
+                      stroke-width="5"
                       stroke-linecap="round"
                       :stroke-dasharray="2 * Math.PI * 34"
                       :stroke-dashoffset="2 * Math.PI * 34 * (1 - kpi.overallProgress / 100)"
-                      transform="rotate(-90 40 40)" />
+                      transform="rotate(-90 40 40)"
+                    />
                     <defs>
                       <linearGradient id="ringGradFs" x1="0" y1="0" x2="1" y2="1">
                         <stop offset="0%" stop-color="var(--aurora-a)" />
@@ -341,19 +355,19 @@ const COLORS_DEEP = {
 // ✅ 深灰主题：深底亮块，工业质感（你现在默认用它，但背景我已换成深蓝夜景）
 const COLORS_STELLAR = {
   ZONE: {
-    FORE: '#6BA4C4',
-    FORE_MID: '#5AAE8E',
-    MID: '#5AAE8E',
-    ENGINE: '#C9A962',
-    AFT: '#D47272',
-    SUPERSTRUCTURE: '#9A9DAA',
-    DEFAULT: '#8A8880',
+    FORE: '#3B9EE8',
+    FORE_MID: '#2DC8A0',
+    MID: '#2DC8A0',
+    ENGINE: '#F5A623',
+    AFT: '#EF5566',
+    SUPERSTRUCTURE: '#8B7FE8',
+    DEFAULT: '#6BAFCF',
   },
   STATUS: {
-    MISSING: '#D47272',
-    IN_PROGRESS_LIGHT: '#4A4A50',
-    IN_PROGRESS_DEEP: '#C9A962',
-    DONE_GREEN: '#5AAE8E',
+    MISSING: '#EF5566',
+    IN_PROGRESS_LIGHT: '#FFE27A',
+    IN_PROGRESS_DEEP: '#F5A623',
+    DONE_GREEN: '#2DC8A0',
   },
 };
 
@@ -588,8 +602,8 @@ function initThree() {
   scene = new THREE.Scene();
 
   // ✅ 方案A：深蓝夜景
-  scene.background = new THREE.Color(0xd9dce2);
-  scene.fog = new THREE.Fog(0xd9dce2, 1, 2); // near/far 由 updateFogAfterFrame 动态改
+  scene.background = new THREE.Color(0xf0f2f7);
+  scene.fog = new THREE.Fog(0xf0f2f7, 1, 2); // near/far 由 updateFogAfterFrame 动态改
 
   camera = new THREE.PerspectiveCamera(45, 1, 0.1, 3000);
 
@@ -728,7 +742,7 @@ function createWaterPlane() {
   scene.add(water);
 
   const gridSize = Math.max(L, B) * 2.5;
-  const gridHelper = new THREE.GridHelper(gridSize, 40, 0x606a78, 0x758093);
+  const gridHelper = new THREE.GridHelper(gridSize, 40, 0xc0c8d0, 0xd0d8e0);
   gridHelper.material.transparent = true;
   gridHelper.material.opacity = 0.55; // ✅ 只保留一次
   scene.add(gridHelper);
