@@ -1,21 +1,55 @@
 <template>
-  <div class="board" style="position: relative">
-    <!-- 内容区域：左侧任务列表（拖拽源） + 右侧日期卡网格 -->
-    <div class="content-board">
-      <!-- 左侧任务列表（仅拖拽，不提供删除） -->
-      <div class="card aside">
-        <div class="fs14 fw mb10">分段任务列表</div>
-        <div class="aside-scroll">
+  <div class="relative flex h-full flex-col overflow-hidden bg-gradient-to-br from-slate-50 via-sky-50/30 to-indigo-50/20 text-slate-800">
+    <!-- Toast -->
+    <transition name="toast-fade">
+      <div
+        v-if="toastVisible"
+        class="pointer-events-none fixed left-1/2 top-5 z-[9999] -translate-x-1/2"
+      >
+        <div
+          class="pointer-events-auto flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium shadow-xl backdrop-blur-sm ring-1"
+          :class="{
+            'bg-emerald-50/95 text-emerald-700 ring-emerald-200/80': toastType === 'success',
+            'bg-amber-50/95 text-amber-700 ring-amber-200/80': toastType === 'warning',
+            'bg-red-50/95 text-red-700 ring-red-200/80': toastType === 'error',
+          }"
+        >
+          <svg v-if="toastType === 'success'" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
+          <svg v-else-if="toastType === 'warning'" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" /></svg>
+          <svg v-else class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" /></svg>
+          {{ toastMsg }}
+        </div>
+      </div>
+    </transition>
+
+    <!-- 内容区域 -->
+    <div class="relative flex min-h-0 flex-1 gap-3 p-4">
+      <!-- 左侧：分段任务列表 -->
+      <div class="flex w-[280px] shrink-0 flex-col overflow-hidden rounded-2xl border border-slate-200/60 bg-white/80 shadow-lg shadow-slate-200/30 backdrop-blur-sm">
+        <!-- 标题区 -->
+        <div class="flex items-center gap-2 border-b border-slate-100 px-4 py-3">
+          <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 0 1 0 3.75H5.625a1.875 1.875 0 0 1 0-3.75Z" /></svg>
+          </div>
+          <div>
+            <div class="text-sm font-semibold text-slate-800">分段任务</div>
+            <div class="text-[11px] text-slate-400">拖拽至右侧场地编辑区</div>
+          </div>
+        </div>
+        <!-- 任务卡片列表 -->
+        <div class="min-h-0 flex-1 space-y-1.5 overflow-y-auto p-3">
           <div
             v-for="task in tasks"
             :key="task.id"
-            class="task-card"
-            :class="{ 'is-completed': task.status === 2 }"
+            class="group grid grid-cols-[72px_1fr] items-center gap-2.5 rounded-xl border border-slate-100 bg-white p-1 transition-all duration-150"
+            :class="task.status === 2
+              ? 'cursor-not-allowed opacity-50 grayscale'
+              : 'cursor-grab shadow-sm hover:shadow-md hover:border-indigo-200/60 hover:-translate-y-0.5 active:cursor-grabbing active:shadow-sm active:translate-y-0'"
             :draggable="task.status !== 2"
             @dragstart="onTaskDragStart(task, $event)"
             @dragend="onTaskDragEnd"
           >
-            <div class="thumb-wrap relative">
+            <div class="flex h-[66px] items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-slate-50 to-slate-100/80">
               <ResponsivePolygon
                 :points="task.points"
                 :padding="0"
@@ -26,21 +60,24 @@
                 :showVertices="false"
               />
             </div>
-            <div class="task-meta">
-              <div class="name-row fw fs14">{{ task.segmentName }}</div>
-              <div class="row">{{ task.range }}</div>
-              <div class="row">
-                当前状态：
-                <span class="fw" :style="{ color: getStatusColor(task.status) }">
-                  {{
-                    task.status == 0
-                      ? '未开工'
-                      : task.status == 1
-                        ? '已开工'
-                        : task.status == 2
-                          ? '已完成'
-                          : ''
-                  }}
+            <div class="min-w-0 py-1 pr-2">
+              <div class="truncate text-[13px] font-semibold text-slate-800">{{ task.segmentName }}</div>
+              <div class="mt-0.5 truncate text-[11px] text-slate-400">{{ task.range }}</div>
+              <div class="mt-1">
+                <span
+                  class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ring-1 ring-inset"
+                  :class="{
+                    'bg-amber-50 text-amber-600 ring-amber-200/60': task.status == 0,
+                    'bg-blue-50 text-blue-600 ring-blue-200/60': task.status == 1,
+                    'bg-emerald-50 text-emerald-600 ring-emerald-200/60': task.status == 2,
+                  }"
+                >
+                  <span class="h-1.5 w-1.5 rounded-full" :class="{
+                    'bg-amber-500': task.status == 0,
+                    'bg-blue-500': task.status == 1,
+                    'bg-emerald-500': task.status == 2,
+                  }"></span>
+                  {{ task.status == 0 ? '未开工' : task.status == 1 ? '已开工' : task.status == 2 ? '已完成' : '' }}
                 </span>
               </div>
             </div>
@@ -48,123 +85,143 @@
         </div>
       </div>
 
-      <!-- 右侧日期卡网格（预览，点击打开编辑面） -->
-      <div class="card flex1 main" v-if="!setSite">
-        <div class="header-row row-between">
-          <div class="fs14 fw mb10">场地任务信息</div>
-          <div class="row-start">
-            <el-button link type="primary" size="small" @click="openStatsDialog" class="mr10">
-              <el-icon class="mr4"><PieChart /></el-icon>
+      <!-- 右侧：日期卡片网格 -->
+      <div v-show="!setSite" class="flex min-w-0 flex-1 flex-col overflow-hidden rounded-2xl border border-slate-200/60 bg-white/80 shadow-lg shadow-slate-200/30 backdrop-blur-sm">
+        <!-- 工具栏 -->
+        <div class="flex items-center justify-between border-b border-slate-100 px-4 py-2.5">
+          <div class="flex items-center gap-2">
+            <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-violet-50 text-violet-600">
+              <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" /></svg>
+            </div>
+            <span class="text-sm font-semibold text-slate-800">场地任务信息</span>
+          </div>
+          <div class="flex items-center gap-1">
+            <!-- 统计分析 -->
+            <button
+              class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-indigo-600 transition hover:bg-indigo-50"
+              @click="openStatsDialog"
+            >
+              <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6a7.5 7.5 0 1 0 7.5 7.5h-7.5V6z" /><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0 0 13.5 3v7.5z" /></svg>
               统计分析
-            </el-button>
-            <el-button link type="primary" size="small" @click="openRatioChart" class="mr10">
-              <el-icon class="mr4"><Histogram /></el-icon>
-              场地利用率
-            </el-button>
-            <el-checkbox v-model="showTaskName" size="small" style="margin-right: 10px !important">
-              显示分段信息
-            </el-checkbox>
-            <el-checkbox v-model="showGrid" size="small" style="margin-right: 10px !important">
-              显示网格
-            </el-checkbox>
-            <el-button link type="primary" size="small" @click="goBack">
-              <el-icon class="mr4"><ArrowLeft /></el-icon>
-              返回上一级
-            </el-button>
+            </button>
+            <div class="mx-0.5 h-3.5 w-px bg-slate-200"></div>
+            <!-- 开关组 -->
+            <button
+              class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs transition"
+              :class="showTaskName ? 'bg-indigo-50 font-medium text-indigo-600' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'"
+              @click="showTaskName = !showTaskName"
+            >
+              <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 0 1 1.037-.443 48.2 48.2 0 0 0 5.887-.37c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" /></svg>
+              分段信息
+            </button>
+            <button
+              class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs transition"
+              :class="showGrid ? 'bg-indigo-50 font-medium text-indigo-600' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'"
+              @click="showGrid = !showGrid"
+            >
+              <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 0 1-1.125-1.125M3.375 19.5h7.5c.621 0 1.125-.504 1.125-1.125m-9.75 0V5.625m0 12.75v-12.75m0 0A1.125 1.125 0 0 1 3.375 4.5h17.25m-17.25 0h7.5m-7.5 0v12.75m0 0h7.5m0 0v-12.75m0 12.75c0 .621-.504 1.125-1.125 1.125m1.125-1.125V5.625m0 0A1.125 1.125 0 0 0 10.875 4.5m.375 1.125v12.75m0-12.75h7.5m-7.5 0v12.75m7.5-12.75a1.125 1.125 0 0 1 1.125 1.125v12.75M20.625 4.5h-7.5m7.5 0a1.125 1.125 0 0 1 1.125 1.125" /></svg>
+              网格
+            </button>
           </div>
         </div>
-        <div class="cards-container">
+
+        <!-- 日期卡片 -->
+        <div class="min-h-0 flex-1 overflow-auto p-3">
           <template v-if="datePanels.length">
-            <div class="cards-wrap">
+            <div class="grid grid-cols-[repeat(auto-fill,minmax(190px,1fr))] gap-3">
               <div
                 v-for="panelDate in datePanels"
                 :key="panelDate.id"
-                class="mini-item"
+                class="group cursor-pointer rounded-xl border border-slate-200/70 bg-white transition-all duration-200 hover:border-indigo-400/50 hover:shadow-[0_0_0_3px_rgba(99,102,241,0.08)]"
                 @click="chooseDateSite(panelDate)"
               >
-                <div class="card-header fs12 cursor-pointer row-between pl5 pr10">
-                  <div class="row-start w100%">
-                    <div>{{ panelDate.date }}</div>
-                    <div class="flex1 pl10 pr10">
-                      <el-progress
-                        :text-inside="true"
-                        :stroke-width="10"
-                        :percentage="panelDate.siteSegmentRatio"
-                        color="#7d46ca"
-                      ></el-progress>
-                    </div>
+                <!-- 顶部：日期 + 占用率 -->
+                <div class="flex items-center justify-between px-3 pt-2.5 pb-1.5">
+                  <div class="flex items-center gap-1.5">
+                    <svg class="h-3.5 w-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" /></svg>
+                    <span class="text-xs font-semibold text-slate-800">{{ panelDate.date }}</span>
                   </div>
-                  <el-icon color="#409eff">
-                    <full-screen />
-                  </el-icon>
+                  <span
+                    class="rounded-md px-1.5 py-0.5 tabular-nums text-[10px] font-bold"
+                    :class="panelDate.siteSegmentRatio > 80
+                      ? 'bg-rose-50 text-rose-600'
+                      : panelDate.siteSegmentRatio > 50
+                        ? 'bg-amber-50 text-amber-600'
+                        : 'bg-indigo-50 text-indigo-600'"
+                  >{{ panelDate.siteSegmentRatio }}%</span>
                 </div>
-                <div class="mini-card">
-                  <SiteCanvas
-                    :site="panelDate.site"
-                    :showGrid="showGrid"
-                    :tasks="panelDate.tasks"
-                    :showTaskName="showTaskName"
-                    :gridPx="5"
-                    gridColor="#d0d7de"
-                    :gridLineWidth="1"
-                    :gridOpacity="0.5"
-                    background="#fff"
-                    :padding="0"
-                    :taskFillColorMap="STATUS_COLORS"
-                  />
+                <!-- 占用率进度条 -->
+                <div class="px-3 pb-2">
+                  <div class="h-1 w-full overflow-hidden rounded-full bg-slate-100">
+                    <div
+                      class="h-full rounded-full transition-all duration-300"
+                      :class="panelDate.siteSegmentRatio > 80 ? 'bg-rose-500' : panelDate.siteSegmentRatio > 50 ? 'bg-amber-500' : 'bg-indigo-500'"
+                      :style="{ width: panelDate.siteSegmentRatio + '%' }"
+                    />
+                  </div>
+                </div>
+                <!-- 场地预览 -->
+                <div class="relative mx-2 mb-2 overflow-hidden rounded-lg border border-slate-100 bg-slate-50/60">
+                  <div class="aspect-[4/3]">
+                    <SiteCanvas
+                      :site="panelDate.site"
+                      :showGrid="showGrid"
+                      :tasks="panelDate.tasks"
+                      :showTaskName="showTaskName"
+                      :gridPx="5"
+                      gridColor="#e2e8f0"
+                      :gridLineWidth="1"
+                      :gridOpacity="0.35"
+                      background="transparent"
+                      :padding="0"
+                      :taskFillColorMap="STATUS_COLORS"
+                    />
+                  </div>
+                  <!-- hover：右下角编辑图标 -->
+                  <div class="absolute bottom-1.5 right-1.5 flex h-6 w-6 items-center justify-center rounded-md bg-white/90 text-slate-400 opacity-0 shadow ring-1 ring-slate-200/80 transition-all duration-150 group-hover:opacity-100 group-hover:text-indigo-600 group-hover:ring-indigo-200">
+                    <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" /></svg>
+                  </div>
+                </div>
+                <!-- 底部任务数 -->
+                <div class="flex items-center gap-1.5 border-t border-slate-50 px-3 py-1.5">
+                  <svg class="h-3 w-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6.429 9.75 2.25 12l4.179 2.25m0-4.5 5.571 3 5.571-3m-11.142 0L2.25 7.5 12 2.25l9.75 5.25-4.179 2.25m0 0L12 12.75l-5.571-3m11.142 0 4.179 2.25L12 17.25 2.25 12l4.179-2.25" /></svg>
+                  <span class="text-[11px] text-slate-500">{{ panelDate.tasks?.length || 0 }} 个分段</span>
                 </div>
               </div>
             </div>
           </template>
-          <div v-else class="empty-wrapper">
-            <el-empty description="暂无数据" :image-size="80" />
+          <div v-else class="flex h-full flex-col items-center justify-center gap-2 text-slate-400">
+            <svg class="h-10 w-10 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5m6 4.125 2.25 2.25m0 0 2.25 2.25M12 13.875l2.25-2.25M12 13.875l-2.25 2.25M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+            </svg>
+            <span class="text-xs">暂无场地数据</span>
           </div>
         </div>
       </div>
 
-      <!-- 右侧覆盖层：polygonSet 编辑（接收拖拽；不遮挡左侧任务列表） -->
-      <transition name="panel-slide">
-        <div
-          v-if="setSite"
-          class="drag-host overlay-panel"
-          :class="{ 'drag-host--over': dragOver }"
-          @dragover.prevent="onDragOver"
-          @dragleave="onDragLeave"
-          @drop.prevent="onDropToPolygonSet"
-        >
-          <polygonSet
-            ref="polygonSetRef"
-            :data="selectSite"
-            @save="saveSite"
-            @pre="goPrevDay"
-            @next="goNextDay"
-            @close="closeSetSite"
-            :statusColorMap="STATUS_COLORS"
-            :siteId="form.site"
-          />
-        </div>
-      </transition>
+      <!-- 右侧覆盖层：polygonSet 编辑（v-show 保持组件不销毁，避免 canvas 重建卡顿） -->
+      <div
+        v-show="setSite"
+        class="absolute inset-y-0 right-0 z-10 w-[calc(100%-292px)] overflow-hidden rounded-2xl border border-slate-200/60 bg-white px-3 shadow-lg transition-all duration-200"
+        :class="dragOver ? 'ring-2 ring-indigo-400/80 ring-offset-2' : ''"
+        @dragover.prevent="onDragOver"
+        @dragleave="onDragLeave"
+        @drop.prevent="onDropToPolygonSet"
+      >
+        <polygonSet
+          ref="polygonSetRef"
+          :data="selectSite"
+          @save="saveSite"
+          @pre="goPrevDay"
+          @next="goNextDay"
+          @close="closeSetSite"
+          :statusColorMap="STATUS_COLORS"
+          :siteId="form.site"
+        />
+      </div>
     </div>
 
-    <!-- 场地利用率图表弹窗 -->
-    <el-dialog
-      v-model="ratioDialogVisible"
-      title="场地利用率"
-      width="90%"
-      append-to-body
-      destroy-on-close
-    >
-      <div
-        ref="ratioChartRef"
-        style="width: 100%; height: 360px"
-        v-loading="!datePanels.length"
-      ></div>
-      <template #footer>
-        <el-button @click="ratioDialogVisible = false">关 闭</el-button>
-      </template>
-    </el-dialog>
-
-    <!-- 场地统计弹窗（子组件） -->
+    <!-- 场地统计弹窗 -->
     <SiteStatsDialog
       v-model="statsDialogVisible"
       :loading="statsLoading"
@@ -177,10 +234,7 @@
 </template>
 
 <script setup>
-import { ArrowLeft, Histogram, PieChart } from '@element-plus/icons-vue';
-import * as echarts from 'echarts';
-import { ElMessage } from 'element-plus';
-import { nextTick, onBeforeUnmount, onMounted, reactive, ref } from 'vue';
+import { onBeforeUnmount, onMounted, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import polygonSet from './components/polygonSet.vue';
 import ResponsivePolygon from './components/ResponsivePolygon.vue';
@@ -188,6 +242,20 @@ import SiteCanvas from './components/SiteCanvas.vue';
 import SiteStatsDialog from './components/SiteStatsDialog.vue';
 import SegmentAreaAll from './SegmentAreaAllMock';
 import taskList from './taskListMock';
+
+/** ===== Toast（替代 ElMessage） ===== */
+const toastVisible = ref(false);
+const toastMsg = ref('');
+const toastType = ref('success');
+let toastTimer = null;
+
+function showToast(msg, type = 'success', duration = 2500) {
+  toastMsg.value = msg;
+  toastType.value = type;
+  toastVisible.value = true;
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { toastVisible.value = false; }, duration);
+}
 
 /** ===== 常量 & Mock 数据 ===== */
 const DEFAULT_SITE_ID = 'site-1';
@@ -220,14 +288,11 @@ const activePanelId = ref(null);
 const polygonSetRef = ref(null);
 const showGrid = ref(true);
 const showTaskName = ref(true);
-const ratioDialogVisible = ref(false);
-const ratioChartRef = ref(null);
-let ratioChart = null;
 const router = useRouter();
 
 /** ===== 统计弹窗 ===== */
 const statsDialogVisible = ref(false);
-const statsViewType = ref('week'); // 'week' | 'month'
+const statsViewType = ref('week');
 const statsLoading = ref(false);
 const statsPeriodStats = ref([]);
 const statsSummary = ref(null);
@@ -345,7 +410,7 @@ function toDate(value) {
 function startOfWeek(date) {
   const d = new Date(date);
   d.setHours(0, 0, 0, 0);
-  const offset = (d.getDay() + 6) % 7; // Monday start
+  const offset = (d.getDay() + 6) % 7;
   d.setDate(d.getDate() - offset);
   return d;
 }
@@ -390,36 +455,21 @@ function buildStatsForView(viewType) {
         .filter((t) => Number(t.status) === 2)
         .map((t) => polygonArea(t.points || []))
         .reduce((sum, v) => sum + v, 0);
-      return {
-        date: dateObj,
-        dateStr: formatDate(dateObj),
-        siteArea,
-        wipArea,
-        doneArea,
-      };
+      return { date: dateObj, dateStr: formatDate(dateObj), siteArea, wipArea, doneArea };
     })
     .filter(Boolean)
     .sort((a, b) => a.date - b.date);
 
-  if (!daily.length) {
-    return { periodStats: [], summary: null };
-  }
+  if (!daily.length) return { periodStats: [], summary: null };
 
   const groups = new Map();
   daily.forEach((item) => {
     const periodStart = viewType === 'month' ? startOfMonth(item.date) : startOfWeek(item.date);
-    const periodEnd =
-      viewType === 'month'
-        ? new Date(periodStart.getFullYear(), periodStart.getMonth() + 1, 1)
-        : addDaysToDate(periodStart, 7);
+    const periodEnd = viewType === 'month'
+      ? new Date(periodStart.getFullYear(), periodStart.getMonth() + 1, 1)
+      : addDaysToDate(periodStart, 7);
     const key = `${formatDate(periodStart)}_${viewType}`;
-    if (!groups.has(key)) {
-      groups.set(key, {
-        start: periodStart,
-        end: periodEnd,
-        items: [],
-      });
-    }
+    if (!groups.has(key)) groups.set(key, { start: periodStart, end: periodEnd, items: [] });
     groups.get(key).items.push(item);
   });
 
@@ -438,33 +488,15 @@ function buildStatsForView(viewType) {
       const idleAvg = siteArea > 0 ? Math.max(0, siteArea - wipAvg) : null;
       const utilization = siteArea > 0 ? wipAvg / siteArea : null;
       const turnover = wipAvg > 0 ? doneArea / wipAvg : null;
-      const label =
-        viewType === 'month'
-          ? `${group.start.getFullYear()}-${String(group.start.getMonth() + 1).padStart(2, '0')}`
-          : getWeekLabel(group.start);
-      return {
-        label,
-        start: formatDate(group.start),
-        end: formatDate(group.end),
-        doneArea,
-        wipStart,
-        wipEnd,
-        wipAvg,
-        turnover,
-        idleAvg,
-        utilization,
-      };
+      const label = viewType === 'month'
+        ? `${group.start.getFullYear()}-${String(group.start.getMonth() + 1).padStart(2, '0')}`
+        : getWeekLabel(group.start);
+      return { label, start: formatDate(group.start), end: formatDate(group.end), doneArea, wipStart, wipEnd, wipAvg, turnover, idleAvg, utilization };
     });
 
-  const turnoverVals = periodStats
-    .map((r) => (r.turnover == null || Number.isNaN(r.turnover) ? null : r.turnover))
-    .filter((v) => v !== null);
-  const idleVals = periodStats
-    .map((r) => (r.idleAvg == null || Number.isNaN(r.idleAvg) ? null : r.idleAvg))
-    .filter((v) => v !== null);
-  const utilVals = periodStats
-    .map((r) => (r.utilization == null || Number.isNaN(r.utilization) ? null : r.utilization))
-    .filter((v) => v !== null);
+  const turnoverVals = periodStats.map((r) => (r.turnover == null || Number.isNaN(r.turnover) ? null : r.turnover)).filter((v) => v !== null);
+  const idleVals = periodStats.map((r) => (r.idleAvg == null || Number.isNaN(r.idleAvg) ? null : r.idleAvg)).filter((v) => v !== null);
+  const utilVals = periodStats.map((r) => (r.utilization == null || Number.isNaN(r.utilization) ? null : r.utilization)).filter((v) => v !== null);
 
   const summary = {
     avgTurnover: mean(turnoverVals),
@@ -489,7 +521,7 @@ function loadMockData() {
 function fetchPanelByDate(targetDate) {
   const panel = datePanels.value.find((item) => item.date === targetDate);
   if (!panel) {
-    ElMessage.warning('该日期暂无数据');
+    showToast('该日期暂无数据', 'warning');
     return null;
   }
   selectSite.value = clonePanel(panel);
@@ -497,14 +529,9 @@ function fetchPanelByDate(targetDate) {
   return panel;
 }
 
-onMounted(() => {
-  loadMockData();
-});
+onMounted(() => { loadMockData(); });
 onBeforeUnmount(() => {
-  if (ratioChart) {
-    ratioChart.dispose();
-    ratioChart = null;
-  }
+  if (toastTimer) clearTimeout(toastTimer);
 });
 
 function loadStatsData() {
@@ -517,34 +544,24 @@ function loadStatsData() {
 
 function openStatsDialog() {
   if (!datePanels.value.length) {
-    ElMessage.warning('暂无统计数据');
+    showToast('暂无统计数据', 'warning');
     return;
   }
   statsDialogVisible.value = true;
   loadStatsData();
 }
 
-function goBack() {
-  router.back();
-}
+function goBack() { router.back(); }
 
 function onStatsViewTypeChange(type) {
   if (statsViewType.value === type) return;
   statsViewType.value = type;
-  if (statsDialogVisible.value) {
-    loadStatsData();
-  }
+  if (statsDialogVisible.value) loadStatsData();
 }
 
 /** ===== 拖拽与编辑弹层 ===== */
-
-function showSetSite() {
-  setSite.value = true;
-}
-function closeSetSite() {
-  setSite.value = false;
-  dragOver.value = false;
-}
+function showSetSite() { setSite.value = true; }
+function closeSetSite() { setSite.value = false; dragOver.value = false; }
 
 function chooseDateSite(panelDate) {
   selectSite.value = clonePanel(panelDate);
@@ -554,136 +571,58 @@ function chooseDateSite(panelDate) {
 
 function adjustDay(step) {
   if (!selectSite.value?.date) {
-    ElMessage.warning('请选择日期后再切换');
+    showToast('请选择日期后再切换', 'warning');
     return;
   }
   fetchPanelByDate(addDays(selectSite.value.date, step));
 }
 
-function goPrevDay() {
-  adjustDay(-1);
-}
-function goNextDay() {
-  adjustDay(1);
-}
+function goPrevDay() { adjustDay(-1); }
+function goNextDay() { adjustDay(1); }
 
-/** 左侧任务卡 dragstart：把任务对象写入 dataTransfer（仅用于拖拽，不删除源） */
 function onTaskDragStart(task, e) {
-  if (task?.status === 2) {
-    e.preventDefault();
-    return;
-  }
-  const payload = {
-    ...task,
-  };
-  e.dataTransfer.setData('application/json', JSON.stringify(payload));
+  if (task?.status === 2) { e.preventDefault(); return; }
+  e.dataTransfer.setData('application/json', JSON.stringify({ ...task }));
   e.dataTransfer.effectAllowed = 'copy';
 }
-function onTaskDragEnd() {
-  dragOver.value = false;
-}
+function onTaskDragEnd() { dragOver.value = false; }
 
-/** 编辑面容器：dragover/leave/drop */
 function onDragOver(e) {
   if (!setSite.value) return;
   dragOver.value = true;
   e.dataTransfer.dropEffect = 'copy';
 }
-function onDragLeave() {
-  dragOver.value = false;
-}
+function onDragLeave() { dragOver.value = false; }
 
 function onDropToPolygonSet(e) {
   dragOver.value = false;
   if (!setSite.value) return;
-
   try {
     const json = e.dataTransfer.getData('application/json');
     if (!json) return;
     const task = JSON.parse(json);
     const normalized = polygonSetRef.value?.canAcceptExternalTask(task);
     if (!normalized?.ok) {
-      ElMessage.error(normalized?.message || '拖拽数据无效');
+      showToast(normalized?.message || '拖拽数据无效', 'error');
       return;
     }
     if (!Array.isArray(selectSite.value.tasks)) selectSite.value.tasks = [];
-    const idx = selectSite.value.tasks.findIndex(
-      (t) => String(t.segmentId) === String(normalized.task.segmentId),
-    );
+    const idx = selectSite.value.tasks.findIndex((t) => String(t.segmentId) === String(normalized.task.segmentId));
     if (idx !== -1) selectSite.value.tasks.splice(idx, 1);
     selectSite.value.tasks.push(normalized.task);
     polygonSetRef.value?.restoreDeletedSegment(normalized.task.segmentId);
-    ElMessage.success('已添加到当前面板');
+    showToast('已添加到当前面板', 'success');
   } catch (err) {
     console.warn('解析拖拽任务失败：', err);
-    ElMessage.error('拖拽数据无效');
+    showToast('拖拽数据无效', 'error');
   }
-}
-
-/** 场地利用率图表 */
-function openRatioChart() {
-  ratioDialogVisible.value = true;
-  nextTick(() => renderRatioChart());
-}
-
-function renderRatioChart() {
-  if (!ratioChartRef.value) return;
-  if (ratioChart) ratioChart.dispose();
-  ratioChart = echarts.init(ratioChartRef.value);
-  const dates = datePanels.value.map((d) => d.date);
-  const ratios = datePanels.value.map((d) => Number(d.siteSegmentRatio ?? 0));
-  const option = {
-    tooltip: { trigger: 'axis' },
-    grid: { left: 40, right: 20, top: 20, bottom: 60 },
-    xAxis: {
-      type: 'category',
-      data: dates,
-      axisLabel: {
-        interval: 0,
-        formatter: (value) => {
-          if (typeof value !== 'string') return value;
-          const parts = value.split(/[-/]/);
-          return parts.length >= 2 ? parts.slice(1).join('-') : value;
-        },
-      },
-    },
-    yAxis: {
-      type: 'value',
-      max: 100,
-      min: 0,
-      axisLabel: { formatter: '{value}%' },
-    },
-    dataZoom: [
-      {
-        type: 'slider',
-        height: 16,
-        bottom: 20,
-        start: 0,
-        end: 100,
-      },
-      { type: 'inside' },
-    ],
-    series: [
-      {
-        type: 'bar',
-        data: ratios,
-        itemStyle: { color: '#7d46ca' },
-        label: {
-          show: true,
-          position: 'top',
-          formatter: ({ value }) => `${value}%`,
-        },
-      },
-    ],
-  };
-  ratioChart.setOption(option);
 }
 
 /* 保存 polygonSet */
 function saveSite() {
   const localPanel = polygonSetRef.value?.getLocalData?.();
   if (!localPanel) {
-    ElMessage.error('未获取到当前面板数据');
+    showToast('未获取到当前面板数据', 'error');
     return;
   }
   const nextPanel = clonePanel(localPanel);
@@ -698,169 +637,26 @@ function saveSite() {
   }
   selectSite.value = clonePanel(nextPanel);
   activePanelId.value = nextPanel?.id ?? activePanelId.value;
-  ElMessage.success('操作成功！');
+  showToast('操作成功！', 'success');
   closeSetSite();
 }
 </script>
 
 <style scoped>
-/* 整体容器 */
-.board {
+/* polygonSet 子组件撑满高度 */
+.absolute > :deep(*) {
   height: 100%;
-  width: 100%;
-  padding: 10px;
 }
 
-/* 内容区域：左边任务列表 + 右边网格 */
-.content-board {
-  display: flex;
-  gap: 10px;
-  height: 100%;
-  width: 100%;
-  position: relative;
+/* Toast 动画 */
+.toast-fade-enter-active,
+.toast-fade-leave-active {
+  transition: opacity 0.25s ease, transform 0.25s ease;
 }
-
-/* 左侧列表（拖拽源） */
-.aside {
-  width: 300px;
-  flex-shrink: 0;
-}
-.aside-scroll {
-  overflow-y: auto;
-  height: calc(100% - 30px);
-}
-.task-card {
-  display: grid;
-  grid-template-columns: 88px 1fr;
-  align-items: center;
-  margin-bottom: 10px;
-  background: #f8f9fc;
-  cursor: grab;
-  border-radius: 4px;
-}
-.task-card.is-completed {
-  cursor: not-allowed;
-  /* opacity: 0.6; */
-}
-.task-card.is-completed:hover {
-  background: #eef2f7;
-}
-.task-card:active {
-  cursor: grabbing;
-}
-.task-card.is-completed:active {
-  cursor: not-allowed;
-}
-.thumb-wrap {
-  width: 80px;
-  height: 70px;
-  padding: 4px;
-  background: #dee3ed;
-  margin-right: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  margin-right: 10px;
-  border-radius: 4px;
-}
-.task-meta {
-  font-size: 12px;
-  color: #475569;
-}
-.name-row {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  margin-bottom: 2px;
-}
-
-/* 右侧网格预览 */
-.main {
-  padding: 10px;
-}
-.cards-container {
-  overflow: auto;
-  height: calc(100% - 40px);
-}
-.empty-wrapper {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.cards-wrap {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-.mini-item {
-  width: 200px;
-  background: #f0f0f0;
-  box-shadow: 3px 2px 3px 0px #d3cbcb;
-}
-.mini-card {
-  width: 200px;
-}
-.card-header {
-  font-weight: 500;
-  line-height: 30px;
-}
-
-/* 覆盖层（接收拖拽） */
-.drag-host {
-  transition:
-    box-shadow 0.15s ease,
-    border-color 0.15s ease;
-}
-.drag-host--over {
-  border: 2px dashed #60a5fa;
-  box-shadow: 0 0 0 6px rgba(96, 165, 250, 0.15) inset;
-  border-radius: 8px;
-}
-.overlay-panel {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: calc(100% - 300px);
-  height: 100%;
-  background: rgba(248, 249, 252, 0.95);
-  padding: 0px 10px;
-  box-sizing: border-box;
-  overflow: hidden;
-}
-.overlay-panel > :deep(*) {
-  height: 100%;
-}
-.panel-slide-enter-active,
-.panel-slide-leave-active {
-  transition:
-    opacity 0.2s ease,
-    transform 0.2s ease;
-}
-.panel-slide-enter-from,
-.panel-slide-leave-to {
+.toast-fade-enter-from,
+.toast-fade-leave-to {
   opacity: 0;
-  transform: translateX(20px);
+  transform: translate(-50%, -8px);
 }
-.panel-slide-enter-to,
-.panel-slide-leave-from {
-  opacity: 1;
-  transform: translateX(0);
-}
-</style>
 
-<style>
-.el-progress-bar__outer {
-  background-color: #c0c4cc !important;
-}
-.el-progress-bar__innerText {
-  display: inline-block;
-  vertical-align: middle;
-  color: #fff;
-  font-size: 10px;
-  margin-top: -3px !important;
-  margin-right: 5px !important;
-}
 </style>

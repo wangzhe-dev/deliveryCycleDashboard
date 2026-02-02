@@ -1,32 +1,24 @@
-.DS_Store
-bomList.js
-formColumn.html
-node_modules/
-dist/
-dist.zip
+# Logs
+logs
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-**/*.log
+pnpm-debug.log*
+lerna-debug.log*
 
-tests/**/coverage/
-tests/e2e/reports
-selenium-debug.log
-.history/
+node_modules
+dist
+dist-ssr
+*.local
 
 # Editor directories and files
+.vscode/*
+!.vscode/extensions.json
 .idea
-.vscode
+.DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
-*.local
-
-package-lock.json
-yarn.lock
-
-helper.json
-
-# Documentation (local only)
-docs/
+*.sw?

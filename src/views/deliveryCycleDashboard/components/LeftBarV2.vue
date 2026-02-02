@@ -1,132 +1,156 @@
 <template>
-  <aside class="leftbar">
-    <!-- 视图 -->
-    <section class="group">
-      <div class="ghead">
-        <div class="rule" />
-        <div class="title">视图</div>
-        <div class="rule" />
+  <aside
+    class="flex flex-col gap-3 rounded-2xl border border-border/70 bg-gradient-to-b from-background/90 via-background/80 to-muted/60 p-2.5 text-slate-900 shadow-[0_16px_32px_rgba(15,23,42,0.12)] backdrop-blur"
+  >
+    <section class="flex flex-col gap-2">
+      <div class="text-center text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">
+        视图
       </div>
-
-      <div class="stack">
-        <button
-          class="btn"
-          :class="{ active: mode === 'normal' }"
+      <div class="grid gap-2">
+        <Button
+          size="sm"
+          class="h-10 w-full justify-start gap-2 rounded-xl text-xs"
+          :variant="mode === 'normal' ? 'default' : 'outline'"
+          :aria-pressed="mode === 'normal'"
           @click="$emit('set-mode', 'normal')"
-          type="button"
         >
-          <span class="ico ico--lg" aria-hidden="true">
-            <svg-icon icon-class="3D-ys" />
+          <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-muted/70">
+            <img :src="icons.model" alt="" class="h-4 w-4" aria-hidden="true" />
           </span>
-          <span class="txt">原始模型</span>
-        </button>
+          <span>原始模型</span>
+        </Button>
 
-        <button
-          class="btn"
-          :class="{ active: mode === 'wire' }"
+        <Button
+          size="sm"
+          class="h-10 w-full justify-start gap-2 rounded-xl text-xs"
+          :variant="mode === 'wire' ? 'default' : 'outline'"
+          :aria-pressed="mode === 'wire'"
           @click="$emit('set-mode', 'wire')"
-          type="button"
         >
-          <span class="ico ico--lg" aria-hidden="true">
-            <svg-icon icon-class="3D-ts" />
+          <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-muted/70">
+            <img :src="icons.wire" alt="" class="h-4 w-4" aria-hidden="true" />
           </span>
-          <span class="txt">透明框线</span>
-        </button>
+          <span>透明框线</span>
+        </Button>
       </div>
     </section>
 
-    <!-- 工具 -->
-    <section class="group">
-      <div class="ghead">
-        <div class="rule" />
-        <div class="title">工具</div>
-        <div class="rule" />
+    <div class="h-px bg-border/70"></div>
+
+    <section class="flex flex-col gap-2">
+      <div class="text-center text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">
+        工具
       </div>
-
-      <div class="stack">
-        <button
-          class="btn btn--accent"
-          :class="{ active: explodeOn }"
+      <div class="grid gap-2">
+        <Button
+          size="sm"
+          class="h-10 w-full justify-start gap-2 rounded-xl text-xs"
+          :variant="explodeOn ? 'default' : 'outline'"
+          :aria-pressed="explodeOn"
           @click="$emit('toggle-explode')"
-          type="button"
         >
-          <span class="ico ico--lg" aria-hidden="true">
-            <svg-icon icon-class="3D-bz" />
+          <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-muted/70">
+            <img :src="icons.explode" alt="" class="h-4 w-4" aria-hidden="true" />
           </span>
-          <span class="txt">爆炸图</span>
-        </button>
+          <span>爆炸图</span>
+        </Button>
 
-        <button
-          class="btn btn--accent"
-          :class="{ active: colorIsolated }"
+        <Button
+          size="sm"
+          class="h-10 w-full justify-start gap-2 rounded-xl text-xs"
+          :variant="colorIsolated ? 'default' : 'outline'"
+          :aria-pressed="colorIsolated"
           @click="$emit('toggle-color-isolation')"
-          type="button"
         >
-          <span class="ico ico--md" aria-hidden="true">
-            <svg-icon icon-class="3D-ys" />
+          <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-muted/70">
+            <img :src="icons.isolate" alt="" class="h-4 w-4" aria-hidden="true" />
           </span>
-          <span class="txt">颜色隔离</span>
-        </button>
-        <button
-          class="btn btn--accent"
-          :class="{ active: toolMode === 'pick' }"
+          <span>颜色隔离</span>
+        </Button>
+
+        <Button
+          size="sm"
+          class="h-10 w-full justify-start gap-2 rounded-xl text-xs"
+          :variant="toolMode === 'pick' ? 'default' : 'outline'"
+          :aria-pressed="toolMode === 'pick'"
           @click="$emit('set-tool', 'pick')"
-          type="button"
         >
-          <span class="ico ico--md" aria-hidden="true">
-            <svg-icon icon-class="3D-xq" />
+          <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-muted/70">
+            <img :src="icons.pick" alt="" class="h-4 w-4" aria-hidden="true" />
           </span>
-          <span class="txt">选择工具</span>
-        </button>
+          <span>选择工具</span>
+        </Button>
 
-        <button
-          class="btn btn--accent"
-          :class="{ active: toolMode === 'measure' }"
+        <Button
+          size="sm"
+          class="h-10 w-full justify-start gap-2 rounded-xl text-xs"
+          :variant="toolMode === 'measure' ? 'default' : 'outline'"
+          :aria-pressed="toolMode === 'measure'"
           @click="$emit('set-tool', 'measure')"
-          type="button"
         >
-          <span class="ico ico--md" aria-hidden="true">
-            <svg-icon icon-class="3D-jl" />
+          <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-muted/70">
+            <img :src="icons.measure" alt="" class="h-4 w-4" aria-hidden="true" />
           </span>
-          <span class="txt">标距工具</span>
-        </button>
+          <span>标距工具</span>
+        </Button>
 
-        <button
-          class="btn btn--accent"
-          :class="{ active: toolMode === 'note' }"
+        <Button
+          size="sm"
+          class="h-10 w-full justify-start gap-2 rounded-xl text-xs"
+          :variant="toolMode === 'note' ? 'default' : 'outline'"
+          :aria-pressed="toolMode === 'note'"
           @click="$emit('set-tool', 'note')"
-          type="button"
         >
-          <span class="ico ico--md" aria-hidden="true">
-            <svg-icon icon-class="3D-dbz" />
+          <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-muted/70">
+            <img :src="icons.note" alt="" class="h-4 w-4" aria-hidden="true" />
           </span>
-          <span class="txt">标注工具</span>
-        </button>
+          <span>标注工具</span>
+        </Button>
 
-        <button class="btn" @click="$emit('fit-view')" type="button">
-          <span class="ico ico--md" aria-hidden="true">
-            <svg-icon icon-class="3D-auto" />
+        <Button
+          size="sm"
+          class="h-10 w-full justify-start gap-2 rounded-xl text-xs"
+          variant="outline"
+          @click="$emit('fit-view')"
+        >
+          <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-muted/70">
+            <img :src="icons.fit" alt="" class="h-4 w-4" aria-hidden="true" />
           </span>
-          <span class="txt">自适应</span>
-        </button>
+          <span>自适应</span>
+        </Button>
 
-        <button class="btn" @click="$emit('clear-marks')" type="button">
-          <span class="ico ico--md" aria-hidden="true">
-            <svg-icon icon-class="3D-qk" />
+        <Button
+          size="sm"
+          class="h-10 w-full justify-start gap-2 rounded-xl text-xs"
+          variant="outline"
+          @click="$emit('clear-marks')"
+        >
+          <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-muted/70">
+            <img :src="icons.clear" alt="" class="h-4 w-4" aria-hidden="true" />
           </span>
-          <span class="txt">清除标注</span>
-        </button>
+          <span>清除标注</span>
+        </Button>
       </div>
     </section>
   </aside>
 </template>
 
 <script setup>
+import { Button } from '@/components/ui';
+import iconModel from '@/assets/icons/svg/3D-ys.svg';
+import iconWire from '@/assets/icons/svg/3D-ts.svg';
+import iconExplode from '@/assets/icons/svg/3D-bz.svg';
+import iconIsolate from '@/assets/icons/svg/3D-xg.svg';
+import iconPick from '@/assets/icons/svg/3D-xq.svg';
+import iconMeasure from '@/assets/icons/svg/3D-jl.svg';
+import iconNote from '@/assets/icons/svg/3D-dbz.svg';
+import iconFit from '@/assets/icons/svg/3D-auto.svg';
+import iconClear from '@/assets/icons/svg/3D-qk.svg';
+
 defineProps({
   mode: { type: String, default: 'normal' }, // normal | wire
   explodeOn: { type: Boolean, default: false },
   toolMode: { type: String, default: 'pick' }, // pick | measure | note
-  isolateSelected: { type: Boolean, default: false },
   colorIsolated: { type: Boolean, default: false },
 });
 
@@ -134,258 +158,20 @@ defineEmits([
   'set-mode',
   'set-tool',
   'toggle-explode',
-  'toggle-param',
   'clear-marks',
-  'toggle-isolate',
   'fit-view',
   'toggle-color-isolation',
 ]);
+
+const icons = {
+  model: iconModel,
+  wire: iconWire,
+  explode: iconExplode,
+  isolate: iconIsolate,
+  pick: iconPick,
+  measure: iconMeasure,
+  note: iconNote,
+  fit: iconFit,
+  clear: iconClear,
+};
 </script>
-
-<style scoped>
-/* ====== Blue Ultra（更亮更通透）+ 大屏：背景稍微深一点（降眩光） ====== */
-.leftbar {
-  /* ✅ 背景稍深：从纯白改为“淡蓝灰渐变”，大屏更舒服 */
-  --lb-bg: var(--left-shell-bg, linear-gradient(180deg, #ffffff 0%, #fbfaf8 100%));
-  --lb-border: transparent;
-
-  /* 分隔线 & 点缀色（爱马仕橙） */
-  --lb-divider: #d3d8de;
-  --lb-mark: #d4722a;
-  --lb-mark-rgb: 212, 114, 42;
-
-  /* 文本 */
-  --lb-text: #1f2933;
-  --lb-text-2: #6b7280;
-  --lb-title: #2b3440;
-  --lb-ico-fg: #2f3a44;
-
-  /* ✅ 卡片也跟着压一点亮度，但仍然通透 */
-  --lb-card-1: #fbf7f1;
-  --lb-card-2: #f1ebe4;
-  --lb-card-h-1: #f6f1ea;
-  --lb-card-h-2: #ebe5dd;
-
-  /* hover / focus */
-  --lb-hover-border: rgba(71, 85, 105, 0.18);
-  --lb-focus: rgba(71, 85, 105, 0.25);
-
-  /* Active：主色（温暖橙棕） */
-  --lb-active-1: #e08a3e;
-  --lb-active-2: #b5622a;
-  --lb-active-border: rgba(181, 98, 42, 0.6);
-  --lb-active-shadow: rgba(181, 98, 42, 0.2);
-  --lb-active-inset: rgba(181, 98, 42, 0.12);
-
-  /* Active：工具组强调色（稍深的橙） */
-  --lb-accent-1: #cf7e35;
-  --lb-accent-2: #a85a24;
-  --lb-accent-border: rgba(168, 90, 36, 0.6);
-  --lb-accent-shadow: rgba(168, 90, 36, 0.2);
-  --lb-accent-inset: rgba(168, 90, 36, 0.12);
-
-  /* icon 渐变 */
-  --lb-ico-g1: rgba(227, 218, 206, 0.6);
-  --lb-ico-g2: rgba(205, 216, 228, 0.35);
-  --lb-ico-g3: rgba(255, 255, 255, 0.85);
-  --lb-ico-stroke: rgba(148, 163, 184, 0.2);
-
-  height: 100%;
-  background: var(--lb-bg);
-  border: 0;
-  border-radius: 12px 0px 0px 12px;
-  padding: 10px;
-  overflow: auto;
-  display: grid;
-  gap: 12px;
-}
-
-.leftbar::-webkit-scrollbar {
-  width: 0;
-  height: 0;
-}
-.leftbar {
-  scrollbar-width: none;
-  scrollbar-color: transparent transparent;
-}
-
-/* 分组头 */
-.group {
-  display: grid;
-  gap: 10px;
-}
-
-.ghead {
-  display: grid;
-  grid-template-columns: 15px 1fr 15px;
-  align-items: center;
-  gap: 4px;
-}
-
-.title {
-  font-size: 13px;
-  font-weight: 800;
-  color: var(--lb-title);
-  letter-spacing: 0.5px;
-  text-align: center;
-}
-
-.rule {
-  height: 1px;
-  background: var(--lb-divider);
-}
-
-.stack {
-  display: grid;
-  gap: 8px;
-}
-
-/* 按钮 */
-.btn {
-  position: relative;
-  width: 100%;
-  border: 1px solid rgba(15, 23, 42, 0.1);
-  background: linear-gradient(180deg, var(--lb-card-1) 0%, var(--lb-card-2) 100%);
-  border-radius: 12px;
-  cursor: pointer;
-
-  padding: 10px 4px;
-  display: grid;
-  grid-template-rows: 1fr auto;
-  justify-items: center;
-  align-items: center;
-  gap: 6px;
-
-  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.06);
-  transition:
-    background 0.12s ease,
-    transform 0.06s ease,
-    box-shadow 0.12s ease,
-    border-color 0.12s ease;
-}
-
-.btn:hover {
-  background: linear-gradient(180deg, var(--lb-card-h-1) 0%, var(--lb-card-h-2) 100%);
-  border-color: var(--lb-hover-border);
-  box-shadow: 0 12px 26px rgba(15, 23, 42, 0.08);
-}
-
-.btn:active {
-  transform: translateY(1px);
-}
-
-.btn:focus-visible {
-  outline: 2px solid var(--lb-focus);
-  outline-offset: 2px;
-}
-
-/* icon */
-.ico {
-  width: 34px;
-  height: 34px;
-  display: grid;
-  place-items: center;
-  color: var(--lb-ico-fg);
-  border-radius: 10px;
-
-  background: linear-gradient(
-    135deg,
-    var(--lb-ico-g1) 0%,
-    var(--lb-ico-g2) 55%,
-    var(--lb-ico-g3) 100%
-  );
-  box-shadow: inset 0 0 0 1px var(--lb-ico-stroke);
-}
-
-.ico--lg {
-  font-size: 30px;
-}
-.ico--md {
-  font-size: 25px;
-}
-
-.ico :deep(.svg-icon) {
-  font-size: inherit;
-}
-
-/* 文案 */
-.txt {
-  font-size: 12px;
-  font-weight: 800;
-  color: var(--lb-text);
-  line-height: 1;
-}
-
-/* Active：主色 */
-.btn.active {
-  background: var(--lb-active-2);
-  border-color: var(--lb-active-border);
-  box-shadow:
-    0 14px 28px var(--lb-active-shadow),
-    0 0 0 2px var(--lb-active-inset) inset,
-    inset 0 1px 0 rgba(255, 255, 255, 0.22);
-}
-
-/* active 底部淡金光带 */
-.btn.active::after {
-  content: '';
-  position: absolute;
-  left: 10px;
-  right: 10px;
-  bottom: 8px;
-  height: 2px;
-  border-radius: 999px;
-  opacity: 0.9;
-  /* background: linear-gradient(
-    90deg,
-    rgba(var(--lb-mark-rgb), 0) 0%,
-    rgba(var(--lb-mark-rgb), 0.85) 50%,
-    rgba(var(--lb-mark-rgb), 0) 100%
-  ); */
-  pointer-events: none;
-}
-
-/* active 右上角淡金点 */
-.btn.active::before {
-  content: '';
-  position: absolute;
-  right: 10px;
-  top: 10px;
-  width: 8px;
-  height: 8px;
-  border-radius: 999px;
-  background: var(--lb-mark);
-  box-shadow:
-    0 0 0 3px rgba(var(--lb-mark-rgb), 0.18),
-    0 0 14px rgba(var(--lb-mark-rgb), 0.25);
-  pointer-events: none;
-}
-
-.btn.active .txt {
-  color: #ffffff;
-}
-.btn.active .ico {
-  color: #ffffff;
-  background: rgba(255, 255, 255, 0.18);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
-}
-
-/* Active：工具组紫色 */
-.btn--accent.active {
-  background: var(--lb-accent-2);
-  border-color: var(--lb-accent-border);
-  box-shadow:
-    0 14px 28px var(--lb-accent-shadow),
-    0 0 0 2px var(--lb-accent-inset) inset,
-    inset 0 1px 0 rgba(255, 255, 255, 0.22);
-}
-
-.btn--accent.active .txt {
-  color: #ffffff;
-}
-.btn--accent.active .ico {
-  color: #ffffff;
-  background: rgba(255, 255, 255, 0.18);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
-}
-</style>

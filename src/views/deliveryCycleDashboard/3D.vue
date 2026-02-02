@@ -1,33 +1,35 @@
 <template>
-  <div class="viewer-stage" ref="stageRef">
-    <div
-      class="viewer-page"
-    >
-      <!-- 顶部栏 -->
-      <TopBar
-        :title="title"
-        :ship-options="shipOptions"
-        :bom-list="bomList"
-        :flow-options="flowOptions"
-        :selected-ship="selectedShip"
-        :selected-part="selectedPart"
-        :selected-flow="selectedFlow"
-        :can-save-marks="canSaveMarks"
-        @update:selected-ship="selectedShip = $event"
-        @update:selected-part="selectedPart = $event"
-        @flow-toggle="toggleFlow"
-        @save="saveMarksToAssembly"
-      />
+  <div
+    ref="stageRef"
+    class="relative h-[100dvh] min-h-screen w-full overflow-hidden bg-background text-slate-900 font-['Sora','Noto_Sans_SC','PingFang_SC','Microsoft_YaHei',sans-serif]"
+  >
+    <div class="relative mx-auto flex h-full min-h-0 w-full max-w-[1680px] flex-col gap-4 px-4 py-4 lg:px-6 lg:py-6">
+      <Card class="animate-[panelIn_0.6s_ease] border-border/70 bg-card/80 shadow-sm backdrop-blur-xl [animation-delay:30ms]">
+        <CardContent class="p-4">
+          <TopBar
+            :ship-options="shipOptions"
+            :bom-list="bomList"
+            :flow-options="flowOptions"
+            :selected-ship="selectedShip"
+            :selected-part="selectedPart"
+            :selected-flow="selectedFlow"
+            @update:selected-ship="selectedShip = $event"
+            @update:selected-part="selectedPart = $event"
+            @flow-toggle="toggleFlow"
+          />
+        </CardContent>
+      </Card>
 
-      <!-- 主体 -->
       <main
-        class="main"
-        :class="{
-          'main--right-collapsed': rightCollapsed,
-        }"
+        class="grid flex-1 min-h-0 gap-4"
+        :class="
+          rightCollapsed
+            ? 'lg:grid-cols-[135px_minmax(0,1fr)]'
+            : 'lg:grid-cols-[135px_minmax(0,1fr)_360px]'
+        "
       >
-        <!-- 左侧操作栏 -->
         <LeftBarV2
+          class="h-full min-h-0 animate-[panelIn_0.6s_ease] [animation-delay:120ms]"
           :mode="mode"
           :explodeOn="explodeOn"
           :toolMode="toolMode"
@@ -35,78 +37,66 @@
           @set-mode="handleSetMode"
           @set-tool="handleSetTool"
           @toggle-explode="toggleExplode"
-          @toggle-param="toggleParam"
           @fit-view="fitView"
           @toggle-color-isolation="toggleColorIsolation"
           @clear-marks="handleClearAllMarks"
         />
 
-        <!-- 左侧文件栏（保留） -->
-        <!--
-      <section class="left-panel" :class="{ 'left-panel--collapsed': leftCollapsed }">
-        <div class="left-panel__body">
-          <LeftPanel
-            v-model="leftTab"
-            :mode="mode"
-            :explodeOn="explodeOn"
-            :toolMode="toolMode"
-            :colorIsolated="colorIsolated"
-            :colorIsolatedOpacity="colorIsolatedOpacity"
-            :colorIsolatedPartOpacity="colorIsolatedPartOpacity"
-            :baseOpacity="baseOpacity"
-            :partOpacity="partOpacity"
-            :explodeFactor="explodeFactor"
-            :notePointScale="notePointScale"
-            :noteLabelOffset="noteLabelOffset"
-            :noteLineWidth="noteLineWidth"
-            :measurePointScale="measurePointScale"
-            :measureLineWidth="measureLineWidth"
-            :measureUnitScale="1000"
-            :notePointColor="notePointColor"
-            :noteLabelColor="noteLabelColor"
-            :measurePointColor="measurePointColor"
-            :measureLineColor="measureLineColor"
-            :measureLabelColor="measureLabelColor"
-            :showCenterMarks="showCenterMarks"
-            :centerColor="centerColor"
-            :centerAxisWidth="centerAxisWidth"
-            :partPdfFiles="partPdfFiles"
-            :excelList="excelList"
-            @set-color-isolated-opacity="colorIsolatedOpacity = $event"
-            @set-color-isolated-part-opacity="colorIsolatedPartOpacity = $event"
-            @set-base-opacity="baseOpacity = $event"
-            @set-part-opacity="partOpacity = $event"
-            @set-explode-factor="explodeFactor = $event"
-            @set-note-point-scale="notePointScale = $event"
-            @set-note-label-offset="noteLabelOffset = $event"
-            @set-note-line-width="noteLineWidth = $event"
-            @set-measure-point-scale="measurePointScale = $event"
-            @set-measure-line-width="measureLineWidth = $event"
-            @set-note-point-color="notePointColor = $event"
-            @set-note-label-color="noteLabelColor = $event"
-            @set-measure-point-color="measurePointColor = $event"
-            @set-measure-line-color="measureLineColor = $event"
-            @set-measure-label-color="measureLabelColor = $event"
-            @set-center-visible="showCenterMarks = $event"
-            @set-center-color="centerColor = $event"
-            @set-center-axis-width="centerAxisWidth = $event"
-          />
-        </div>
-      </section>
-      -->
+        <Card
+          class="relative flex h-full flex-col overflow-hidden bg-slate-50/90 text-slate-900 shadow-[0_16px_32px_rgba(15,23,42,0.12)]"
+        >
+          <div
+            class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_35%_25%,rgba(56,189,248,0.14),transparent_55%),radial-gradient(circle_at_70%_80%,rgba(251,191,36,0.16),transparent_55%)]"
+          ></div>
 
-        <!-- 中间：模型 -->
-        <section class="center">
-          <el-button
-            class="fullscreen-btn"
-            :icon="isFullscreen ? Aim : FullScreen"
-            circle
-            @click="toggleFullscreen"
-            :title="isFullscreen ? '退出全屏' : '全屏'"
-          />
-          <div class="center__canvas">
+          <CardHeader class="relative z-10 flex-row items-center justify-between px-4 py-3 text-slate-900">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="rounded-full bg-slate-900/5 px-3 py-1 text-[11px] font-semibold text-slate-600">
+                分段 {{ selectedPart }}
+              </span>
+              <span class="rounded-full bg-slate-900/5 px-3 py-1 text-[11px] font-semibold text-slate-600">
+                流向 {{ selectedFlow || '全部' }}
+              </span>
+              <span class="rounded-full bg-slate-900/5 px-3 py-1 text-[11px] font-semibold text-slate-600">
+                模式 {{ modeLabel }}
+              </span>
+              <span class="rounded-full bg-slate-900/5 px-3 py-1 text-[11px] font-semibold text-slate-600">
+                工具 {{ toolModeLabel }}
+              </span>
+              <span
+                v-if="activeGroupFilter"
+                class="rounded-full bg-amber-200/40 px-3 py-1 text-[11px] font-semibold text-amber-900"
+              >
+                组立 {{ activeGroupFilter }}
+              </span>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="icon"
+                class="h-9 w-9 border-slate-300/80 bg-white/70 text-slate-700 hover:bg-white"
+                @click="toggleFullscreen"
+                :title="isFullscreen ? '退出全屏' : '全屏'"
+              >
+                <component :is="isFullscreen ? Minimize2 : Maximize2" class="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                class="h-9 w-9 border-slate-300/80 bg-white/70 text-slate-700 hover:bg-white"
+                @click="toggleRightCollapsed"
+                :title="rightCollapsed ? '展开右侧面板' : '收起右侧面板'"
+              >
+                <component :is="rightCollapsed ? ChevronLeft : ChevronRight" class="h-4 w-4" />
+              </Button>
+            </div>
+          </CardHeader>
+
+          <CardContent class="relative flex-1 min-h-0 p-0">
             <ThreeModelViewer
               ref="viewerRef"
+              class="h-full w-full"
               :modelUrl="modelUrl"
               :mode="mode"
               :explode="explodeOn"
@@ -146,18 +136,12 @@
               @measure-updated="onMeasureUpdated"
               @model-loaded="handleModelLoaded"
             />
-            <button class="center__right-toggle" type="button" @click="toggleRightCollapsed">
-              <span>{{ rightCollapsed ? '>>' : '<<' }}</span>
-            </button>
-            <!-- 左侧文件栏隐藏时，先不显示左侧折叠按钮 -->
-            <!--
-          <button class="center__left-toggle" type="button" @click="leftCollapsed = !leftCollapsed">
-            <span>{{ leftCollapsed ? '<<' : '>>' }}</span>
-          </button>
-          --></div>
-        </section>
+          </CardContent>
+        </Card>
 
         <RightPanelV2
+          class="h-full min-h-0 animate-[panelIn_0.6s_ease] [animation-delay:160ms]"
+          :class="rightCollapsed ? 'hidden' : ''"
           :right-collapsed="rightCollapsed"
           :right-tree-left="rightTreeLeft"
           :right-tree-right="rightTreeRight"
@@ -168,11 +152,11 @@
           :measure-list="measureList"
           :note-list="noteList"
           :fmt="fmt"
-          :fmt-text="fmtText"
           :get-measure-display-text="getMeasureDisplayText"
           :get-delta-val="getDeltaVal"
           :show-detail-panels="!isPartModel || !!activeGroupFilter"
-          :on-toggle-collapse="toggleRightCollapsed"
+          :can-save-marks="canSaveMarks"
+          :on-save="saveMarksToAssembly"
           :on-left-node-click="onLeftNodeClick"
           :on-right-node-click="onRightNodeClick"
           :on-hud-tab-change="setHudTab"
@@ -191,9 +175,10 @@
 </template>
 
 <script setup>
-import { Aim, FullScreen } from '@element-plus/icons-vue';
+import { ChevronLeft, ChevronRight, Maximize2, Minimize2 } from 'lucide-vue-next';
 import { showError, showSuccess } from '@/utils/utils';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { Button, Card, CardContent, CardHeader } from '@/components/ui';
 import LeftBarV2 from './components/LeftBarV2.vue';
 import { M101P } from './components/M101P.js';
 import { M102P } from './components/M102P.js';
@@ -203,21 +188,7 @@ import ThreeModelViewer from './components/ThreeModelViewer.vue';
 import TopBar from './components/TopBar.vue';
 import { fetchMaster3dByCode, updateMaster3dJson } from './services.js';
 
-const title = ref('三维作业指导书');
-const searchText = ref('');
-const leftTab = ref('PART');
-
-const DESIGN_WIDTH = 1920;
-const DESIGN_HEIGHT = 1080;
-const pageScale = ref(1);
 const stageRef = ref(null);
-const updatePageScale = () => {
-  const el = stageRef.value;
-  const w = el ? el.clientWidth : window.innerWidth || DESIGN_WIDTH;
-  const h = el ? el.clientHeight : window.innerHeight || DESIGN_HEIGHT;
-  const scale = Math.min(w / DESIGN_WIDTH, h / DESIGN_HEIGHT, 1);
-  pageScale.value = Number.isFinite(scale) ? scale : 1;
-};
 
 /** 当前分段 */
 const selectedPart = ref('M315P');
@@ -251,8 +222,6 @@ const partNameTree = computed(() => {
     children: Array.from(set).map((name) => ({ name, materials_code: name })),
   }));
 });
-
-function handleFlowQuery() {}
 
 function toggleFlow(flow) {
   selectedFlow.value = selectedFlow.value === flow ? '' : flow;
@@ -310,17 +279,24 @@ function onFullscreenChange() {
 }
 
 const rightCollapsed = ref(false);
-const leftCollapsed = ref(false);
+const scheduleViewerResize = () => {
+  nextTick(() => {
+    viewerRef.value?.resizeViewer?.();
+  });
+};
 
-watch([rightCollapsed, leftCollapsed], async () => {
-  await nextTick();
-  viewerRef.value?.resizeViewer?.();
-});
+watch(rightCollapsed, scheduleViewerResize);
 
 /** 左侧工具栏状态 */
 const mode = ref('normal'); // normal | wire
 const toolMode = ref('pick'); // pick | measure | note
 const colorIsolated = ref(true);
+const modeLabel = computed(() => (mode.value === 'wire' ? '透明框线' : '原始模型'));
+const toolModeLabel = computed(() => {
+  if (toolMode.value === 'measure') return '标距';
+  if (toolMode.value === 'note') return '标注';
+  return '选择';
+});
 // 颜色隔离模式下的面透明度（组立）
 const colorIsolatedOpacity = ref(1);
 // 颜色隔离模式下的面透明度（分段）
@@ -342,7 +318,6 @@ const canSaveMarks = computed(
 );
 
 const fmt = (v) => (typeof v === 'number' && !Number.isNaN(v) ? v.toFixed(2) : '-');
-const fmtText = (v) => (v == null || v === '' ? '-' : String(v));
 const normalizeDelta = (v) => {
   const arr = Array.isArray(v) ? v.slice(0, 3) : [];
   while (arr.length < 3) arr.push(0);
@@ -353,10 +328,6 @@ const getDeltaVal = (v, idx) => {
   return arr[idx] ?? 0;
 };
 const fmtNum = (v) => (typeof v === 'number' && !Number.isNaN(v) ? v.toFixed(2) : '-');
-const fmtVec3 = (v) => {
-  const [x, y, z] = normalizeDelta(v);
-  return `${x.toFixed(3)}, ${y.toFixed(3)}, ${z.toFixed(3)}`;
-};
 const getMeasureDisplayText = (m) => {
   const txt = String(m?.text ?? '').trim();
   if (txt) return txt;
@@ -468,9 +439,7 @@ function findNodeByCode(list, code) {
 }
 
 /** 找到分段根节点 */
-function getPartRoot() {
-  return findNodeByCode(bomList.value, selectedPart.value);
-}
+const partRoot = computed(() => findNodeByCode(bomList.value, selectedPart.value));
 
 /** 找某节点父节点 code */
 function findParentCode(root, targetCode) {
@@ -486,7 +455,7 @@ function findParentCode(root, targetCode) {
 
 /** 判断层级 */
 function getLevelUnderSelectedPart(code) {
-  const root = getPartRoot();
+  const root = partRoot.value;
   if (!root) return '分段';
   if (code === root.materials_code) return '分段';
   if ((root.children || []).some((c) => c.materials_code === code)) return '组立';
@@ -638,27 +607,22 @@ function handleSetTool(t) {
 function toggleExplode() {
   explodeOn.value = !explodeOn.value;
 }
-function toggleParam() {
-  console.log('toggle-param');
-}
 
 /** 清除（仍可通过左侧工具栏触发；右下不再放清除按钮） */
-function handleClearAllMarks() {
+function resetMarks() {
   viewerRef.value?.clearMarks?.();
   noteList.value = [];
   measureList.value = [];
 }
-
-/** 顶部搜索 */
-function doSearch() {
-  console.log('search:', searchText.value);
+function handleClearAllMarks() {
+  resetMarks();
 }
 
-function getSelectedAssemblyCode() {
+const selectedAssemblyCode = computed(() => {
   if (selectedLeftCode.value) return selectedLeftCode.value;
   if (getLevelUnderSelectedPart(selectedNodeCode.value) === '组立') return selectedNodeCode.value;
   return '';
-}
+});
 
 function getMaterialsCodeWithShip(code) {
   const ship = String(selectedShip.value || '').trim();
@@ -699,7 +663,7 @@ function buildMarksPayload() {
 
 let syncTimer = null;
 function scheduleMarksSync() {
-  const code = getSelectedAssemblyCode();
+  const code = selectedAssemblyCode.value;
   if (!code) return;
   const payload = buildMarksPayload();
   if (syncTimer) clearTimeout(syncTimer);
@@ -727,7 +691,7 @@ function extractPayloadFromResponse(res) {
 }
 
 async function saveMarksToAssembly() {
-  const code = getSelectedAssemblyCode();
+  const code = selectedAssemblyCode.value;
   if (!code) {
     console.warn('saveMarksToAssembly: no assembly selected');
     return;
@@ -751,9 +715,7 @@ async function saveMarksToAssembly() {
 }
 
 async function loadMarksForAssembly(code) {
-  viewerRef.value?.clearMarks?.();
-  noteList.value = [];
-  measureList.value = [];
+  resetMarks();
 
   let payload = null;
   try {
@@ -764,7 +726,6 @@ async function loadMarksForAssembly(code) {
     payload = null;
   }
 
-  if (!payload) return;
   if (!payload) return;
 
   const notes = Array.isArray(payload.notes) ? payload.notes : [];
@@ -807,28 +768,21 @@ async function loadMarksForAssembly(code) {
   measureList.value = loadedMeasures;
 }
 
-/** prev/next */
-function goPrevPart() {
-  const idx = bomList.value.findIndex((x) => x.materials_code === selectedPart.value);
-  const nextIdx = Math.max(0, idx - 1);
-  selectedPart.value = bomList.value[nextIdx]?.materials_code || selectedPart.value;
-}
-function goNextPart() {
-  const idx = bomList.value.findIndex((x) => x.materials_code === selectedPart.value);
-  const nextIdx = Math.min(bomList.value.length - 1, idx + 1);
-  selectedPart.value = bomList.value[nextIdx]?.materials_code || selectedPart.value;
-}
-
 /** 模型 URL */
 const modelUrl = ref('');
-const getPartModelUrl = () =>
-  selectedPart.value ? `/models/${selectedShip.value}/${selectedPart.value}.glb` : '';
-const normalizeChildModelUrl = (url) => {
-  if (!url) return '';
-  if (import.meta.env.DEV) return url;
-  if (url.startsWith('/cp/')) return url;
-  return url.startsWith('/') ? `/cp${url}` : `/cp/${url}`;
+const resolvePublicUrl = (path) => {
+  if (!path) return '';
+  if (/^https?:\/\//i.test(path)) return path;
+  const base = import.meta.env.BASE_URL || '/';
+  const basePrefix = base.endsWith('/') ? base.slice(0, -1) : base;
+  const normalized = path.startsWith('/') ? path : `/${path}`;
+  return `${basePrefix}${normalized}`;
 };
+const getPartModelUrl = () =>
+  selectedPart.value
+    ? resolvePublicUrl(`models/${selectedShip.value}/${selectedPart.value}.glb`)
+    : '';
+const normalizeChildModelUrl = (url) => resolvePublicUrl(url);
 const setModelUrlToPart = () => {
   modelUrl.value = getPartModelUrl();
 };
@@ -863,15 +817,6 @@ const activeColorIsolatedOpacity = computed(() =>
   isPartModel.value ? colorIsolatedPartOpacity.value : colorIsolatedOpacity.value,
 );
 
-const partPdfFiles = computed(() => {
-  const node = findNodeByCode(bomList.value, selectedPart.value);
-  return Array.isArray(node?.pdfUrl) ? node.pdfUrl : [];
-});
-const excelList = computed(() => {
-  const node = findNodeByCode(bomList.value, selectedPart.value);
-  return Array.isArray(node?.excelList) ? node.excelList : [];
-});
-
 /** 给 Three 用的 code 列表 */
 function collectCodes(root) {
   const res = [];
@@ -883,7 +828,7 @@ function collectCodes(root) {
   }
   return res;
 }
-const knownCodes = computed(() => collectCodes(getPartRoot()));
+const knownCodes = computed(() => collectCodes(partRoot.value));
 
 /** Three 拾取回传 -> 同步右侧树 */
 function handleModelPicked(payload) {
@@ -896,7 +841,7 @@ function handleModelPicked(payload) {
   selectedNodeCode.value = code;
   refreshSelectedInfo();
 
-  const root = getPartRoot();
+  const root = partRoot.value;
   const level = getLevelUnderSelectedPart(code);
 
   if (level === '分段') {
@@ -954,6 +899,7 @@ function updateMeasureField(id, patch) {
     seq: next.seq,
     text, // 空 => 自动距离
   });
+  scheduleMarksSync();
 }
 
 function updateNoteDeltaAxis(id, axisIdx, value) {
@@ -980,6 +926,7 @@ function updateMeasurePointDeltaAxis(id, pointKey, axisIdx, value) {
   else next.bDelta = nextDelta;
   measureList.value.splice(idx, 1, next);
   viewerRef.value?.updateMeasurePointByDelta?.(id, pointKey, nextDelta);
+  scheduleMarksSync();
 }
 
 /** ✅ 定位：要求放大（Three 内部做 fitBox） */
@@ -1053,6 +1000,7 @@ function onMeasure(e) {
   const idx = measureList.value.findIndex((x) => x.id === item.id);
   if (idx >= 0) measureList.value[idx] = { ...measureList.value[idx], ...item };
   else measureList.value.unshift(item);
+  scheduleMarksSync();
 }
 
 function onMeasureUpdated(e) {
@@ -1061,6 +1009,7 @@ function onMeasureUpdated(e) {
   if (idx < 0) return;
   const next = { ...measureList.value[idx], ...e };
   measureList.value.splice(idx, 1, next);
+  scheduleMarksSync();
 }
 
 /** OrientWidget -> 相机视角 */
@@ -1113,9 +1062,7 @@ watch(
     fitView();
 
     // 切分段：清空测量/标注列表（更符合分段隔离）
-    noteList.value = [];
-    measureList.value = [];
-    viewerRef.value?.clearMarks?.();
+    resetMarks();
     viewerRef.value?.showAllMeshes?.();
   },
   { immediate: true },
@@ -1127,11 +1074,9 @@ watch(
     if (!code) {
       selectedLeafCode.value = '';
       rightTreeRight.value = [];
-      viewerRef.value?.clearMarks?.();
       activeGroupFilter.value = '';
       viewerRef.value?.showAllMeshes?.();
-      noteList.value = [];
-      measureList.value = [];
+      resetMarks();
       return;
     }
     refreshRightTreeForLeft();
@@ -1139,283 +1084,35 @@ watch(
   },
 );
 
-/** 时间（保留） */
-const timeText = ref('11:12');
-let timer = null;
-const pad2 = (n) => String(n).padStart(2, '0');
-const tick = () => {
-  const d = new Date();
-  timeText.value = `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
-};
-onMounted(() => {
-  tick();
-  timer = window.setInterval(tick, 30_000);
-});
-onBeforeUnmount(() => {
-  if (timer) window.clearInterval(timer);
-});
-
 let _stageRo = null;
 onMounted(() => {
-  updatePageScale();
-  window.addEventListener('resize', updatePageScale);
+  window.addEventListener('resize', scheduleViewerResize);
   document.addEventListener('fullscreenchange', onFullscreenChange);
   if (stageRef.value) {
-    _stageRo = new ResizeObserver(updatePageScale);
+    _stageRo = new ResizeObserver(scheduleViewerResize);
     _stageRo.observe(stageRef.value);
   }
 });
 onBeforeUnmount(() => {
-  window.removeEventListener('resize', updatePageScale);
+  window.removeEventListener('resize', scheduleViewerResize);
   document.removeEventListener('fullscreenchange', onFullscreenChange);
   if (_stageRo) {
     _stageRo.disconnect();
     _stageRo = null;
   }
+  if (syncTimer) clearTimeout(syncTimer);
 });
 </script>
 
 <style scoped>
-.viewer-stage {
-  height: 100%;
-  width: 100%;
-  position: relative;
-  overflow: hidden;
-}
-
-.viewer-page {
-  height: 100%;
-  width: 100%;
-  display: grid;
-  grid-template-rows: auto 1fr;
-  overflow: hidden;
-  padding: 5px;
-}
-
-.icon-btn {
-  height: 28px;
-  min-width: 28px;
-  padding: 0 8px;
-  border: 1px solid #e5e7eb;
-  background: #fff;
-  border-radius: 6px;
-  cursor: pointer;
-}
-.icon-btn:active {
-  transform: translateY(1px);
-}
-
-/* 主体：4列 */
-.main {
-  position: relative;
-  display: grid;
-  grid-template-columns: 80px 1fr minmax(0, 340px);
-  gap: 5px;
-  padding: 10px;
-  overflow: hidden;
-  transition: grid-template-columns 0.28s ease;
-  --left-shell-bg:
-    linear-gradient(
-      160deg,
-      rgba(100, 116, 139, 0.12) 0%,
-      rgba(148, 163, 184, 0.1) 35%,
-      rgba(203, 213, 225, 0.1) 70%
-    ),
-    linear-gradient(180deg, #f6f2eb 0%, #eee7df 100%);
-  background: linear-gradient(180deg, #e6e7e5 0%, #dcddda 55%, #d1d2cf 100%);
-  border: 1px solid rgba(15, 23, 42, 0.18);
-  border-top: 0;
-  border-radius: 0 0 22px 22px;
-  box-shadow:
-    0 22px 60px rgba(6, 18, 38, 0.22),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8);
-}
-.main::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(1000px 360px at 18% 0%, rgba(14, 116, 144, 0.18), transparent 55%),
-    radial-gradient(900px 300px at 88% 5%, rgba(30, 64, 175, 0.16), transparent 60%);
-  opacity: 0.8;
-  pointer-events: none;
-  z-index: 0;
-}
-.main::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    repeating-linear-gradient(
-      90deg,
-      rgba(12, 24, 52, 0.04),
-      rgba(12, 24, 52, 0.04) 1px,
-      transparent 1px,
-      transparent 140px
-    ),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0));
-  opacity: 0.5;
-  pointer-events: none;
-  z-index: 0;
-}
-.main > * {
-  position: relative;
-  z-index: 1;
-}
-.main--right-collapsed {
-  grid-template-columns: 80px 1fr 0px;
-}
-
-@media (max-width: 1200px) {
-  .main {
-    grid-template-columns: 60px 1fr minmax(0, 280px);
-    padding: 5px;
-    gap: 3px;
+@keyframes panelIn {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
   }
-  .main--right-collapsed {
-    grid-template-columns: 60px 1fr 0px;
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
-}
-
-@media (max-width: 768px) {
-  .main {
-    grid-template-columns: 48px 1fr minmax(0, 220px);
-    padding: 3px;
-    gap: 2px;
-  }
-  .main--right-collapsed {
-    grid-template-columns: 48px 1fr 0px;
-  }
-}
-
-/* 全屏按钮 */
-.fullscreen-btn {
-  position: absolute !important;
-  top: 10px;
-  right: 10px;
-  z-index: 5;
-  box-shadow:
-    0 4px 12px rgba(15, 23, 42, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.7);
-}
-
-/* 中间 */
-.center {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  border-radius: 16px;
-  overflow: hidden;
-  background:
-    radial-gradient(120% 120% at 12% 8%, rgba(14, 116, 144, 0.22), transparent 42%),
-    radial-gradient(120% 120% at 88% 0%, rgba(30, 64, 175, 0.18), transparent 46%),
-    linear-gradient(180deg, rgba(24, 29, 36, 0.9), rgba(12, 16, 20, 0.95));
-  box-shadow:
-    0 16px 36px rgba(3, 7, 18, 0.35),
-    inset 0 0 46px rgba(15, 23, 42, 0.35);
-}
-.center__canvas {
-  flex: 1;
-  min-height: 0;
-  position: relative;
-  background:
-    radial-gradient(120% 120% at 18% 10%, rgba(14, 116, 144, 0.18), transparent 48%),
-    linear-gradient(180deg, rgba(22, 27, 34, 0.65), rgba(10, 13, 18, 0.75));
-  overflow: hidden;
-}
-.center__canvas::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(120deg, rgba(255, 255, 255, 0.08), transparent 35%),
-    repeating-linear-gradient(
-      0deg,
-      rgba(148, 163, 184, 0.08) 0,
-      rgba(148, 163, 184, 0.08) 1px,
-      transparent 1px,
-      transparent 120px
-    ),
-    repeating-linear-gradient(
-      90deg,
-      rgba(148, 163, 184, 0.06) 0,
-      rgba(148, 163, 184, 0.06) 1px,
-      transparent 1px,
-      transparent 120px
-    );
-  opacity: 0.35;
-  pointer-events: none;
-  z-index: 0;
-}
-.center__canvas::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(70% 70% at 50% 50%, transparent 0%, rgba(2, 6, 23, 0.6) 100%);
-  opacity: 0.4;
-  pointer-events: none;
-  z-index: 0;
-}
-.center__canvas > * {
-  position: relative;
-  z-index: 1;
-}
-.center__right-toggle {
-  position: absolute;
-  top: 50%;
-  right: 0;
-  transform: translateY(-50%);
-  height: 32px;
-  width: 32px;
-  border-radius: 8px 0 0 8px;
-  border: 1px solid rgba(148, 163, 184, 0.35);
-  background: linear-gradient(180deg, rgba(248, 250, 252, 0.95), rgba(226, 232, 240, 0.9));
-  color: #0f172a;
-  font-weight: 800;
-  cursor: pointer;
-  z-index: 3;
-  box-shadow:
-    0 6px 14px rgba(15, 23, 42, 0.25),
-    inset 0 1px 0 rgba(255, 255, 255, 0.7);
-}
-.center__right-toggle:active {
-  transform: translateY(calc(-50% + 1px));
-}
-.center__left-toggle {
-  position: absolute;
-  top: 50%;
-  left: 0;
-  transform: translateY(-50%);
-  height: 32px;
-  width: 32px;
-  border-radius: 0 8px 8px 0;
-  border: 1px solid rgba(148, 163, 184, 0.35);
-  background: linear-gradient(180deg, rgba(248, 250, 252, 0.95), rgba(226, 232, 240, 0.9));
-  color: #0f172a;
-  font-weight: 800;
-  cursor: pointer;
-  z-index: 3;
-  box-shadow:
-    0 6px 14px rgba(15, 23, 42, 0.25),
-    inset 0 1px 0 rgba(255, 255, 255, 0.7);
-}
-.center__left-toggle:active {
-  transform: translateY(calc(-50% + 1px));
-}
-
-/* 左侧面板 */
-.left-panel {
-  position: relative;
-  height: 100%;
-  min-height: 0;
-  margin-left: -5px; /* 贴近 LeftBarV2，消掉列间距 */
-  transition: all 0.28s ease;
-}
-.left-panel__body {
-  height: 100%;
-}
-.left-panel--collapsed .left-panel__body {
-  opacity: 0;
-  pointer-events: none;
 }
 </style>

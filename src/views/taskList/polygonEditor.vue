@@ -60,18 +60,18 @@
 
               <label class="fs12 mr10">
                 <div class="mr3 mb5">图形旋转</div>
-                <el-button :icon="RefreshRight" size="small" @click="applyRotate(10)">
+                <el-button size="small" @click="applyRotate(10)">
                   顺时针
                 </el-button>
-                <el-button :icon="RefreshLeft" size="small" @click="applyRotate(-10)">
+                <el-button size="small" @click="applyRotate(-10)">
                   逆时针
                 </el-button>
               </label>
 
               <label class="fs12">
                 <div class="mr3 mb5">图形缩放</div>
-                <el-button :icon="ZoomIn" size="small" @click="applyScale(1.1)">放大</el-button>
-                <el-button :icon="ZoomOut" size="small" @click="applyScale(1 / 1.1)">
+                <el-button size="small" @click="applyScale(1.1)">放大</el-button>
+                <el-button size="small" @click="applyScale(1 / 1.1)">
                   缩小
                 </el-button>
               </label>
@@ -160,12 +160,7 @@
                       />
                     </label>
                     <label>
-                      <el-button
-                        type="primary"
-                        :icon="Plus"
-                        @click="addPointAtEnd(newPoint.x, newPoint.y)"
-                        size="small"
-                      >
+                      <el-button type="primary" @click="addPointAtEnd(newPoint.x, newPoint.y)" size="small">
                         新增点
                       </el-button>
                     </label>
@@ -209,12 +204,7 @@
                         size="small"
                       />
                     </label>
-                    <el-button
-                      size="small"
-                      :icon="Delete"
-                      type="danger"
-                      @click="deletePoint(i)"
-                    ></el-button>
+                    <el-button size="small" type="danger" @click="deletePoint(i)"></el-button>
                   </div>
                 </div>
                 <div v-if="edgeLengths[i] !== undefined" class="pt-edge">
@@ -249,7 +239,6 @@
  * - 颜色集中到 reactive(colors)，draw 系列函数全部引用这些变量。
  * - 其它交互/量测逻辑保持不变。
  */
-import { Delete, Plus, RefreshLeft, RefreshRight, ZoomIn, ZoomOut } from '@element-plus/icons-vue';
 import {
   computed,
   defineEmits,

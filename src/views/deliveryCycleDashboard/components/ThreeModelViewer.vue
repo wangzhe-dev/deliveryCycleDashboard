@@ -1367,7 +1367,10 @@ async function loadModel(url) {
     } else {
       const loader = new GLTFLoader();
       const dracoLoader = new DRACOLoader();
-      dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.7/');
+      const base = import.meta.env.BASE_URL || '/';
+      const basePrefix = base.endsWith('/') ? base.slice(0, -1) : base;
+      dracoLoader.setDecoderPath(`${basePrefix}/draco/`);
+      dracoLoader.preload();
       loader.setDRACOLoader(dracoLoader);
       const gltf = await loader.loadAsync(url);
       rootGroup = gltf.scene || new THREE.Group();
