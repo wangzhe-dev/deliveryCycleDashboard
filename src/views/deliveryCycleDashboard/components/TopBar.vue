@@ -52,13 +52,6 @@
       <el-button type="primary" size="large" :disabled="!canSaveMarks" @click="emit('save')">
         保存组立标注信息
       </el-button>
-      <el-button
-        type="primary"
-        size="large"
-        @click="toggleFullscreen"
-      >
-        {{ isFullscreen ? '退出全屏' : '全屏' }}
-      </el-button>
     </div>
   </header>
 </template>
@@ -75,22 +68,7 @@ const props = defineProps({
   canSaveMarks: { type: Boolean, default: false },
 });
 
-import { ref } from 'vue';
-
 const emit = defineEmits(['update:selected-ship', 'update:selected-part', 'flow-toggle', 'save']);
-
-const isFullscreen = ref(false);
-const toggleFullscreen = () => {
-  const stage = document.querySelector('.viewer-stage');
-  if (!stage) return;
-  isFullscreen.value = !isFullscreen.value;
-  if (isFullscreen.value) {
-    stage.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;width:100%;height:100%;';
-  } else {
-    stage.style.cssText = '';
-  }
-  window.dispatchEvent(new Event('resize'));
-};
 </script>
 
 <style scoped>
@@ -100,7 +78,7 @@ const toggleFullscreen = () => {
 .topbar {
   position: relative;
   display: grid;
-  grid-template-columns: auto 1fr 370px;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 12px;
   padding: 10px 12px;
@@ -297,16 +275,34 @@ const toggleFullscreen = () => {
 @media (max-width: 1280px) {
   .topbar {
     grid-template-columns: 1fr;
-    gap: 10px;
+    gap: 8px;
+    padding: 8px 10px;
   }
   .topbar__right {
     justify-content: flex-start;
+    flex-wrap: wrap;
   }
   .topbar__center {
     flex-wrap: wrap;
   }
   .topbar__select {
-    min-width: 240px;
+    min-width: 140px;
+  }
+}
+
+@media (max-width: 768px) {
+  .topbar {
+    gap: 6px;
+    padding: 6px 8px;
+    border-radius: 12px 12px 0 0;
+  }
+  .topbar__select {
+    min-width: 110px;
+  }
+  .flow-tab {
+    height: 28px;
+    padding: 0 10px;
+    font-size: 12px;
   }
 }
 </style>

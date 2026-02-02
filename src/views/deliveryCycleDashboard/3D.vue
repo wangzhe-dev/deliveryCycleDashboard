@@ -2,11 +2,6 @@
   <div class="viewer-stage" ref="stageRef">
     <div
       class="viewer-page"
-      :style="{
-        '--page-width': `${DESIGN_WIDTH}px`,
-        '--page-height': `${DESIGN_HEIGHT}px`,
-        '--page-scale': pageScale,
-      }"
     >
       <!-- 顶部栏 -->
       <TopBar
@@ -102,6 +97,13 @@
 
         <!-- 中间：模型 -->
         <section class="center">
+          <el-button
+            class="fullscreen-btn"
+            :icon="isFullscreen ? Aim : FullScreen"
+            circle
+            @click="toggleFullscreen"
+            :title="isFullscreen ? '退出全屏' : '全屏'"
+          />
           <div class="center__canvas">
             <ThreeModelViewer
               ref="viewerRef"
@@ -189,6 +191,7 @@
 </template>
 
 <script setup>
+import { Aim, FullScreen } from '@element-plus/icons-vue';
 import { showError, showSuccess } from '@/utils/utils';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import LeftBarV2 from './components/LeftBarV2.vue';
@@ -288,6 +291,24 @@ const measureLabelColor = ref('#111111');
 const markFilter = ref('all'); // all | dim | note
 const meshLabelColor = ref('#111827');
 const meshLabelSize = ref(12);
+const isFullscreen = ref(false);
+function toggleFullscreen() {
+  const el = stageRef.value;
+  if (!el) return;
+  if (!document.fullscreenElement) {
+    el.requestFullscreen().then(() => {
+      isFullscreen.value = true;
+    });
+  } else {
+    document.exitFullscreen().then(() => {
+      isFullscreen.value = false;
+    });
+  }
+}
+function onFullscreenChange() {
+  isFullscreen.value = !!document.fullscreenElement;
+}
+
 const rightCollapsed = ref(false);
 const leftCollapsed = ref(false);
 
@@ -1138,6 +1159,7 @@ let _stageRo = null;
 onMounted(() => {
   updatePageScale();
   window.addEventListener('resize', updatePageScale);
+  document.addEventListener('fullscreenchange', onFullscreenChange);
   if (stageRef.value) {
     _stageRo = new ResizeObserver(updatePageScale);
     _stageRo.observe(stageRef.value);
@@ -1145,6 +1167,7 @@ onMounted(() => {
 });
 onBeforeUnmount(() => {
   window.removeEventListener('resize', updatePageScale);
+  document.removeEventListener('fullscreenchange', onFullscreenChange);
   if (_stageRo) {
     _stageRo.disconnect();
     _stageRo = null;
@@ -1161,17 +1184,12 @@ onBeforeUnmount(() => {
 }
 
 .viewer-page {
-  height: var(--page-height);
-  width: var(--page-width);
-  position: absolute;
-  top: 50%;
-  left: 50%;
+  height: 100%;
+  width: 100%;
   display: grid;
-  grid-template-rows: 70px 1fr;
+  grid-template-rows: auto 1fr;
   overflow: hidden;
   padding: 5px;
-  transform: translate(-50%, -50%) scale(var(--page-scale));
-  transform-origin: center;
 }
 
 .icon-btn {
@@ -1191,7 +1209,7 @@ onBeforeUnmount(() => {
 .main {
   position: relative;
   display: grid;
-  grid-template-columns: 100px 1fr 340px;
+  grid-template-columns: 80px 1fr minmax(0, 340px);
   gap: 5px;
   padding: 10px;
   overflow: hidden;
@@ -1245,7 +1263,40 @@ onBeforeUnmount(() => {
   z-index: 1;
 }
 .main--right-collapsed {
-  grid-template-columns: 100px 1fr 0px;
+  grid-template-columns: 80px 1fr 0px;
+}
+
+@media (max-width: 1200px) {
+  .main {
+    grid-template-columns: 60px 1fr minmax(0, 280px);
+    padding: 5px;
+    gap: 3px;
+  }
+  .main--right-collapsed {
+    grid-template-columns: 60px 1fr 0px;
+  }
+}
+
+@media (max-width: 768px) {
+  .main {
+    grid-template-columns: 48px 1fr minmax(0, 220px);
+    padding: 3px;
+    gap: 2px;
+  }
+  .main--right-collapsed {
+    grid-template-columns: 48px 1fr 0px;
+  }
+}
+
+/* 全屏按钮 */
+.fullscreen-btn {
+  position: absolute !important;
+  top: 10px;
+  right: 10px;
+  z-index: 5;
+  box-shadow:
+    0 4px 12px rgba(15, 23, 42, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
 }
 
 /* 中间 */
