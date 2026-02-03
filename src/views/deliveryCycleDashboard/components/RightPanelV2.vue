@@ -71,9 +71,9 @@
     <!-- 组立详情 -->
     <Card class="flex min-h-0 flex-col shadow-[0_16px_32px_rgba(15,23,42,0.12)]">
       <CardHeader class="flex flex-wrap items-center justify-between gap-2 px-4 py-3">
-        <div class="flex-1">
-          <CardTitle class="text-[15px]">组立详情</CardTitle>
-          <div class="text-[12px] text-muted-foreground">实时查看测量与工艺标注</div>
+        <div class="flex-1 text-center">
+          <CardTitle class="text-[15px] text-center">组立详情</CardTitle>
+          <div class="text-[12px] text-center text-muted-foreground">实时查看测量与工艺标注</div>
         </div>
         <div class="flex flex-wrap gap-2">
           <button
