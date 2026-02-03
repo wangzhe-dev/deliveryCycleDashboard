@@ -11,7 +11,7 @@ import ShipMilestonePanel from './ShipMilestonePanel.vue'
 const MANUFACTURING_ZONES: Record<string, { subZones: string[]; color?: number }> = {
   FORE: { subZones: ['FF1', 'FF2', 'FF3'] },
   FORE_MID: { subZones: ['FM1', 'FM2', 'FM3'] },
-  MID: { subZones: ['MD1', 'MD2', 'MD3', 'MD4'], color: 0x10b981 },
+  MID: { subZones: ['MD1', 'MD2', 'MD3', 'MD4'], color: 0xfbbf24 },
   ENGINE: { subZones: ['ER1', 'ER2', 'ER3'] },
   AFT: { subZones: ['AF1', 'AF2', 'AF3'] },
   SUPERSTRUCTURE: { subZones: ['SS1', 'SS2', 'SS3'] },
@@ -61,41 +61,42 @@ const milestones = reactive([
 ])
 
 // ===================== 颜色常量 =====================
+// 柔和工业色系 - 平衡的饱和度
 const COLORS = {
   ZONE: {
-    A: '#2a9d8f',
-    B: '#e9c46a',
-    E: '#f4a261',
-    F: '#e76f51',
-    S: '#264653',
-    FORE: '#2a9d8f',
-    FORE_MID: '#3bb7a5',
-    MID: '#e9c46a',
-    ENGINE: '#f4a261',
-    AFT: '#e76f51',
-    SUPERSTRUCTURE: '#264653',
-    DEFAULT: '#2a9d8f',
+    A: '#2dd4bf',          // 青绿
+    B: '#fbbf24',          // 琥珀
+    E: '#fb923c',          // 橙色
+    F: '#f87171',          // 珊瑚红
+    S: '#a78bfa',          // 薰衣草紫
+    FORE: '#2dd4bf',       // 青绿 - 船艏
+    FORE_MID: '#5eead4',   // 浅青 - 前舷
+    MID: '#fbbf24',        // 琥珀 - 中舷
+    ENGINE: '#fb923c',     // 橙色 - 机舱
+    AFT: '#f87171',        // 珊瑚红 - 船艉
+    SUPERSTRUCTURE: '#a78bfa', // 薰衣草紫 - 上建
+    DEFAULT: '#2dd4bf',
   } as Record<string, string>,
   STATUS: {
-    MISSING: '#e76f51',
-    IN_PROGRESS_LIGHT: '#e9c46a',
-    IN_PROGRESS_DEEP: '#f4a261',
-    DONE_GREEN: '#2a9d8f',
+    MISSING: '#f87171',
+    IN_PROGRESS_LIGHT: '#fde047',
+    IN_PROGRESS_DEEP: '#fb923c',
+    DONE_GREEN: '#2dd4bf',
   },
 }
 
 const ZONE_COLORS: Record<string, string> = {
-  fore: '#2a9d8f',
-  foreMid: '#3bb7a5',
-  mid: '#e9c46a',
-  engine: '#f4a261',
-  aft: '#e76f51',
-  super: '#264653',
+  fore: '#2dd4bf',
+  foreMid: '#5eead4',
+  mid: '#fbbf24',
+  engine: '#fb923c',
+  aft: '#f87171',
+  super: '#a78bfa',
 }
 
 // ===================== 阈值/发光 =====================
 const THRESHOLDS = { MISSING: 20, DONE: 80 }
-const EMISSIVE = { BASE: 0.35, HOVER_BOOST: 0.3, HOVER_MAX: 0.7 }
+const EMISSIVE = { BASE: 0.15, HOVER_BOOST: 0.15, HOVER_MAX: 0.35 }
 
 // ===================== 推演 =====================
 const SIM = { days: 90, msPerDay: 260 }
@@ -253,16 +254,16 @@ function initThree() {
   if (!canvas || !wrap) return
 
   scene = new THREE.Scene()
-  scene.background = new THREE.Color(0x18181b)
-  scene.fog = new THREE.Fog(0x18181b, 1, 2)
+  scene.background = new THREE.Color(0xe7e7e7)
+  // 关闭雾效，避免颜色被冲淡
+  scene.fog = null
 
   camera = new THREE.PerspectiveCamera(45, 1, 0.1, 3000)
 
   renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true })
   renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1))
   renderer.setClearAlpha(0)
-  renderer.toneMapping = THREE.ACESFilmicToneMapping
-  renderer.toneMappingExposure = 1.3
+  renderer.toneMapping = THREE.NoToneMapping  // 关闭色调映射，保持原色
   renderer.shadowMap.enabled = true
   renderer.shadowMap.type = THREE.PCFSoftShadowMap
   if ('outputColorSpace' in renderer) renderer.outputColorSpace = THREE.SRGBColorSpace
@@ -303,13 +304,20 @@ function createEnvironment() {
   const pmremGenerator = new THREE.PMREMGenerator(renderer)
   pmremGenerator.compileEquirectangularShader()
   const envScene = new THREE.Scene()
+
+  // 中性灰环境球 - 避免过亮
   const skyGeo = new THREE.SphereGeometry(100, 32, 16)
-  const skyMat = new THREE.MeshBasicMaterial({ color: 0x18181b, side: THREE.BackSide })
+  const skyMat = new THREE.MeshBasicMaterial({ color: 0xcccccc, side: THREE.BackSide })
   envScene.add(new THREE.Mesh(skyGeo, skyMat))
-  envScene.add(new THREE.AmbientLight(0xd4d4d8, 0.3))
-  const envLight = new THREE.DirectionalLight(0xfafafa, 0.55)
-  envLight.position.set(1, 0.9, 1)
+
+  // 柔和环境光
+  envScene.add(new THREE.AmbientLight(0xffffff, 0.3))
+
+  // 主光源
+  const envLight = new THREE.DirectionalLight(0xffffff, 0.5)
+  envLight.position.set(1, 1, 1)
   envScene.add(envLight)
+
   const envMap = pmremGenerator.fromScene(envScene, 0.04).texture
   scene.environment = envMap
   pmremGenerator.dispose()
@@ -320,29 +328,35 @@ function addLights() {
   scene.traverse((o) => { if ((o as any).isLight) toRemove.push(o) })
   toRemove.forEach((l) => scene.remove(l))
 
-  const key = new THREE.DirectionalLight(0xfafafa, 1.5)
+  // 主光源
+  const key = new THREE.DirectionalLight(0xffffff, 1.2)
   key.position.set(80, 160, 120)
   key.castShadow = true
-  key.shadow.mapSize.set(1024, 1024)
+  key.shadow.mapSize.set(2048, 2048)
   key.shadow.camera.near = 1
   key.shadow.camera.far = 800
   key.shadow.camera.left = -40
   key.shadow.camera.right = 40
   key.shadow.camera.top = 40
   key.shadow.camera.bottom = -40
-  key.shadow.bias = -0.001
+  key.shadow.bias = -0.0005
   scene.add(key)
 
-  const fill = new THREE.DirectionalLight(0xd4d4d8, 0.5)
+  // 补光
+  const fill = new THREE.DirectionalLight(0xffffff, 0.5)
   fill.position.set(-120, 90, -80)
   scene.add(fill)
 
-  const rim = new THREE.DirectionalLight(0xa1a1aa, 0.42)
+  // 轮廓光
+  const rim = new THREE.DirectionalLight(0xffffff, 0.4)
   rim.position.set(-60, 80, 160)
   scene.add(rim)
 
-  scene.add(new THREE.AmbientLight(0xa1a1aa, 0.45))
-  scene.add(new THREE.HemisphereLight(0x52525b, 0x18181b, 0.22))
+  // 环境光
+  scene.add(new THREE.AmbientLight(0xffffff, 0.6))
+
+  // 半球光
+  scene.add(new THREE.HemisphereLight(0xffffff, 0xe7e7e7, 0.4))
 }
 
 function createWaterPlane() {
@@ -352,14 +366,14 @@ function createWaterPlane() {
 
   const geometry = new THREE.PlaneGeometry(L * 2, B * 3)
   const material = new THREE.MeshStandardMaterial({
-    color: 0x27272a,
+    color: 0xd4d4d4,
     transparent: true,
-    opacity: 0.18,
+    opacity: 0.35,
     side: THREE.DoubleSide,
     depthWrite: false,
-    metalness: 0.25,
-    roughness: 0.7,
-    envMapIntensity: 0.22,
+    metalness: 0.1,
+    roughness: 0.8,
+    envMapIntensity: 0.3,
   })
   const water = new THREE.Mesh(geometry, material)
   water.rotation.x = -Math.PI / 2
@@ -369,9 +383,9 @@ function createWaterPlane() {
   scene.add(water)
 
   const gridSize = Math.max(L, B) * 2.5
-  const gridHelper = new THREE.GridHelper(gridSize, 40, 0x3f3f46, 0x27272a)
+  const gridHelper = new THREE.GridHelper(gridSize, 40, 0xc5c5c5, 0xd4d4d4)
   ;(gridHelper.material as THREE.Material).transparent = true
-  ;(gridHelper.material as THREE.Material).opacity = 0.4
+  ;(gridHelper.material as THREE.Material).opacity = 0.5
   scene.add(gridHelper)
 }
 
@@ -410,11 +424,12 @@ function createAllSegments() {
     const mZoneKey = getManufacturingZoneKey(cfg)
     const zoneColor = COLORS.ZONE[mZoneKey || ''] || COLORS.ZONE[cfg.zone] || COLORS.ZONE.DEFAULT
 
+    // 柔和质感材质 - 适度金属感和粗糙度
     const baseMat = new THREE.MeshStandardMaterial({
       color: zoneColor,
       emissive: zoneColor,
       emissiveIntensity: EMISSIVE.BASE,
-      metalness: 0.15,
+      metalness: 0.2,
       roughness: 0.5,
       envMapIntensity: 0.6,
     })
@@ -423,7 +438,7 @@ function createAllSegments() {
       color: COLORS.STATUS.IN_PROGRESS_DEEP,
       emissive: COLORS.STATUS.IN_PROGRESS_DEEP,
       emissiveIntensity: EMISSIVE.BASE,
-      metalness: 0.15,
+      metalness: 0.2,
       roughness: 0.45,
       polygonOffset: true,
       polygonOffsetFactor: -1,
@@ -444,8 +459,9 @@ function createAllSegments() {
     baseMesh.renderOrder = 1
     fillMesh.renderOrder = 2
 
+    // 更深的边缘线增加立体感
     const edgeGeo = new THREE.EdgesGeometry(baseGeo, 15)
-    const edgeMat = new THREE.LineBasicMaterial({ color: 0xa1a1aa, transparent: true, opacity: 0.18 })
+    const edgeMat = new THREE.LineBasicMaterial({ color: 0x555555, transparent: true, opacity: 0.35 })
     const edgeLine = new THREE.LineSegments(edgeGeo, edgeMat)
     edgeLine.renderOrder = 3
 
@@ -754,47 +770,46 @@ const progressRingDash = computed(() => {
           <canvas ref="canvasRef" class="w-full h-full block" />
 
           <!-- 顶部浮层工具栏 -->
-          <div class="absolute top-0 inset-x-0 p-3.5 flex items-start justify-between pointer-events-none">
+          <div class="absolute top-0 inset-x-0 p-4 flex items-start justify-between pointer-events-none">
             <!-- 左上：标题 -->
             <div class="pointer-events-auto">
-              <div class="bg-foreground/80 backdrop-blur-xl rounded-lg px-3.5 py-2 flex items-center gap-2.5 ring-1 ring-foreground/20 shadow-xl">
-                <div class="w-1.5 h-1.5 rounded-full bg-accent shadow-[0_0_6px_rgba(244,162,97,0.6)] animate-pulse" />
-                <h2 class="ui-title text-secondary tracking-tight">{{ shipTitle }}</h2>
-                <div class="h-3.5 w-px bg-secondary/40" />
-                <span class="ui-meta text-secondary/70 tabular-nums font-medium">{{ kpi.totalCount }} 分段</span>
+              <div class="clay-panel px-4 py-2.5 flex items-center gap-3">
+                <div class="w-2 h-2 rounded-full bg-[#e76f51] shadow-[0_0_8px_rgba(0,217,165,0.7)] animate-pulse" />
+                <h2 class="text-[15px] font-semibold text-[#555] tracking-tight">{{ shipTitle }}</h2>
+                <div class="h-4 w-px bg-[#c5c5c5]" />
+                <span class="text-[13px] text-[#777] tabular-nums font-medium">{{ kpi.totalCount }} 分段</span>
               </div>
             </div>
 
             <!-- 右上：视图切换 + 全屏 -->
-            <div class="pointer-events-auto flex items-center gap-1.5">
-              <div class="bg-foreground/80 backdrop-blur-xl rounded-lg p-0.5 flex items-center ring-1 ring-foreground/20 shadow-xl">
+            <div class="pointer-events-auto flex items-center gap-3">
+              <div class="clay-panel p-1.5 flex items-center gap-1">
                 <button
                   v-for="v in [
                     { key: 'complete' as const, label: '船体概览', icon: 'M2.25 12l8.954-8.955a1.126 1.126 0 0 1 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25' },
                     { key: 'progress' as const, label: '建造进度', icon: 'M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125z' },
                   ]"
                   :key="v.key"
-                  class="flex items-center gap-1.5 px-3 py-1.5 ui-meta font-medium rounded-md transition-all duration-200"
-                  :class="currentView === v.key
-                    ? 'bg-destructive/15 text-destructive ring-1 ring-destructive/40'
-                    : 'text-secondary/60 hover:text-destructive hover:bg-destructive/10'"
+                  class="clay-btn-tab flex items-center gap-2 px-3.5 py-2 text-[13px] font-medium transition-all duration-300"
+                  :class="currentView === v.key ? 'clay-btn-tab--active' : ''"
                   @click="setView(v.key)"
                 >
-                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                     <path stroke-linecap="round" stroke-linejoin="round" :d="v.icon" />
                   </svg>
                   {{ v.label }}
                 </button>
               </div>
               <button
-                class="bg-foreground/80 backdrop-blur-xl rounded-lg w-8 h-8 flex items-center justify-center text-secondary/60 hover:text-destructive hover:bg-foreground/70 transition-all ring-1 ring-foreground/20 shadow-xl"
+                class="clay-btn-icon w-10 h-10 flex items-center justify-center transition-all duration-300"
+                :class="isFullscreen ? 'clay-btn-icon--active' : ''"
                 :title="isFullscreen ? '退出全屏' : '全屏显示'"
                 @click="toggleFullscreen"
               >
-                <svg v-if="!isFullscreen" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <svg v-if="!isFullscreen" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
                 </svg>
-                <svg v-else class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <svg v-else class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M9 9V4.5M9 9H4.5M9 9 3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5 5.25 5.25" />
                 </svg>
               </button>
@@ -802,55 +817,53 @@ const progressRingDash = computed(() => {
           </div>
 
           <!-- 左下：操作提示 -->
-          <div class="absolute bottom-3.5 left-3.5 pointer-events-none">
-            <div class="flex items-center gap-1.5 select-none">
-              <div class="flex items-center gap-1 bg-foreground/70 backdrop-blur-lg rounded-md px-2 py-1 ring-1 ring-foreground/20">
-                <kbd class="ui-micro font-mono text-secondary/80 bg-foreground/60 rounded px-1 py-px ring-1 ring-foreground/20">LMB</kbd>
-                <span class="ui-micro text-secondary/70">旋转</span>
+          <div class="absolute bottom-4 left-4 pointer-events-none">
+            <div class="flex items-center gap-2 select-none">
+              <div class="clay-hint flex items-center gap-1.5 px-2.5 py-1.5">
+                <kbd class="clay-kbd">LMB</kbd>
+                <span class="text-[11px] text-[#777]">旋转</span>
               </div>
-              <div class="flex items-center gap-1 bg-foreground/70 backdrop-blur-lg rounded-md px-2 py-1 ring-1 ring-foreground/20">
-                <kbd class="ui-micro font-mono text-secondary/80 bg-foreground/60 rounded px-1 py-px ring-1 ring-foreground/20">RMB</kbd>
-                <span class="ui-micro text-secondary/70">平移</span>
+              <div class="clay-hint flex items-center gap-1.5 px-2.5 py-1.5">
+                <kbd class="clay-kbd">RMB</kbd>
+                <span class="text-[11px] text-[#777]">平移</span>
               </div>
-              <div class="flex items-center gap-1 bg-foreground/70 backdrop-blur-lg rounded-md px-2 py-1 ring-1 ring-foreground/20">
-                <kbd class="ui-micro font-mono text-secondary/80 bg-foreground/60 rounded px-1 py-px ring-1 ring-foreground/20">Scroll</kbd>
-                <span class="ui-micro text-secondary/70">缩放</span>
+              <div class="clay-hint flex items-center gap-1.5 px-2.5 py-1.5">
+                <kbd class="clay-kbd">Scroll</kbd>
+                <span class="text-[11px] text-[#777]">缩放</span>
               </div>
             </div>
           </div>
 
           <!-- 右下：推演控制浮层 -->
-          <div class="absolute bottom-3.5 right-3.5 pointer-events-auto">
-            <div class="bg-foreground/80 backdrop-blur-xl rounded-xl px-3.5 py-2.5 ring-1 ring-foreground/20 shadow-xl w-[320px]">
-              <div class="flex items-center gap-2.5">
+          <div class="absolute bottom-4 right-4 pointer-events-auto">
+            <div class="clay-panel px-4 py-3 w-[340px]">
+              <div class="flex items-center gap-3">
                 <button
-                  class="shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200"
-                  :class="simPlaying
-                    ? 'bg-destructive text-destructive-foreground shadow-lg shadow-destructive/25 ring-1 ring-destructive/40'
-                    : 'bg-foreground/60 text-secondary/60 hover:bg-foreground/70 hover:text-destructive ring-1 ring-foreground/20'"
+                  class="clay-btn-play shrink-0 w-11 h-11 rounded-full flex items-center justify-center transition-all duration-300"
+                  :class="simPlaying ? 'clay-btn-play--active' : ''"
                   :title="simPlaying ? '暂停推演' : '播放推演'"
                   @click="toggleSimPlay"
                 >
-                  <svg v-if="!simPlaying" class="w-3 h-3 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                  <svg v-if="!simPlaying" class="w-4 h-4 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M8 5v14l11-7z"/>
                   </svg>
-                  <svg v-else class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                  <svg v-else class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
                   </svg>
                 </button>
                 <div class="flex-1 min-w-0">
-                  <div class="flex items-baseline justify-between mb-1">
-                    <span class="ui-micro text-secondary/70 font-medium uppercase tracking-wider">推演进度</span>
-                    <div class="flex items-baseline gap-1">
-                      <span class="ui-meta font-semibold text-secondary tabular-nums font-mono">{{ simDateText }}</span>
-                      <span class="ui-micro text-secondary/50 tabular-nums font-mono">D{{ simIndex }}/{{ SIM.days }}</span>
+                  <div class="flex items-baseline justify-between mb-1.5">
+                    <span class="text-[11px] text-[#888] font-medium uppercase tracking-wider">推演进度</span>
+                    <div class="flex items-baseline gap-1.5">
+                      <span class="text-[13px] font-semibold text-[#444] tabular-nums font-mono">{{ simDateText }}</span>
+                      <span class="text-[11px] text-[#999] tabular-nums font-mono">D{{ simIndex }}/{{ SIM.days }}</span>
                     </div>
                   </div>
-                  <div class="relative h-4 flex items-center">
-                    <div class="w-full h-[3px] bg-foreground/60 rounded-full overflow-hidden">
+                  <div class="relative h-5 flex items-center">
+                    <div class="clay-progress-track w-full">
                       <div
-                        class="h-full rounded-full transition-all duration-200"
-                        :class="simPlaying ? 'bg-destructive' : 'bg-secondary/70'"
+                        class="clay-progress-fill transition-all duration-200"
+                        :class="simPlaying ? 'clay-progress-fill--active' : ''"
                         :style="{ width: (simIndex / SIM.days * 100) + '%' }"
                       />
                     </div>
@@ -866,23 +879,24 @@ const progressRingDash = computed(() => {
           </div>
 
           <!-- 全屏时叠加进度 -->
-          <div v-if="isFullscreen" class="absolute top-20 left-4 pointer-events-none">
-            <div class="bg-foreground/85 backdrop-blur-xl rounded-xl p-4 shadow-xl ring-1 ring-foreground/20">
-              <div class="flex items-center gap-3">
-                <div class="relative w-14 h-14 shrink-0">
+          <div v-if="isFullscreen" class="absolute top-24 left-4 pointer-events-none">
+            <div class="clay-panel p-4">
+              <div class="flex items-center gap-4">
+                <div class="clay-progress-ring relative w-16 h-16 shrink-0">
                   <svg viewBox="0 0 80 80" class="w-full h-full -rotate-90">
-                    <circle cx="40" cy="40" r="34" fill="none" stroke-width="6" class="stroke-secondary/20" />
+                    <circle cx="40" cy="40" r="34" fill="none" stroke-width="6" stroke="#d4d4d4" />
                     <circle cx="40" cy="40" r="34" fill="none" stroke-width="6" stroke-linecap="round"
-                      class="stroke-destructive transition-all duration-500"
+                      stroke="#e76f51"
+                      class="transition-all duration-500"
                       :stroke-dasharray="progressRingDash.array" :stroke-dashoffset="progressRingDash.offset" />
                   </svg>
-                  <span class="absolute inset-0 flex items-center justify-center ui-meta font-bold text-secondary">{{ kpi.overallProgress }}%</span>
+                  <span class="absolute inset-0 flex items-center justify-center text-[13px] font-bold text-[#444]">{{ kpi.overallProgress }}%</span>
                 </div>
-                <div class="text-xs space-y-1">
-                  <div class="ui-title text-secondary">整体装配</div>
-                  <div class="ui-meta flex gap-3 text-secondary/70">
-                    <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-primary" />{{ kpi.installedCount }} 已装</span>
-                    <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-secondary" />{{ kpi.remainingCount }} 剩余</span>
+                <div class="space-y-1.5">
+                  <div class="text-[14px] font-semibold text-[#444]">整体装配</div>
+                  <div class="text-[12px] flex gap-4 text-[#666]">
+                    <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-[#e76f51]" />{{ kpi.installedCount }} 已装</span>
+                    <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-[#ff3366]" />{{ kpi.remainingCount }} 剩余</span>
                   </div>
                 </div>
               </div>
@@ -1078,5 +1092,382 @@ const progressRingDash = computed(() => {
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
+}
+
+/* ===================== 液态玻璃样式 ===================== */
+
+/* 基础面板 - 毛玻璃容器 */
+.clay-panel {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.7) 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    rgba(255, 255, 255, 0.6) 100%
+  );
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.08),
+    0 2px 8px rgba(0, 0, 0, 0.04),
+    inset 0 1px 1px rgba(255, 255, 255, 0.9),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.05);
+}
+
+/* Tab 按钮 - 液态玻璃 */
+.clay-btn-tab {
+  position: relative;
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.8) 0%,
+    rgba(255, 255, 255, 0.5) 100%
+  );
+  backdrop-filter: blur(8px);
+  border-radius: 14px;
+  color: #666;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.08),
+    0 2px 4px rgba(0, 0, 0, 0.04),
+    inset 0 1px 1px rgba(255, 255, 255, 1),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.03);
+  cursor: pointer;
+  outline: none;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.clay-btn-tab::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent
+  );
+  transition: left 0.5s ease;
+}
+
+.clay-btn-tab:hover {
+  color: #444;
+  transform: translateY(-2px) scale(1.02);
+  border-color: rgba(255, 255, 255, 0.9);
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.12),
+    0 4px 8px rgba(0, 0, 0, 0.06),
+    inset 0 1px 2px rgba(255, 255, 255, 1),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.02);
+}
+
+.clay-btn-tab:hover::before {
+  left: 100%;
+}
+
+.clay-btn-tab:active {
+  transform: translateY(1px) scale(0.98);
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.08),
+    inset 0 2px 4px rgba(0, 0, 0, 0.06);
+}
+
+.clay-btn-tab--active {
+  background: linear-gradient(
+    145deg,
+    rgba(231, 111, 81, 0.2) 0%,
+    rgba(231, 111, 81, 0.1) 100%
+  );
+  color: #e76f51;
+  border-color: rgba(231, 111, 81, 0.4);
+  box-shadow:
+    0 4px 20px rgba(231, 111, 81, 0.2),
+    0 2px 8px rgba(231, 111, 81, 0.1),
+    inset 0 1px 1px rgba(255, 255, 255, 0.8),
+    inset 0 -1px 1px rgba(231, 111, 81, 0.1);
+}
+
+.clay-btn-tab--active:hover {
+  transform: none;
+  box-shadow:
+    0 4px 24px rgba(231, 111, 81, 0.25),
+    0 2px 8px rgba(231, 111, 81, 0.15),
+    inset 0 1px 1px rgba(255, 255, 255, 0.9);
+}
+
+/* 图标按钮 - 液态玻璃 */
+.clay-btn-icon {
+  position: relative;
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.85) 0%,
+    rgba(255, 255, 255, 0.5) 100%
+  );
+  backdrop-filter: blur(8px);
+  border-radius: 16px;
+  color: #666;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.08),
+    0 2px 4px rgba(0, 0, 0, 0.04),
+    inset 0 1px 1px rgba(255, 255, 255, 1);
+  cursor: pointer;
+  outline: none;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.clay-btn-icon:hover {
+  color: #444;
+  transform: translateY(-3px) scale(1.05);
+  box-shadow:
+    0 12px 32px rgba(0, 0, 0, 0.12),
+    0 4px 12px rgba(0, 0, 0, 0.08),
+    inset 0 1px 2px rgba(255, 255, 255, 1);
+}
+
+.clay-btn-icon:active {
+  transform: translateY(1px) scale(0.98);
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.08),
+    inset 0 2px 4px rgba(0, 0, 0, 0.06);
+}
+
+.clay-btn-icon--active {
+  background: linear-gradient(
+    145deg,
+    rgba(231, 111, 81, 0.25) 0%,
+    rgba(231, 111, 81, 0.1) 100%
+  );
+  color: #e76f51;
+  border-color: rgba(231, 111, 81, 0.4);
+  box-shadow:
+    0 4px 20px rgba(231, 111, 81, 0.25),
+    inset 0 1px 1px rgba(255, 255, 255, 0.8);
+}
+
+/* 播放/暂停按钮 - 液态水滴 */
+.clay-btn-play {
+  position: relative;
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(240, 240, 240, 0.7) 50%,
+    rgba(255, 255, 255, 0.8) 100%
+  );
+  backdrop-filter: blur(8px);
+  color: #666;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    0 4px 12px rgba(0, 0, 0, 0.06),
+    inset 0 2px 3px rgba(255, 255, 255, 1),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.04);
+  cursor: pointer;
+  outline: none;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  overflow: hidden;
+}
+
+.clay-btn-play::before {
+  content: '';
+  position: absolute;
+  top: 10%;
+  left: 15%;
+  width: 35%;
+  height: 25%;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.clay-btn-play:hover {
+  color: #e76f51;
+  transform: translateY(-4px) scale(1.08);
+  box-shadow:
+    0 16px 48px rgba(0, 0, 0, 0.15),
+    0 8px 24px rgba(0, 0, 0, 0.1),
+    0 0 0 4px rgba(231, 111, 81, 0.1),
+    inset 0 2px 4px rgba(255, 255, 255, 1);
+}
+
+.clay-btn-play:active {
+  transform: translateY(2px) scale(0.95);
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.1),
+    inset 0 4px 8px rgba(0, 0, 0, 0.08);
+}
+
+.clay-btn-play--active {
+  background: linear-gradient(
+    145deg,
+    #f4a261 0%,
+    #e76f51 50%,
+    #d45d42 100%
+  );
+  color: #fff;
+  border-color: rgba(231, 111, 81, 0.6);
+  box-shadow:
+    0 8px 32px rgba(231, 111, 81, 0.4),
+    0 4px 12px rgba(231, 111, 81, 0.3),
+    0 0 0 4px rgba(231, 111, 81, 0.15),
+    inset 0 2px 3px rgba(255, 255, 255, 0.4),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.1);
+  animation: liquid-pulse 2s ease-in-out infinite;
+}
+
+.clay-btn-play--active::before {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.5) 0%,
+    rgba(255, 255, 255, 0) 100%
+  );
+}
+
+.clay-btn-play--active:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow:
+    0 12px 40px rgba(231, 111, 81, 0.5),
+    0 6px 16px rgba(231, 111, 81, 0.35),
+    0 0 0 6px rgba(231, 111, 81, 0.2),
+    inset 0 2px 4px rgba(255, 255, 255, 0.5);
+}
+
+@keyframes liquid-pulse {
+  0%, 100% {
+    box-shadow:
+      0 8px 32px rgba(231, 111, 81, 0.4),
+      0 4px 12px rgba(231, 111, 81, 0.3),
+      0 0 0 4px rgba(231, 111, 81, 0.15),
+      inset 0 2px 3px rgba(255, 255, 255, 0.4),
+      inset 0 -2px 3px rgba(0, 0, 0, 0.1);
+  }
+  50% {
+    box-shadow:
+      0 8px 40px rgba(231, 111, 81, 0.55),
+      0 4px 16px rgba(231, 111, 81, 0.4),
+      0 0 0 8px rgba(231, 111, 81, 0.1),
+      inset 0 2px 3px rgba(255, 255, 255, 0.5),
+      inset 0 -2px 3px rgba(0, 0, 0, 0.08);
+  }
+}
+
+/* 进度条轨道 - 玻璃凹槽 */
+.clay-progress-track {
+  height: 8px;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.06) 0%,
+    rgba(255, 255, 255, 0.4) 100%
+  );
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.08),
+    0 1px 1px rgba(255, 255, 255, 0.8);
+  overflow: hidden;
+}
+
+/* 进度条填充 - 液态流动 */
+.clay-progress-fill {
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    #a1a1aa 0%,
+    #71717a 50%,
+    #a1a1aa 100%
+  );
+  background-size: 200% 100%;
+  border-radius: 8px;
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.4),
+    0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.clay-progress-fill--active {
+  background: linear-gradient(
+    90deg,
+    #f4a261 0%,
+    #e76f51 25%,
+    #d45d42 50%,
+    #e76f51 75%,
+    #f4a261 100%
+  );
+  background-size: 200% 100%;
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.5),
+    0 0 12px rgba(231, 111, 81, 0.4),
+    0 2px 4px rgba(231, 111, 81, 0.2);
+  animation: flow 2s linear infinite;
+}
+
+@keyframes flow {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+/* 提示框 - 微型玻璃 */
+.clay-hint {
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.75) 0%,
+    rgba(255, 255, 255, 0.5) 100%
+  );
+  backdrop-filter: blur(8px);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.06),
+    inset 0 1px 1px rgba(255, 255, 255, 0.9);
+}
+
+/* 键盘按键 - 玻璃按键 */
+.clay-kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  padding: 3px 8px;
+  font-size: 10px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-weight: 600;
+  color: #555;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(245, 245, 245, 0.7) 100%
+  );
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.06),
+    inset 0 1px 1px rgba(255, 255, 255, 1),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.03);
+}
+
+/* 进度环容器 - 玻璃圆环 */
+.clay-progress-ring {
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.6) 0%,
+    rgba(255, 255, 255, 0.3) 100%
+  );
+  backdrop-filter: blur(8px);
+  border-radius: 50%;
+  padding: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.08),
+    inset 0 2px 4px rgba(0, 0, 0, 0.04),
+    inset 0 -1px 1px rgba(255, 255, 255, 0.8);
 }
 </style>
