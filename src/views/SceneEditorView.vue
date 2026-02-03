@@ -1,88 +1,161 @@
 <template>
   <div ref="pageRef" class="scene-editor-theme h-full w-full overflow-auto bg-background text-foreground">
-    <div
-      ref="editorCardRef"
-      tabindex="0"
-      class="flex h-full flex-col gap-3 p-4 outline-none focus-visible:outline-none"
-      @keydown.capture="onKeyDown"
-      @keyup.capture="onKeyUp"
-    >
+    <div ref="editorCardRef" tabindex="0" class="flex h-full flex-col gap-3 p-4 outline-none focus-visible:outline-none"
+      @keydown.capture="onKeyDown" @keyup.capture="onKeyUp">
       <!-- Settings Strip -->
       <Card class="editor-toolbar flex flex-wrap items-center gap-3 px-4 py-2.5">
         <!-- Grid settings group -->
         <div class="flex h-8 items-center rounded-lg border border-border bg-muted/70 px-2">
-          <svg viewBox="0 0 24 24" class="mr-2 h-3.5 w-3.5 text-muted-foreground" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18" /><path d="M8 17V9" /><path d="M13 17V5" /><path d="M18 17v-3" /></svg>
+          <svg viewBox="0 0 24 24" class="mr-2 h-3.5 w-3.5 text-muted-foreground" fill="none" stroke="currentColor"
+            stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 3v18h18" />
+            <path d="M8 17V9" />
+            <path d="M13 17V5" />
+            <path d="M18 17v-3" />
+          </svg>
           <label class="flex items-center gap-1.5">
             <span class="text-[13px] text-muted-foreground">栅格</span>
-            <input type="number" min="0.01" step="0.01" v-model.number="gridUnitM" class="h-5 w-12 rounded border-0 bg-card px-1.5 text-center text-[13px] font-medium text-foreground shadow-sm ring-1 ring-border focus:outline-none focus:ring-2 focus:ring-primary/40" />
+            <input type="number" min="0.01" step="0.01" v-model.number="gridUnitM"
+              class="h-5 w-12 rounded border-0 bg-card px-1.5 text-center text-[13px] font-medium text-foreground shadow-sm ring-1 ring-border focus:outline-none focus:ring-2 focus:ring-primary/40" />
           </label>
           <span class="mx-2 h-3.5 w-px bg-border"></span>
           <label class="flex items-center gap-1.5">
             <span class="text-[13px] text-muted-foreground">缩放</span>
-            <input type="number" min="10" step="10" v-model.number="pxPerM" @change="redraw" class="h-5 w-12 rounded border-0 bg-card px-1.5 text-center text-[13px] font-medium text-foreground shadow-sm ring-1 ring-border focus:outline-none focus:ring-2 focus:ring-primary/40" />
+            <input type="number" min="10" step="10" v-model.number="pxPerM" @change="redraw"
+              class="h-5 w-12 rounded border-0 bg-card px-1.5 text-center text-[13px] font-medium text-foreground shadow-sm ring-1 ring-border focus:outline-none focus:ring-2 focus:ring-primary/40" />
           </label>
           <span class="mx-2 h-3.5 w-px bg-border"></span>
           <label class="flex items-center gap-1.5">
             <span class="text-[13px] text-muted-foreground">吸附</span>
-            <input type="number" min="0" step="0.01" v-model.number="snapM" @change="redraw" class="h-5 w-12 rounded border-0 bg-card px-1.5 text-center text-[13px] font-medium text-foreground shadow-sm ring-1 ring-border focus:outline-none focus:ring-2 focus:ring-primary/40" />
+            <input type="number" min="0" step="0.01" v-model.number="snapM" @change="redraw"
+              class="h-5 w-12 rounded border-0 bg-card px-1.5 text-center text-[13px] font-medium text-foreground shadow-sm ring-1 ring-border focus:outline-none focus:ring-2 focus:ring-primary/40" />
           </label>
         </div>
 
         <!-- Transform group -->
         <div class="flex h-8 items-center rounded-lg border border-border bg-muted/70 px-1">
-          <button class="inline-flex h-6 items-center gap-1 rounded px-1.5 text-[13px] font-medium text-muted-foreground transition hover:bg-card hover:text-foreground hover:shadow-sm active:scale-95" @click="applyRotate(-10)">
-            <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-8-8" /><path d="M12 4v4H8" /></svg>
+          <button
+            class="inline-flex h-6 items-center gap-1 rounded px-1.5 text-[13px] font-medium text-muted-foreground transition hover:bg-card hover:text-foreground hover:shadow-sm active:scale-95"
+            @click="applyRotate(-10)">
+            <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.6"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 12a8 8 0 1 1-8-8" />
+              <path d="M12 4v4H8" />
+            </svg>
             -10°
           </button>
-          <button class="inline-flex h-6 items-center gap-1 rounded px-1.5 text-[13px] font-medium text-muted-foreground transition hover:bg-card hover:text-foreground hover:shadow-sm active:scale-95" @click="applyRotate(10)">
-            <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 8-8" /><path d="M12 4v4h4" /></svg>
+          <button
+            class="inline-flex h-6 items-center gap-1 rounded px-1.5 text-[13px] font-medium text-muted-foreground transition hover:bg-card hover:text-foreground hover:shadow-sm active:scale-95"
+            @click="applyRotate(10)">
+            <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.6"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 12a8 8 0 1 0 8-8" />
+              <path d="M12 4v4h4" />
+            </svg>
             +10°
           </button>
           <span class="mx-0.5 h-4 w-px bg-border"></span>
-          <button class="inline-flex h-6 w-6 items-center justify-center rounded text-muted-foreground transition hover:bg-card hover:text-foreground hover:shadow-sm active:scale-95" @click="applyScale(1 / 1.1)">
-            <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14" /><circle cx="12" cy="12" r="9" /></svg>
+          <button
+            class="inline-flex h-6 w-6 items-center justify-center rounded text-muted-foreground transition hover:bg-card hover:text-foreground hover:shadow-sm active:scale-95"
+            @click="applyScale(1 / 1.1)">
+            <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.6"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12h14" />
+              <circle cx="12" cy="12" r="9" />
+            </svg>
           </button>
-          <button class="inline-flex h-6 w-6 items-center justify-center rounded text-muted-foreground transition hover:bg-card hover:text-foreground hover:shadow-sm active:scale-95" @click="applyScale(1.1)">
-            <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14" /><path d="M5 12h14" /><circle cx="12" cy="12" r="9" /></svg>
+          <button
+            class="inline-flex h-6 w-6 items-center justify-center rounded text-muted-foreground transition hover:bg-card hover:text-foreground hover:shadow-sm active:scale-95"
+            @click="applyScale(1.1)">
+            <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.6"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 5v14" />
+              <path d="M5 12h14" />
+              <circle cx="12" cy="12" r="9" />
+            </svg>
           </button>
         </div>
 
         <!-- Add point group -->
         <div class="flex h-8 items-center gap-1.5 rounded-lg border border-border bg-muted/70 px-2">
-          <svg viewBox="0 0 24 24" class="h-3.5 w-3.5 text-muted-foreground" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3" /><path d="M12 5v2" /><path d="M12 17v2" /><path d="M5 12h2" /><path d="M17 12h2" /></svg>
+          <svg viewBox="0 0 24 24" class="h-3.5 w-3.5 text-muted-foreground" fill="none" stroke="currentColor"
+            stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3" />
+            <path d="M12 5v2" />
+            <path d="M12 17v2" />
+            <path d="M5 12h2" />
+            <path d="M17 12h2" />
+          </svg>
           <div class="relative">
-            <span class="absolute left-1.5 top-1/2 -translate-y-1/2 text-[13px] font-medium text-muted-foreground">X</span>
-            <input type="number" step="0.01" v-model.number="newPoint.x" @keydown.stop :min="0" class="h-5 w-14 rounded border-0 bg-card pl-4 pr-1 text-right text-[13px] font-medium text-foreground shadow-sm ring-1 ring-border focus:outline-none focus:ring-2 focus:ring-primary/40" />
+            <span
+              class="absolute left-1.5 top-1/2 -translate-y-1/2 text-[13px] font-medium text-muted-foreground">X</span>
+            <input type="number" step="0.01" v-model.number="newPoint.x" @keydown.stop :min="0"
+              class="h-5 w-14 rounded border-0 bg-card pl-4 pr-1 text-right text-[13px] font-medium text-foreground shadow-sm ring-1 ring-border focus:outline-none focus:ring-2 focus:ring-primary/40" />
           </div>
           <div class="relative">
-            <span class="absolute left-1.5 top-1/2 -translate-y-1/2 text-[13px] font-medium text-muted-foreground">Y</span>
-            <input type="number" step="0.01" v-model.number="newPoint.y" @keydown.stop :min="0" class="h-5 w-14 rounded border-0 bg-card pl-4 pr-1 text-right text-[13px] font-medium text-foreground shadow-sm ring-1 ring-border focus:outline-none focus:ring-2 focus:ring-primary/40" />
+            <span
+              class="absolute left-1.5 top-1/2 -translate-y-1/2 text-[13px] font-medium text-muted-foreground">Y</span>
+            <input type="number" step="0.01" v-model.number="newPoint.y" @keydown.stop :min="0"
+              class="h-5 w-14 rounded border-0 bg-card pl-4 pr-1 text-right text-[13px] font-medium text-foreground shadow-sm ring-1 ring-border focus:outline-none focus:ring-2 focus:ring-primary/40" />
           </div>
-          <button class="inline-flex h-5 items-center gap-1 rounded bg-destructive px-2 text-[13px] font-medium text-destructive-foreground shadow-sm transition hover:bg-destructive/90 active:scale-95" @click="addPointAtEnd(newPoint.x, newPoint.y)">
-            <svg viewBox="0 0 24 24" class="h-2.5 w-2.5" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14" /><path d="M5 12h14" /></svg>
+          <button
+            class="inline-flex h-5 items-center gap-1 rounded bg-destructive px-2 text-[13px] font-medium text-destructive-foreground shadow-sm transition hover:bg-destructive/90 active:scale-95"
+            @click="addPointAtEnd(newPoint.x, newPoint.y)">
+            <svg viewBox="0 0 24 24" class="h-2.5 w-2.5" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 5v14" />
+              <path d="M5 12h14" />
+            </svg>
             新增
           </button>
         </div>
 
         <div class="ml-auto flex items-center gap-1.5">
           <div class="flex h-8 items-center rounded-lg border border-border bg-muted px-1">
-            <button class="inline-flex h-6 items-center gap-1 rounded px-2 text-[13px] font-medium text-muted-foreground transition hover:bg-card hover:text-foreground hover:shadow-sm" @click="toggleFullscreen">
-              <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V5h4M20 9V5h-4M4 15v4h4M20 15v4h-4" /></svg>
+            <button
+              class="inline-flex h-6 items-center gap-1 rounded px-2 text-[13px] font-medium text-muted-foreground transition hover:bg-card hover:text-foreground hover:shadow-sm"
+              @click="toggleFullscreen">
+              <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.6"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 9V5h4M20 9V5h-4M4 15v4h4M20 15v4h-4" />
+              </svg>
               {{ isFullscreen ? '退出专注' : '专注视图' }}
             </button>
             <span class="mx-0.5 h-4 w-px bg-border"></span>
-            <button class="inline-flex h-6 items-center gap-1 rounded px-2 text-[13px] font-medium text-muted-foreground transition hover:bg-card hover:text-foreground hover:shadow-sm" :class="{ 'opacity-40 pointer-events-none': points.length < 3 || isClosed }" :disabled="points.length < 3 || isClosed" @click="closePolygon">
-              <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polygon points="5,3 19,3 19,21 5,21" /><polygon points="8,7 16,7 16,17 8,17" /></svg>
+            <button
+              class="inline-flex h-6 items-center gap-1 rounded px-2 text-[13px] font-medium text-muted-foreground transition hover:bg-card hover:text-foreground hover:shadow-sm"
+              :class="{ 'opacity-40 pointer-events-none': points.length < 3 || isClosed }"
+              :disabled="points.length < 3 || isClosed" @click="closePolygon">
+              <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.6"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="5,3 19,3 19,21 5,21" />
+                <polygon points="8,7 16,7 16,17 8,17" />
+              </svg>
               闭合
             </button>
             <span class="mx-0.5 h-4 w-px bg-border"></span>
-            <button class="inline-flex h-6 items-center gap-1 rounded px-2 text-[13px] font-medium text-destructive transition hover:bg-destructive/10 hover:text-destructive" @click="reset">
-              <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16" /><path d="M10 11v6M14 11v6" /><path d="M9 7l1-2h4l1 2" /><rect x="6" y="7" width="12" height="13" rx="2" /></svg>
+            <button
+              class="inline-flex h-6 items-center gap-1 rounded px-2 text-[13px] font-medium text-destructive transition hover:bg-destructive/10 hover:text-destructive"
+              @click="reset">
+              <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.6"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 7h16" />
+                <path d="M10 11v6M14 11v6" />
+                <path d="M9 7l1-2h4l1 2" />
+                <rect x="6" y="7" width="12" height="13" rx="2" />
+              </svg>
               清空
             </button>
           </div>
-          <button class="inline-flex h-8 items-center gap-1.5 rounded-lg bg-destructive px-4 text-[13px] font-medium text-destructive-foreground shadow-sm transition hover:bg-destructive/90 active:scale-95" @click="handleSave">
-            <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5h11l3 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z" /><path d="M7 5v6h8" /><path d="M7 19v-6h10v6" /></svg>
+          <button
+            class="inline-flex h-8 items-center gap-1.5 rounded-lg bg-destructive px-4 text-[13px] font-medium text-destructive-foreground shadow-sm transition hover:bg-destructive/90 active:scale-95"
+            @click="handleSave">
+            <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.8"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 5h11l3 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z" />
+              <path d="M7 5v6h8" />
+              <path d="M7 19v-6h10v6" />
+            </svg>
             保存
           </button>
         </div>
@@ -93,20 +166,11 @@
         <div class="relative flex min-h-0 flex-1 flex-col">
           <div class="relative flex-1 overflow-hidden rounded-xl border border-border shadow-sm">
             <div ref="wrapRef" class="scene-stage relative h-full w-full" @contextmenu.prevent>
-              <canvas
-                ref="canvasRef"
-                class="block h-full w-full"
-                @mousedown="onMouseDown"
-                @click="onClick"
-                @dblclick="closePolygon"
-                @mousemove="onMove"
-                @mouseleave="onMouseLeave"
-              ></canvas>
+              <canvas ref="canvasRef" class="block h-full w-full" @mousedown="onMouseDown" @click="onClick"
+                @dblclick="closePolygon" @mousemove="onMove" @mouseleave="onMouseLeave"></canvas>
 
-              <div
-                v-if="overlayHint"
-                class="overlay-hint glass-panel glass-panel--pill pointer-events-none absolute left-4 top-4 px-3 py-1 text-xs"
-              >
+              <div v-if="overlayHint"
+                class="overlay-hint glass-panel glass-panel--pill pointer-events-none absolute left-4 top-4 px-3 py-1 text-xs">
                 {{ overlayHint }}
               </div>
 
@@ -115,7 +179,11 @@
                 <div class="glass-hints pointer-events-none flex flex-wrap gap-1.5 text-[11px]">
                   <div class="glass-pill inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5">
                     <span class="glass-icon flex h-5 w-5 items-center justify-center rounded">
-                      <svg viewBox="0 0 24 24" class="h-3 w-3 text-secondary" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="3" width="10" height="18" rx="5" /><path d="M12 7v4" /></svg>
+                      <svg viewBox="0 0 24 24" class="h-3 w-3 text-secondary" fill="none" stroke="currentColor"
+                        stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="7" y="3" width="10" height="18" rx="5" />
+                        <path d="M12 7v4" />
+                      </svg>
                     </span>
                     单击加点
                   </div>
@@ -147,14 +215,13 @@
                     删除
                   </div>
                 </div>
-
-                <!-- Status & toggle overlay -->
-                <div class="status-overlay glass-panel glass-panel--pill glass-sheen flex items-center gap-2 px-3 py-1.5 text-[11px]">
+              </div>
+              <div class="absolute right-2 top-7 z-50">
+                <div
+                  class="status-overlay status-overlay--top glass-panel glass-panel--pill glass-sheen  flex flex-wrap items-center gap-2 px-3 py-1.5 text-[11px]">
                   <span class="font-medium text-secondary">{{ points.length }}</span> 点
-                  <span
-                    class="inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-medium"
-                    :class="isClosed ? 'bg-primary/20 text-primary' : 'bg-foreground/40 text-secondary/70'"
-                  >
+                  <span class="inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-medium"
+                    :class="isClosed ? 'bg-primary/20 text-primary' : 'bg-foreground/40 text-secondary/70'">
                     <span class="h-1.5 w-1.5 rounded-full" :class="isClosed ? 'bg-primary' : 'bg-secondary/70'"></span>
                     {{ isClosed ? '已闭合' : '未闭合' }}
                   </span>
@@ -177,51 +244,59 @@
                   </label>
                 </div>
               </div>
+
             </div>
+
+
           </div>
         </div>
 
         <!-- Point List -->
         <Card class="flex min-h-0 flex-col lg:overflow-hidden">
           <CardHeader class="relative z-10 flex-row items-center gap-2 space-y-0 px-4 py-3 text-foreground">
-            <svg viewBox="0 0 24 24" class="h-6 w-6 text-primary" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="16" rx="2" /><path d="M9 8h6" /><path d="M9 12h6" /><path d="M9 16h6" /></svg>
+            <svg viewBox="0 0 24 24" class="h-6 w-6 text-primary" fill="none" stroke="currentColor" stroke-width="1.6"
+              stroke-linecap="round" stroke-linejoin="round">
+              <rect x="5" y="4" width="14" height="16" rx="2" />
+              <path d="M9 8h6" />
+              <path d="M9 12h6" />
+              <path d="M9 16h6" />
+            </svg>
             <span class="text-sm font-medium text-foreground">点列表</span>
           </CardHeader>
           <CardContent class="flex-1 overflow-y-auto p-3">
             <div v-if="!points.length" class="py-8 text-center text-sm text-muted-foreground">暂无点位</div>
             <div class="flex flex-col gap-2">
-              <div
-                v-for="(p, i) in points"
-                :key="i"
-                class="rounded-lg border px-3 py-2.5 transition"
-                :class="
-                  i === selectedIndex
-                    ? 'border-primary/50 bg-primary/10'
-                    : 'border-border bg-card hover:border-primary/30'
-                "
-              >
+              <div v-for="(p, i) in points" :key="i" class="rounded-lg border px-3 py-2.5 transition" :class="i === selectedIndex
+                ? 'border-primary/50 bg-primary/10'
+                : 'border-border bg-card hover:border-primary/30'
+                ">
                 <div class="flex items-center justify-between">
                   <button type="button" class="text-sm font-semibold text-foreground" @click="selectedIndex = i">
                     #{{ i + 1 }}
                   </button>
-                  <Button
-                    variant="outline"
-                    size="icon"
+                  <Button variant="outline" size="icon"
                     class="h-7 w-7 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                    @click="deletePoint(i)"
-                  >
-                    <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16" /><path d="M10 11v6M14 11v6" /><path d="M9 7l1-2h4l1 2" /><rect x="6" y="7" width="12" height="13" rx="2" /></svg>
+                    @click="deletePoint(i)">
+                    <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.6"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M4 7h16" />
+                      <path d="M10 11v6M14 11v6" />
+                      <path d="M9 7l1-2h4l1 2" />
+                      <rect x="6" y="7" width="12" height="13" rx="2" />
+                    </svg>
                   </Button>
                 </div>
 
                 <div class="mt-2 grid grid-cols-2 gap-2" @click="selectedIndex = i">
                   <label class="flex flex-col gap-1 text-[11px] text-muted-foreground">
                     <span>X</span>
-                    <input type="number" step="0.01" v-model.number="points[i].x" @input="onPointInput(i)" @keydown.stop class="h-7 rounded-md border border-border bg-muted px-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/35" />
+                    <input type="number" step="0.01" v-model.number="points[i].x" @input="onPointInput(i)" @keydown.stop
+                      class="h-7 rounded-md border border-border bg-muted px-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/35" />
                   </label>
                   <label class="flex flex-col gap-1 text-[11px] text-muted-foreground">
                     <span>Y</span>
-                    <input type="number" step="0.01" v-model.number="points[i].y" @input="onPointInput(i)" @keydown.stop class="h-7 rounded-md border border-border bg-muted px-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/35" />
+                    <input type="number" step="0.01" v-model.number="points[i].y" @input="onPointInput(i)" @keydown.stop
+                      class="h-7 rounded-md border border-border bg-muted px-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/35" />
                   </label>
                 </div>
 
@@ -230,7 +305,8 @@
                     <span>长度</span>
                     <span class="text-foreground">{{ edgeLengths[i].toFixed(2) }} m</span>
                   </div>
-                  <div v-if="showAngleLabels && vertexAngles[i] !== undefined" class="mt-0.5 flex items-center justify-between">
+                  <div v-if="showAngleLabels && vertexAngles[i] !== undefined"
+                    class="mt-0.5 flex items-center justify-between">
                     <span>角度</span>
                     <span class="text-foreground">{{ vertexAngles[i].toFixed(2) }}°</span>
                   </div>
@@ -281,7 +357,7 @@
   z-index: 0;
 }
 
-.scene-stage > canvas {
+.scene-stage>canvas {
   position: relative;
   z-index: 1;
 }
@@ -291,13 +367,10 @@
 }
 
 .glass-panel {
-  position: relative;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.82) 0%,
-    rgba(255, 255, 255, 0.5) 50%,
-    rgba(255, 255, 255, 0.72) 100%
-  );
+  background: linear-gradient(135deg,
+      rgba(255, 255, 255, 0.82) 0%,
+      rgba(255, 255, 255, 0.5) 50%,
+      rgba(255, 255, 255, 0.72) 100%);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-radius: 999px;
@@ -315,11 +388,9 @@
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.65) 0%,
-    rgba(255, 255, 255, 0) 55%
-  );
+  background: linear-gradient(180deg,
+      rgba(255, 255, 255, 0.65) 0%,
+      rgba(255, 255, 255, 0) 55%);
   pointer-events: none;
 }
 
@@ -335,12 +406,10 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.55),
-    transparent
-  );
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(255, 255, 255, 0.55),
+      transparent);
   transform: translateX(-120%);
   transition: transform 0.65s ease;
   pointer-events: none;
@@ -434,18 +503,20 @@
   font-weight: 600;
 }
 
-/* 状态栏 - 稍强调 */
-.scene-bottom-row .status-overlay {
+/* 状态栏 - 右上角轻盈玻璃 */
+.status-overlay--top {
   pointer-events: auto;
-  flex-shrink: 0;
-  background: rgba(255, 255, 255, 0.75);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(231, 111, 81, 0.2);
+  /* max-width: min(560px, 92%); */
+  background: linear-gradient(120deg, rgba(255, 250, 248, 0.82), rgba(255, 255, 255, 0.72));
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  border: 1px solid rgba(231, 111, 81, 0.18);
+  z-index: 3;
   box-shadow:
-    0 4px 16px rgba(0, 0, 0, 0.06),
-    0 1px 4px rgba(231, 111, 81, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+    0 12px 28px rgba(15, 23, 42, 0.08),
+    0 2px 8px rgba(231, 111, 81, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  color: #6b7280;
 }
 </style>
 
