@@ -1,5 +1,5 @@
 <template>
-  <div class="relative flex h-full flex-col overflow-hidden bg-gradient-to-br from-slate-50 via-sky-50/30 to-indigo-50/20 text-slate-800">
+  <div class="venue-theme relative flex h-full flex-col overflow-hidden bg-background text-foreground">
     <!-- Toast -->
     <transition name="toast-fade">
       <div
@@ -9,9 +9,9 @@
         <div
           class="pointer-events-auto flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium shadow-xl backdrop-blur-sm ring-1"
           :class="{
-            'bg-emerald-50/95 text-emerald-700 ring-emerald-200/80': toastType === 'success',
-            'bg-amber-50/95 text-amber-700 ring-amber-200/80': toastType === 'warning',
-            'bg-red-50/95 text-red-700 ring-red-200/80': toastType === 'error',
+            'bg-primary/10 text-foreground ring-primary/30': toastType === 'success',
+            'bg-secondary/40 text-foreground ring-secondary/60': toastType === 'warning',
+            'bg-destructive/10 text-destructive ring-destructive/30': toastType === 'error',
           }"
         >
           <svg v-if="toastType === 'success'" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
@@ -25,31 +25,31 @@
     <!-- 内容区域 -->
     <div class="relative flex min-h-0 flex-1 gap-3 p-4">
       <!-- 左侧：分段任务列表 -->
-      <div class="flex w-[280px] shrink-0 flex-col overflow-hidden rounded-2xl border border-slate-200/60 bg-white/80 shadow-lg shadow-slate-200/30 backdrop-blur-sm">
+      <Card class="flex w-[280px] shrink-0 flex-col overflow-hidden rounded-2xl">
         <!-- 标题区 -->
-        <div class="flex items-center gap-2 border-b border-slate-100 px-4 py-3">
-          <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
+        <CardHeader class="flex-row items-center gap-2 space-y-0 border-b border-border px-4 py-3">
+          <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-secondary/40 text-foreground">
             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 0 1 0 3.75H5.625a1.875 1.875 0 0 1 0-3.75Z" /></svg>
           </div>
           <div>
-            <div class="text-sm font-semibold text-slate-800">分段任务</div>
-            <div class="text-[11px] text-slate-400">拖拽至右侧场地编辑区</div>
+            <div class="text-sm font-semibold text-foreground">分段任务</div>
+            <div class="text-[11px] text-muted-foreground">拖拽至右侧场地编辑区</div>
           </div>
-        </div>
+        </CardHeader>
         <!-- 任务卡片列表 -->
-        <div class="min-h-0 flex-1 space-y-1.5 overflow-y-auto p-3">
+        <CardContent class="min-h-0 flex-1 space-y-1.5 overflow-y-auto p-3 pt-3">
           <div
             v-for="task in tasks"
             :key="task.id"
-            class="group grid grid-cols-[72px_1fr] items-center gap-2.5 rounded-xl border border-slate-100 bg-white p-1 transition-all duration-150"
+            class="group grid grid-cols-[72px_1fr] items-center gap-2.5 rounded-xl border border-border bg-card p-1 transition-all duration-150"
             :class="task.status === 2
               ? 'cursor-not-allowed opacity-50 grayscale'
-              : 'cursor-grab shadow-sm hover:shadow-md hover:border-indigo-200/60 hover:-translate-y-0.5 active:cursor-grabbing active:shadow-sm active:translate-y-0'"
+              : 'cursor-grab shadow-sm hover:shadow-md hover:border-primary/40 hover:-translate-y-0.5 active:cursor-grabbing active:shadow-sm active:translate-y-0'"
             :draggable="task.status !== 2"
             @dragstart="onTaskDragStart(task, $event)"
             @dragend="onTaskDragEnd"
           >
-            <div class="flex h-[66px] items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-slate-50 to-slate-100/80">
+            <div class="flex h-[66px] items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-muted to-card">
               <ResponsivePolygon
                 :points="task.points"
                 :padding="0"
@@ -61,54 +61,54 @@
               />
             </div>
             <div class="min-w-0 py-1 pr-2">
-              <div class="truncate text-[13px] font-semibold text-slate-800">{{ task.segmentName }}</div>
-              <div class="mt-0.5 truncate text-[11px] text-slate-400">{{ task.range }}</div>
+              <div class="truncate text-[13px] font-semibold text-foreground">{{ task.segmentName }}</div>
+              <div class="mt-0.5 truncate text-[11px] text-muted-foreground">{{ task.range }}</div>
               <div class="mt-1">
                 <span
                   class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ring-1 ring-inset"
                   :class="{
-                    'bg-amber-50 text-amber-600 ring-amber-200/60': task.status == 0,
-                    'bg-blue-50 text-blue-600 ring-blue-200/60': task.status == 1,
-                    'bg-emerald-50 text-emerald-600 ring-emerald-200/60': task.status == 2,
+                    'bg-secondary/40 text-foreground ring-secondary/60': task.status == 0,
+                    'bg-primary/15 text-primary ring-primary/30': task.status == 1,
+                    'bg-accent/25 text-foreground ring-accent/40': task.status == 2,
                   }"
                 >
                   <span class="h-1.5 w-1.5 rounded-full" :class="{
-                    'bg-amber-500': task.status == 0,
-                    'bg-blue-500': task.status == 1,
-                    'bg-emerald-500': task.status == 2,
+                    'bg-secondary': task.status == 0,
+                    'bg-primary': task.status == 1,
+                    'bg-accent': task.status == 2,
                   }"></span>
                   {{ task.status == 0 ? '未开工' : task.status == 1 ? '已开工' : task.status == 2 ? '已完成' : '' }}
                 </span>
               </div>
             </div>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       <!-- 右侧：日期卡片网格 -->
-      <div v-show="!setSite" class="flex min-w-0 flex-1 flex-col overflow-hidden rounded-2xl border border-slate-200/60 bg-white/80 shadow-lg shadow-slate-200/30 backdrop-blur-sm">
+      <Card class="flex min-w-0 flex-1 flex-col overflow-hidden rounded-2xl">
         <!-- 工具栏 -->
-        <div class="flex items-center justify-between border-b border-slate-100 px-4 py-2.5">
+        <CardHeader v-show="!setSite" class="flex-row items-center justify-between space-y-0 border-b border-border px-4 py-2.5">
           <div class="flex items-center gap-2">
-            <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-violet-50 text-violet-600">
+            <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-accent/30 text-foreground">
               <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" /></svg>
             </div>
-            <span class="text-sm font-semibold text-slate-800">场地任务信息</span>
+            <span class="text-sm font-semibold text-foreground">场地任务信息</span>
           </div>
           <div class="flex items-center gap-1">
             <!-- 统计分析 -->
             <button
-              class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-indigo-600 transition hover:bg-indigo-50"
+              class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-destructive transition hover:bg-destructive/10"
               @click="openStatsDialog"
             >
               <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6a7.5 7.5 0 1 0 7.5 7.5h-7.5V6z" /><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0 0 13.5 3v7.5z" /></svg>
               统计分析
             </button>
-            <div class="mx-0.5 h-3.5 w-px bg-slate-200"></div>
+            <div class="mx-0.5 h-3.5 w-px bg-border"></div>
             <!-- 开关组 -->
             <button
               class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs transition"
-              :class="showTaskName ? 'bg-indigo-50 font-medium text-indigo-600' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'"
+              :class="showTaskName ? 'bg-destructive/10 font-medium text-destructive' : 'text-muted-foreground hover:bg-muted hover:text-foreground'"
               @click="showTaskName = !showTaskName"
             >
               <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 0 1 1.037-.443 48.2 48.2 0 0 0 5.887-.37c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" /></svg>
@@ -116,109 +116,116 @@
             </button>
             <button
               class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs transition"
-              :class="showGrid ? 'bg-indigo-50 font-medium text-indigo-600' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'"
+              :class="showGrid ? 'bg-destructive/10 font-medium text-destructive' : 'text-muted-foreground hover:bg-muted hover:text-foreground'"
               @click="showGrid = !showGrid"
             >
               <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 0 1-1.125-1.125M3.375 19.5h7.5c.621 0 1.125-.504 1.125-1.125m-9.75 0V5.625m0 12.75v-12.75m0 0A1.125 1.125 0 0 1 3.375 4.5h17.25m-17.25 0h7.5m-7.5 0v12.75m0 0h7.5m0 0v-12.75m0 12.75c0 .621-.504 1.125-1.125 1.125m1.125-1.125V5.625m0 0A1.125 1.125 0 0 0 10.875 4.5m.375 1.125v12.75m0-12.75h7.5m-7.5 0v12.75m7.5-12.75a1.125 1.125 0 0 1 1.125 1.125v12.75M20.625 4.5h-7.5m7.5 0a1.125 1.125 0 0 1 1.125 1.125" /></svg>
               网格
             </button>
           </div>
-        </div>
+        </CardHeader>
 
         <!-- 日期卡片 -->
-        <div class="min-h-0 flex-1 overflow-auto p-3">
-          <template v-if="datePanels.length">
-            <div class="grid grid-cols-[repeat(auto-fill,minmax(190px,1fr))] gap-3">
-              <div
-                v-for="panelDate in datePanels"
-                :key="panelDate.id"
-                class="group cursor-pointer rounded-xl border border-slate-200/70 bg-white transition-all duration-200 hover:border-indigo-400/50 hover:shadow-[0_0_0_3px_rgba(99,102,241,0.08)]"
-                @click="chooseDateSite(panelDate)"
-              >
-                <!-- 顶部：日期 + 占用率 -->
-                <div class="flex items-center justify-between px-3 pt-2.5 pb-1.5">
-                  <div class="flex items-center gap-1.5">
-                    <svg class="h-3.5 w-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" /></svg>
-                    <span class="text-xs font-semibold text-slate-800">{{ panelDate.date }}</span>
+        <CardContent class="min-h-0 flex-1 overflow-hidden p-3 pt-3">
+          <div v-show="!setSite" class="h-full overflow-auto">
+            <template v-if="datePanels.length">
+              <div class="grid grid-cols-[repeat(auto-fill,minmax(190px,1fr))] gap-3">
+                <div
+                  v-for="panelDate in datePanels"
+                  :key="panelDate.id"
+                  class="group cursor-pointer rounded-xl border border-border bg-muted/70 transition-all duration-300 hover:border-primary/50 hover:bg-card hover:shadow-[0_12px_32px_rgba(38,70,83,0.14)]"
+                  @click="chooseDateSite(panelDate)"
+                >
+                  <!-- 顶部：日期 + 占用率 -->
+                  <div class="flex items-center justify-between px-3 pt-2.5 pb-1.5">
+                    <div class="flex items-center gap-1.5">
+                      <svg class="h-3.5 w-3.5 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" /></svg>
+                      <span class="text-xs font-semibold text-foreground">{{ panelDate.date }}</span>
+                    </div>
+                    <span
+                      class="rounded-md px-1.5 py-0.5 tabular-nums text-[10px] font-bold transition-colors duration-300"
+                      :class="panelDate.siteSegmentRatio > 80
+                        ? 'bg-destructive/10 text-destructive'
+                        : panelDate.siteSegmentRatio > 50
+                          ? 'bg-secondary/40 text-foreground'
+                          : 'bg-primary/10 text-primary'"
+                    >{{ panelDate.siteSegmentRatio }}%</span>
                   </div>
-                  <span
-                    class="rounded-md px-1.5 py-0.5 tabular-nums text-[10px] font-bold"
-                    :class="panelDate.siteSegmentRatio > 80
-                      ? 'bg-rose-50 text-rose-600'
-                      : panelDate.siteSegmentRatio > 50
-                        ? 'bg-amber-50 text-amber-600'
-                        : 'bg-indigo-50 text-indigo-600'"
-                  >{{ panelDate.siteSegmentRatio }}%</span>
-                </div>
-                <!-- 占用率进度条 -->
-                <div class="px-3 pb-2">
-                  <div class="h-1 w-full overflow-hidden rounded-full bg-slate-100">
-                    <div
-                      class="h-full rounded-full transition-all duration-300"
-                      :class="panelDate.siteSegmentRatio > 80 ? 'bg-rose-500' : panelDate.siteSegmentRatio > 50 ? 'bg-amber-500' : 'bg-indigo-500'"
-                      :style="{ width: panelDate.siteSegmentRatio + '%' }"
-                    />
+                  <!-- 占用率进度条 -->
+                  <div class="px-3 pb-2">
+                    <div class="h-1 w-full overflow-hidden rounded-full bg-muted">
+                      <div
+                        class="h-full rounded-full transition-all duration-300"
+                        :class="panelDate.siteSegmentRatio > 80 ? 'bg-destructive' : panelDate.siteSegmentRatio > 50 ? 'bg-secondary' : 'bg-primary'"
+                        :style="{ width: panelDate.siteSegmentRatio + '%' }"
+                      />
+                    </div>
                   </div>
-                </div>
-                <!-- 场地预览 -->
-                <div class="relative mx-2 mb-2 overflow-hidden rounded-lg border border-slate-100 bg-slate-50/60">
-                  <div class="aspect-[4/3]">
-                    <SiteCanvas
-                      :site="panelDate.site"
-                      :showGrid="showGrid"
-                      :tasks="panelDate.tasks"
-                      :showTaskName="showTaskName"
-                      :gridPx="5"
-                      gridColor="#e2e8f0"
-                      :gridLineWidth="1"
-                      :gridOpacity="0.35"
-                      background="transparent"
-                      :padding="0"
-                      :taskFillColorMap="STATUS_COLORS"
-                    />
+                  <!-- 场地预览 -->
+                  <div class="relative mx-2 mb-2 overflow-hidden rounded-lg border border-border bg-muted/70 transition-all duration-300 group-hover:shadow-[0_8px_18px_rgba(38,70,83,0.12)]">
+                    <div class="aspect-[4/3] transition-transform duration-300 group-hover:scale-[0.98]">
+                      <SiteCanvas
+                        :site="panelDate.site"
+                        :showGrid="showGrid"
+                        :tasks="panelDate.tasks"
+                        :showTaskName="showTaskName"
+                        :gridPx="5"
+                        gridColor="#dbe4e7"
+                        :gridLineWidth="1"
+                        :gridOpacity="0.35"
+                        background="transparent"
+                        bgFill="rgba(42, 157, 143, 0.16)"
+                        bgStroke="#2a9d8f"
+                        taskStrokeColor="#264653"
+                        labelColor="#264653"
+                        :padding="0"
+                        :taskFillColorMap="STATUS_COLORS"
+                      />
+                    </div>
+                    <!-- hover：右下角编辑图标 -->
+                    <div class="absolute bottom-1.5 right-1.5 flex h-6 w-6 items-center justify-center rounded-md bg-destructive text-destructive-foreground opacity-0 shadow ring-1 ring-destructive/40 transition-all duration-150 group-hover:opacity-100">
+                      <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" /></svg>
+                    </div>
                   </div>
-                  <!-- hover：右下角编辑图标 -->
-                  <div class="absolute bottom-1.5 right-1.5 flex h-6 w-6 items-center justify-center rounded-md bg-white/90 text-slate-400 opacity-0 shadow ring-1 ring-slate-200/80 transition-all duration-150 group-hover:opacity-100 group-hover:text-indigo-600 group-hover:ring-indigo-200">
-                    <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" /></svg>
+                  <!-- 底部任务数 -->
+                  <div class="flex items-center gap-1.5 border-t border-muted px-3 py-1.5">
+                    <svg class="h-3 w-3 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6.429 9.75 2.25 12l4.179 2.25m0-4.5 5.571 3 5.571-3m-11.142 0L2.25 7.5 12 2.25l9.75 5.25-4.179 2.25m0 0L12 12.75l-5.571-3m11.142 0 4.179 2.25L12 17.25 2.25 12l4.179-2.25" /></svg>
+                    <span class="text-[11px] text-muted-foreground">{{ panelDate.tasks?.length || 0 }} 个分段</span>
                   </div>
-                </div>
-                <!-- 底部任务数 -->
-                <div class="flex items-center gap-1.5 border-t border-slate-50 px-3 py-1.5">
-                  <svg class="h-3 w-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6.429 9.75 2.25 12l4.179 2.25m0-4.5 5.571 3 5.571-3m-11.142 0L2.25 7.5 12 2.25l9.75 5.25-4.179 2.25m0 0L12 12.75l-5.571-3m11.142 0 4.179 2.25L12 17.25 2.25 12l4.179-2.25" /></svg>
-                  <span class="text-[11px] text-slate-500">{{ panelDate.tasks?.length || 0 }} 个分段</span>
                 </div>
               </div>
+            </template>
+            <div v-else class="flex h-full flex-col items-center justify-center gap-2 text-muted-foreground">
+              <svg class="h-10 w-10 text-muted-foreground/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5m6 4.125 2.25 2.25m0 0 2.25 2.25M12 13.875l2.25-2.25M12 13.875l-2.25 2.25M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+              </svg>
+              <span class="text-xs">暂无场地数据</span>
             </div>
-          </template>
-          <div v-else class="flex h-full flex-col items-center justify-center gap-2 text-slate-400">
-            <svg class="h-10 w-10 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5m6 4.125 2.25 2.25m0 0 2.25 2.25M12 13.875l2.25-2.25M12 13.875l-2.25 2.25M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
-            </svg>
-            <span class="text-xs">暂无场地数据</span>
           </div>
-        </div>
-      </div>
 
-      <!-- 右侧覆盖层：polygonSet 编辑（v-show 保持组件不销毁，避免 canvas 重建卡顿） -->
+          <div v-show="setSite" class="h-full">
+            <polygonSet
+              ref="polygonSetRef"
+              :data="selectSite"
+              @save="saveSite"
+              @pre="goPrevDay"
+              @next="goNextDay"
+              @close="closeSetSite"
+              :statusColorMap="STATUS_COLORS"
+              :siteId="form.site"
+            />
+          </div>
+        </CardContent>
+      </Card>
+
       <div
         v-show="setSite"
-        class="absolute inset-y-0 right-0 z-10 w-[calc(100%-292px)] overflow-hidden rounded-2xl border border-slate-200/60 bg-white px-3 shadow-lg transition-all duration-200"
-        :class="dragOver ? 'ring-2 ring-indigo-400/80 ring-offset-2' : ''"
+        class="absolute inset-y-0 right-0 left-[292px] pointer-events-none z-10"
+        :class="dragOver ? 'ring-2 ring-primary/50 ring-offset-2 ring-offset-background' : ''"
         @dragover.prevent="onDragOver"
         @dragleave="onDragLeave"
         @drop.prevent="onDropToPolygonSet"
-      >
-        <polygonSet
-          ref="polygonSetRef"
-          :data="selectSite"
-          @save="saveSite"
-          @pre="goPrevDay"
-          @next="goNextDay"
-          @close="closeSetSite"
-          :statusColorMap="STATUS_COLORS"
-          :siteId="form.site"
-        />
-      </div>
+      ></div>
     </div>
 
     <!-- 场地统计弹窗 -->
@@ -234,6 +241,7 @@
 </template>
 
 <script setup>
+import { Card, CardContent, CardHeader } from '@/components/ui';
 import { onBeforeUnmount, onMounted, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import polygonSet from './components/polygonSet.vue';
@@ -272,11 +280,11 @@ const DEFAULT_SITE = {
   settings: { gridUnitM: 1, pxPerM: 5, snapM: 1 },
 };
 const STATUS_COLORS = {
-  0: { fill: '#FFD707', text: '#FFD707' },
-  1: { fill: '#2388FF', text: '#2388FF' },
-  2: { fill: 'green', text: 'green' },
+  0: { fill: '#e9c46a', text: '#e9c46a' },
+  1: { fill: '#2a9d8f', text: '#2a9d8f' },
+  2: { fill: '#f4a261', text: '#f4a261' },
 };
-const getStatusColor = (status) => STATUS_COLORS[status]?.text || '#475569';
+const getStatusColor = (status) => STATUS_COLORS[status]?.text || '#264653';
 
 /** ===== 状态 ===== */
 const tasks = ref([]);
@@ -643,6 +651,28 @@ function saveSite() {
 </script>
 
 <style scoped>
+.venue-theme {
+  --background: 0 0% 100%;
+  --foreground: 197 37% 24%;
+  --card: 0 0% 100%;
+  --card-foreground: 197 37% 24%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 197 37% 24%;
+  --primary: 173 58% 39%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 42 74% 66%;
+  --secondary-foreground: 197 37% 24%;
+  --muted: 0 0% 97%;
+  --muted-foreground: 197 20% 35%;
+  --accent: 27 87% 67%;
+  --accent-foreground: 197 37% 24%;
+  --destructive: 12 76% 61%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 197 22% 85%;
+  --input: 0 0% 100%;
+  --ring: 173 58% 39%;
+}
+
 /* polygonSet 子组件撑满高度 */
 .absolute > :deep(*) {
   height: 100%;

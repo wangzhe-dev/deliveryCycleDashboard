@@ -3,16 +3,16 @@
     <Transition name="stats-fade">
       <div
         v-if="innerVisible"
-        class="fixed inset-0 z-[2000] flex items-center justify-center bg-black/30 backdrop-blur-sm"
+        class="stats-theme fixed inset-0 z-[2000] flex items-center justify-center bg-foreground/10 backdrop-blur-sm"
         @click.self="close"
         @keydown.escape="close"
       >
         <!-- loading overlay -->
         <div
           v-if="loading"
-          class="absolute inset-0 z-10 flex items-center justify-center bg-white/60"
+          class="absolute inset-0 z-10 flex items-center justify-center bg-card/70"
         >
-          <svg class="h-8 w-8 animate-spin text-indigo-500" viewBox="0 0 24 24" fill="none">
+          <svg class="h-8 w-8 animate-spin text-destructive" viewBox="0 0 24 24" fill="none">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/>
           </svg>
@@ -22,10 +22,10 @@
           <!-- 头部：标题 + chips + 关闭按钮 -->
           <div class="flex items-start justify-between gap-4 mb-3.5">
             <div class="flex flex-col gap-1">
-              <div class="text-xl font-bold text-slate-900">
+              <div class="text-xl font-bold text-foreground">
                 曲面分段 · 周转率 &amp; 利用率
               </div>
-              <div class="text-[13px] text-gray-500">
+              <div class="text-[13px] text-muted-foreground">
                 按 <b>周 / 月</b> 统计当前场地任务的周转率、空闲面积与场地利用率。
               </div>
             </div>
@@ -37,8 +37,8 @@
                   :key="t.key"
                   class="px-3 py-1 rounded-full text-xs border cursor-pointer transition-all duration-150"
                   :class="currentViewType === t.key
-                    ? 'border-indigo-400 bg-gradient-to-br from-indigo-50 to-sky-50 text-blue-700 shadow-[0_0_18px_rgba(129,140,248,0.45)]'
-                    : 'border-transparent bg-blue-50/90 text-gray-500 hover:border-indigo-400/60'"
+                    ? 'border-destructive/60 bg-destructive/10 text-destructive shadow-[0_0_18px_rgba(231,111,81,0.35)]'
+                    : 'border-transparent bg-muted/70 text-muted-foreground hover:border-destructive/40'"
                   @click="handleViewTypeClick(t.key)"
                 >
                   {{ t.label }}
@@ -46,7 +46,7 @@
               </div>
 
               <button
-                class="w-[30px] h-[30px] rounded-full border border-slate-300/60 bg-slate-50 text-gray-500 text-lg flex items-center justify-center cursor-pointer transition-all duration-150 hover:bg-blue-100 hover:border-orange-500 hover:text-red-700"
+                class="w-[30px] h-[30px] rounded-full border border-border bg-card text-muted-foreground text-lg flex items-center justify-center cursor-pointer transition-all duration-150 hover:bg-destructive/10 hover:border-destructive/40 hover:text-destructive"
                 @click="close"
                 title="关闭"
               >
@@ -56,30 +56,30 @@
           </div>
 
           <!-- 概览指标 -->
-          <div v-if="summary" class="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-3.5 mb-4">
+          <div v-if="summary" class="stats-metric-container mb-4">
             <div class="metric-card">
-              <div class="metric-label">统计范围</div>
+              <div class="stats-metric-title">统计范围</div>
               <div class="metric-value">{{ summary.rangeLabel }}</div>
               <div class="metric-subvalue">
                 任务时间 {{ summary.minDate }} ~ {{ summary.maxDate }}
               </div>
             </div>
             <div class="metric-card">
-              <div class="metric-label">平均周转率</div>
+              <div class="stats-metric-title">平均周转率</div>
               <div class="metric-value">
                 {{ formatNumber(summary.avgTurnover, 2) }}
               </div>
               <div class="metric-subvalue">完工面积 / 平均在制面积</div>
             </div>
             <div class="metric-card">
-              <div class="metric-label">平均空闲面积</div>
+              <div class="stats-metric-title">平均空闲面积</div>
               <div class="metric-value">
                 {{ formatNumber(summary.avgIdleArea, 1) }} ㎡
               </div>
               <div class="metric-subvalue">以在制面积近似为占用面积</div>
             </div>
             <div class="metric-card">
-              <div class="metric-label">平均场地利用率</div>
+              <div class="stats-metric-title">平均场地利用率</div>
               <div class="metric-value">
                 {{ formatPercent(summary.avgUtilization) }}
               </div>
@@ -90,61 +90,61 @@
           <!-- 表格区块 -->
           <div class="flex-1 min-h-0 flex flex-col">
             <div class="flex flex-col gap-1 mb-1.5">
-              <div class="inline-flex items-center gap-2 text-sm font-semibold text-slate-900 before:content-[''] before:w-1 before:h-[18px] before:rounded-full before:bg-gradient-to-b before:from-indigo-600 before:to-sky-500">
+              <div class="inline-flex items-center gap-2 text-sm font-semibold text-foreground before:content-[''] before:w-1 before:h-[18px] before:rounded-full before:bg-gradient-to-b before:from-primary before:to-accent">
                 周 / 月周期明细
               </div>
-              <div class="text-xs text-gray-500">
+              <div class="text-xs text-muted-foreground">
                 按周期查看完工面积、在制面积以及场地利用情况，可一眼看出波峰波谷。
               </div>
             </div>
 
-            <div class="flex-1 min-h-0 overflow-auto mt-1 rounded-xl bg-slate-50/90 shadow-[inset_0_0_0_1px_rgba(226,232,240,0.9)] scrollbar-hide">
+            <div class="flex-1 min-h-0 overflow-auto mt-1 rounded-xl bg-muted/60 shadow-[inset_0_0_0_1px_rgba(0,0,0,0.05)] scrollbar-hide">
               <table v-if="rows.length" class="w-full border-collapse text-xs">
-                <thead class="bg-gradient-to-r from-blue-500/[0.16] to-emerald-500/[0.12]">
+                <thead class="bg-gradient-to-r from-primary/15 to-secondary/25">
                   <tr>
-                    <th class="sticky top-0 z-[1] min-w-[140px] px-2.5 py-[7px] border-b border-slate-200/90 text-left text-slate-900 whitespace-nowrap">周期</th>
-                    <th class="sticky top-0 z-[1] px-2.5 py-[7px] border-b border-slate-200/90 text-right text-slate-900 whitespace-nowrap">完工面积(㎡)</th>
-                    <th class="sticky top-0 z-[1] px-2.5 py-[7px] border-b border-slate-200/90 text-right text-slate-900 whitespace-nowrap">期初在制(㎡)</th>
-                    <th class="sticky top-0 z-[1] px-2.5 py-[7px] border-b border-slate-200/90 text-right text-slate-900 whitespace-nowrap">期末在制(㎡)</th>
-                    <th class="sticky top-0 z-[1] px-2.5 py-[7px] border-b border-slate-200/90 text-right text-slate-900 whitespace-nowrap">平均在制(㎡)</th>
-                    <th class="sticky top-0 z-[1] min-w-[150px] px-2.5 py-[7px] border-b border-slate-200/90 text-right text-slate-900 whitespace-nowrap">周转率</th>
-                    <th class="sticky top-0 z-[1] px-2.5 py-[7px] border-b border-slate-200/90 text-right text-slate-900 whitespace-nowrap">平均空闲面积(㎡)</th>
-                    <th class="sticky top-0 z-[1] min-w-[150px] px-2.5 py-[7px] border-b border-slate-200/90 text-right text-slate-900 whitespace-nowrap">场地利用率</th>
+                    <th class="sticky top-0 z-[1] min-w-[140px] px-2.5 py-[7px] border-b border-border text-left text-foreground whitespace-nowrap">周期</th>
+                    <th class="sticky top-0 z-[1] px-2.5 py-[7px] border-b border-border text-right text-foreground whitespace-nowrap">完工面积(㎡)</th>
+                    <th class="sticky top-0 z-[1] px-2.5 py-[7px] border-b border-border text-right text-foreground whitespace-nowrap">期初在制(㎡)</th>
+                    <th class="sticky top-0 z-[1] px-2.5 py-[7px] border-b border-border text-right text-foreground whitespace-nowrap">期末在制(㎡)</th>
+                    <th class="sticky top-0 z-[1] px-2.5 py-[7px] border-b border-border text-right text-foreground whitespace-nowrap">平均在制(㎡)</th>
+                    <th class="sticky top-0 z-[1] min-w-[150px] px-2.5 py-[7px] border-b border-border text-right text-foreground whitespace-nowrap">周转率</th>
+                    <th class="sticky top-0 z-[1] px-2.5 py-[7px] border-b border-border text-right text-foreground whitespace-nowrap">平均空闲面积(㎡)</th>
+                    <th class="sticky top-0 z-[1] min-w-[150px] px-2.5 py-[7px] border-b border-border text-right text-foreground whitespace-nowrap">场地利用率</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr
                     v-for="row in rows"
                     :key="row.label"
-                    class="odd:bg-white even:bg-gray-50 hover:bg-sky-50 transition-colors"
+                    class="odd:bg-card even:bg-muted/50 hover:bg-primary/5 transition-colors"
                   >
-                    <td class="px-2.5 py-[7px] border-b border-slate-200/90 text-left bg-gradient-to-r from-gray-50 to-blue-50/60 border-r border-r-slate-200/90">
+                    <td class="px-2.5 py-[7px] border-b border-border text-left bg-gradient-to-r from-muted/60 to-primary/5 border-r border-r-border">
                       <div class="font-semibold">{{ row.label }}</div>
-                      <div class="text-[11px] text-gray-500">
+                      <div class="text-[11px] text-muted-foreground">
                         {{ formatDate(row.start) }} ~
                         {{ formatDate(addDays(row.end, -1)) }}
                       </div>
                     </td>
 
-                    <td class="px-2.5 py-[7px] border-b border-slate-200/90 text-right tabular-nums">
+                    <td class="px-2.5 py-[7px] border-b border-border text-right tabular-nums">
                       {{ formatNumber(row.doneArea, 1) }}
                     </td>
-                    <td class="px-2.5 py-[7px] border-b border-slate-200/90 text-right tabular-nums">
+                    <td class="px-2.5 py-[7px] border-b border-border text-right tabular-nums">
                       {{ formatNumber(row.wipStart, 1) }}
                     </td>
-                    <td class="px-2.5 py-[7px] border-b border-slate-200/90 text-right tabular-nums">
+                    <td class="px-2.5 py-[7px] border-b border-border text-right tabular-nums">
                       {{ formatNumber(row.wipEnd, 1) }}
                     </td>
-                    <td class="px-2.5 py-[7px] border-b border-slate-200/90 text-right tabular-nums">
+                    <td class="px-2.5 py-[7px] border-b border-border text-right tabular-nums">
                       {{ formatNumber(row.wipAvg, 1) }}
                     </td>
 
                     <!-- 周转率 -->
-                    <td class="px-2.5 py-[7px] border-b border-slate-200/90 text-right tabular-nums">
+                    <td class="px-2.5 py-[7px] border-b border-border text-right tabular-nums">
                       <div class="inline-flex items-center gap-1.5">
                         <div
                           v-if="row.turnover !== null && !isNaN(row.turnover)"
-                          class="w-[60px] h-[7px] rounded-full bg-slate-300/25 overflow-hidden shrink-0"
+                          class="w-[60px] h-[7px] rounded-full bg-border/60 overflow-hidden shrink-0"
                           :title="`周转率：${formatNumber(row.turnover, 2)}`"
                         >
                           <div
@@ -153,27 +153,27 @@
                             :style="{ width: (getTurnoverRatio(row) * 100 || 0) + '%' }"
                           ></div>
                         </div>
-                        <span v-if="row.turnover !== null" class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] border border-slate-300/70 bg-white text-slate-900">
+                        <span v-if="row.turnover !== null" class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] border border-border bg-card text-foreground">
                           {{ formatNumber(row.turnover, 2) }}
                         </span>
-                        <span v-else class="text-gray-500">-</span>
+                        <span v-else class="text-muted-foreground">-</span>
                       </div>
                     </td>
 
-                    <td class="px-2.5 py-[7px] border-b border-slate-200/90 text-right tabular-nums">
+                    <td class="px-2.5 py-[7px] border-b border-border text-right tabular-nums">
                       {{ formatNumber(row.idleAvg, 1) }}
                     </td>
 
                     <!-- 场地利用率 -->
-                    <td class="px-2.5 py-[7px] border-b border-slate-200/90 text-right tabular-nums">
+                    <td class="px-2.5 py-[7px] border-b border-border text-right tabular-nums">
                       <div class="inline-flex items-center gap-1.5">
                         <div
                           v-if="row.utilization !== null && !isNaN(row.utilization)"
-                          class="w-[60px] h-[7px] rounded-full bg-slate-300/25 overflow-hidden shrink-0"
+                          class="w-[60px] h-[7px] rounded-full bg-border/60 overflow-hidden shrink-0"
                           :title="`场地利用率：${formatPercent(row.utilization)}`"
                         >
                           <div
-                            class="h-full rounded-full bg-gradient-to-r from-indigo-600 via-sky-500 to-emerald-500"
+                            class="h-full rounded-full bg-gradient-to-r from-primary via-secondary to-accent"
                             :style="{ width: (getUtilizationRatio(row) * 100 || 0) + '%' }"
                           ></div>
                         </div>
@@ -184,7 +184,7 @@
                 </tbody>
               </table>
 
-              <div v-else class="p-5 text-center text-gray-500">暂无数据</div>
+              <div v-else class="p-5 text-center text-muted-foreground">暂无数据</div>
             </div>
           </div>
         </div>
@@ -298,25 +298,43 @@ const getTurnoverBarClass = (row) => {
   const v = row.turnover === null || row.turnover === undefined ? null : Number(row.turnover);
   if (v === null || isNaN(v)) return '';
   if (currentViewType.value === 'week') {
-    if (v < 0.5) return 'bg-gradient-to-r from-sky-500 to-indigo-500';
-    if (v <= 1.2) return 'bg-gradient-to-r from-emerald-500 to-green-500';
-    return 'bg-gradient-to-r from-orange-500 to-red-500';
+    if (v < 0.5) return 'bg-gradient-to-r from-primary to-secondary';
+    if (v <= 1.2) return 'bg-gradient-to-r from-secondary to-accent';
+    return 'bg-gradient-to-r from-accent to-destructive';
   } else {
-    if (v < 1) return 'bg-gradient-to-r from-sky-500 to-indigo-500';
-    if (v <= 3) return 'bg-gradient-to-r from-emerald-500 to-green-500';
-    return 'bg-gradient-to-r from-orange-500 to-red-500';
+    if (v < 1) return 'bg-gradient-to-r from-primary to-secondary';
+    if (v <= 3) return 'bg-gradient-to-r from-secondary to-accent';
+    return 'bg-gradient-to-r from-accent to-destructive';
   }
 };
 </script>
 
 <style scoped>
+.stats-theme {
+  --background: 0 0% 100%;
+  --foreground: 197 37% 24%;
+  --card: 0 0% 100%;
+  --card-foreground: 197 37% 24%;
+  --primary: 173 58% 39%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 42 74% 66%;
+  --secondary-foreground: 197 37% 24%;
+  --muted: 0 0% 97%;
+  --muted-foreground: 197 20% 35%;
+  --accent: 27 87% 67%;
+  --accent-foreground: 197 37% 24%;
+  --destructive: 12 76% 61%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 197 22% 85%;
+}
+
 .stats-wrap {
-  background: radial-gradient(circle at top left, #eff6ff, #ffffff 40%, #f2f2ff);
-  color: #111827;
+  background: linear-gradient(160deg, hsl(var(--background)) 0%, hsl(var(--muted)) 100%);
+  color: hsl(var(--foreground));
   border-radius: 18px;
   padding: 18px 22px 16px;
-  border: 1px solid rgba(148, 163, 184, 0.4);
-  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.16);
+  border: 1px solid hsl(var(--border));
+  box-shadow: 0 18px 40px rgba(38, 70, 83, 0.14);
   width: calc(100vw - 40px);
   height: calc(100vh - 40px);
   box-sizing: border-box;
@@ -324,44 +342,76 @@ const getTurnoverBarClass = (row) => {
   flex-direction: column;
 }
 
+.stats-metric-container {
+  overflow: auto;
+  display: flex;
+  gap: 16px;
+  scroll-snap-type: x mandatory;
+  width: 100%;
+  padding: 2px 6px 10px;
+}
+
+.stats-metric-container:hover > .metric-card:not(:hover) {
+  opacity: 0.25;
+}
+
 .metric-card {
   position: relative;
-  background: linear-gradient(135deg, #eff6ff 0%, #eef2ff 45%, #f2f6ff 100%);
-  border-radius: 16px;
-  padding: 12px 14px;
-  border: 1px solid rgba(181, 188, 249, 0.7);
-  box-shadow:
-    0 10px 22px rgba(129, 140, 248, 0.25),
-    0 0 0 1px rgba(255, 255, 255, 0.9) inset;
+  flex: 1 1 220px;
+  min-width: 220px;
+  scroll-snap-align: start;
+  background: rgba(255, 255, 255, 0.55);
+  border-radius: 14px;
+  padding: 18px 16px;
+  border: 1px solid rgba(38, 70, 83, 0.12);
+  /* box-shadow: 0 10px 26px rgba(38, 70, 83, 0.18); */
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
   overflow: hidden;
+  transition: transform 0.2s ease, opacity 0.2s ease, box-shadow 0.2s ease;
 }
 .metric-card::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at top right, rgba(59, 130, 246, 0.25), transparent 55%);
+  background: radial-gradient(circle at top right, rgba(231, 111, 81, 0.18), transparent 55%);
   opacity: 0.7;
   pointer-events: none;
 }
-.metric-label {
+.metric-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px rgba(38, 70, 83, 0.2);
+}
+
+.stats-metric-title {
   position: relative;
+  width: 100%;
+  display: inline-block;
+  word-break: break-all;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
+  margin: 0 auto 10px;
   font-size: 11px;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: #6b7280;
+  letter-spacing: 0.12em;
+  color: hsl(var(--muted-foreground));
 }
 .metric-value {
   position: relative;
-  margin-top: 4px;
+  margin-top: 0;
   font-size: 20px;
   font-weight: 600;
-  color: #111827;
+  color: hsl(var(--foreground));
+  text-align: center;
 }
 .metric-subvalue {
   position: relative;
-  margin-top: 2px;
+  margin-top: 6px;
   font-size: 12px;
-  color: #4b5563;
+  color: hsl(var(--muted-foreground));
+  text-align: center;
 }
 
 .scrollbar-hide {
