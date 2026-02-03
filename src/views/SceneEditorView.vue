@@ -1,431 +1,97 @@
 <template>
-  <div ref="pageRef" class="h-full w-full overflow-auto bg-muted/40 text-foreground">
+  <div ref="pageRef" class="h-full w-full overflow-auto bg-zinc-50 text-foreground">
     <div
       ref="editorCardRef"
       tabindex="0"
-      class="flex min-h-full flex-col gap-5 p-5 outline-none focus-visible:outline-none"
+      class="flex h-full flex-col gap-3 p-4 outline-none focus-visible:outline-none"
       @keydown.capture="onKeyDown"
       @keyup.capture="onKeyUp"
     >
-      <header
-        class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-zinc-200 bg-white px-3 py-2 shadow-sm"
-      >
-        <div class="flex items-center gap-3">
-          <div
-            class="flex h-11 w-11 items-center justify-center rounded-xl bg-zinc-100 ring-1 ring-black/10"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-              class="h-6 w-6 text-zinc-900"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.6"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="M4 7h16M7 4v16M17 4v16M4 17h16" />
-            </svg>
-          </div>
-          <div>
-            <div class="text-xs uppercase tracking-[0.32em] text-zinc-500">Scene Editor</div>
-            <div class="text-lg font-semibold text-zinc-900">场地设计</div>
-          </div>
+      <!-- Settings Strip -->
+      <div class="flex flex-wrap items-end gap-3 rounded-xl border border-zinc-200 bg-white px-4 py-2.5 shadow-sm">
+        <!-- Grid settings group -->
+        <div class="flex h-8 items-center rounded-lg border border-zinc-200 bg-zinc-50/80 px-2">
+          <svg viewBox="0 0 24 24" class="mr-2 h-3.5 w-3.5 text-zinc-400" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18" /><path d="M8 17V9" /><path d="M13 17V5" /><path d="M18 17v-3" /></svg>
+          <label class="flex items-center gap-1.5">
+            <span class="text-[10px] text-zinc-400">栅格</span>
+            <input type="number" min="0.01" step="0.01" v-model.number="gridUnitM" class="h-5 w-12 rounded border-0 bg-white px-1.5 text-center text-[11px] font-medium text-zinc-900 shadow-sm ring-1 ring-zinc-200 focus:outline-none focus:ring-2 focus:ring-sky-500/40" />
+          </label>
+          <span class="mx-2 h-3.5 w-px bg-zinc-200"></span>
+          <label class="flex items-center gap-1.5">
+            <span class="text-[10px] text-zinc-400">缩放</span>
+            <input type="number" min="10" step="10" v-model.number="pxPerM" @change="redraw" class="h-5 w-12 rounded border-0 bg-white px-1.5 text-center text-[11px] font-medium text-zinc-900 shadow-sm ring-1 ring-zinc-200 focus:outline-none focus:ring-2 focus:ring-sky-500/40" />
+          </label>
+          <span class="mx-2 h-3.5 w-px bg-zinc-200"></span>
+          <label class="flex items-center gap-1.5">
+            <span class="text-[10px] text-zinc-400">吸附</span>
+            <input type="number" min="0" step="0.01" v-model.number="snapM" @change="redraw" class="h-5 w-12 rounded border-0 bg-white px-1.5 text-center text-[11px] font-medium text-zinc-900 shadow-sm ring-1 ring-zinc-200 focus:outline-none focus:ring-2 focus:ring-sky-500/40" />
+          </label>
         </div>
 
-        <div class="flex flex-wrap items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            class="gap-2 border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-100"
-            @click="toggleFullscreen"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-              class="h-4 w-4"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.6"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="M4 9V5h4M20 9V5h-4M4 15v4h4M20 15v4h-4" />
-            </svg>
-            <span>{{ isFullscreen ? '退出专注视图' : '进入专注视图' }}</span>
-          </Button>
+        <!-- Transform group -->
+        <div class="flex h-8 items-center rounded-lg border border-zinc-200 bg-zinc-50/80 px-1">
+          <button class="inline-flex h-6 items-center gap-1 rounded px-1.5 text-[11px] font-medium text-zinc-600 transition hover:bg-white hover:text-zinc-900 hover:shadow-sm active:scale-95" @click="applyRotate(-10)">
+            <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-8-8" /><path d="M12 4v4H8" /></svg>
+            -10°
+          </button>
+          <button class="inline-flex h-6 items-center gap-1 rounded px-1.5 text-[11px] font-medium text-zinc-600 transition hover:bg-white hover:text-zinc-900 hover:shadow-sm active:scale-95" @click="applyRotate(10)">
+            <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 8-8" /><path d="M12 4v4h4" /></svg>
+            +10°
+          </button>
+          <span class="mx-0.5 h-4 w-px bg-zinc-200"></span>
+          <button class="inline-flex h-6 w-6 items-center justify-center rounded text-zinc-600 transition hover:bg-white hover:text-zinc-900 hover:shadow-sm active:scale-95" @click="applyScale(1 / 1.1)">
+            <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14" /><circle cx="12" cy="12" r="9" /></svg>
+          </button>
+          <button class="inline-flex h-6 w-6 items-center justify-center rounded text-zinc-600 transition hover:bg-white hover:text-zinc-900 hover:shadow-sm active:scale-95" @click="applyScale(1.1)">
+            <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14" /><path d="M5 12h14" /><circle cx="12" cy="12" r="9" /></svg>
+          </button>
+        </div>
 
-          <Button variant="destructive" size="sm" class="gap-2" @click="reset">
-            <svg
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-              class="h-4 w-4"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.6"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="M4 7h16" />
-              <path d="M10 11v6M14 11v6" />
-              <path d="M9 7l1-2h4l1 2" />
-              <rect x="6" y="7" width="12" height="13" rx="2" />
-            </svg>
-            清空
-          </Button>
+        <!-- Add point group -->
+        <div class="flex h-8 items-center gap-1.5 rounded-lg border border-zinc-200 bg-zinc-50/80 px-2">
+          <svg viewBox="0 0 24 24" class="h-3.5 w-3.5 text-zinc-400" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3" /><path d="M12 5v2" /><path d="M12 17v2" /><path d="M5 12h2" /><path d="M17 12h2" /></svg>
+          <div class="relative">
+            <span class="absolute left-1.5 top-1/2 -translate-y-1/2 text-[9px] font-medium text-zinc-400">X</span>
+            <input type="number" step="0.01" v-model.number="newPoint.x" @keydown.stop :min="0" class="h-5 w-14 rounded border-0 bg-white pl-4 pr-1 text-right text-[11px] font-medium text-zinc-900 shadow-sm ring-1 ring-zinc-200 focus:outline-none focus:ring-2 focus:ring-sky-500/40" />
+          </div>
+          <div class="relative">
+            <span class="absolute left-1.5 top-1/2 -translate-y-1/2 text-[9px] font-medium text-zinc-400">Y</span>
+            <input type="number" step="0.01" v-model.number="newPoint.y" @keydown.stop :min="0" class="h-5 w-14 rounded border-0 bg-white pl-4 pr-1 text-right text-[11px] font-medium text-zinc-900 shadow-sm ring-1 ring-zinc-200 focus:outline-none focus:ring-2 focus:ring-sky-500/40" />
+          </div>
+          <button class="inline-flex h-5 items-center gap-1 rounded bg-zinc-900 px-2 text-[10px] font-medium text-white shadow-sm transition hover:bg-zinc-800 active:scale-95" @click="addPointAtEnd(newPoint.x, newPoint.y)">
+            <svg viewBox="0 0 24 24" class="h-2.5 w-2.5" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14" /><path d="M5 12h14" /></svg>
+            新增
+          </button>
+        </div>
 
-          <Button
-            variant="secondary"
-            size="sm"
-            class="gap-2 bg-zinc-100 text-zinc-700 hover:bg-zinc-200"
-            :disabled="points.length < 3 || isClosed"
-            @click="closePolygon"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-              class="h-4 w-4"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.6"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="M5 4h14v16H5z" />
-              <path d="M7 7h10v10H7z" />
-            </svg>
-            闭合图形
-          </Button>
-
-          <Button
-            size="sm"
-            class="gap-2 bg-sky-500 text-white hover:bg-sky-400"
-            @click="handleSave"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-              class="h-4 w-4"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.6"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="M5 5h11l3 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z" />
-              <path d="M7 5v6h8" />
-              <path d="M7 19v-6h10v6" />
-            </svg>
+        <div class="ml-auto flex items-center gap-1.5">
+          <div class="flex h-8 items-center rounded-lg border border-zinc-200 bg-zinc-50 px-1">
+            <button class="inline-flex h-6 items-center gap-1 rounded px-2 text-[11px] font-medium text-zinc-600 transition hover:bg-white hover:text-zinc-900 hover:shadow-sm" @click="toggleFullscreen">
+              <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V5h4M20 9V5h-4M4 15v4h4M20 15v4h-4" /></svg>
+              {{ isFullscreen ? '退出专注' : '专注视图' }}
+            </button>
+            <span class="mx-0.5 h-4 w-px bg-zinc-200"></span>
+            <button class="inline-flex h-6 items-center gap-1 rounded px-2 text-[11px] font-medium text-zinc-600 transition hover:bg-white hover:text-zinc-900 hover:shadow-sm" :class="{ 'opacity-40 pointer-events-none': points.length < 3 || isClosed }" :disabled="points.length < 3 || isClosed" @click="closePolygon">
+              <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polygon points="5,3 19,3 19,21 5,21" /><polygon points="8,7 16,7 16,17 8,17" /></svg>
+              闭合
+            </button>
+            <span class="mx-0.5 h-4 w-px bg-zinc-200"></span>
+            <button class="inline-flex h-6 items-center gap-1 rounded px-2 text-[11px] font-medium text-red-500 transition hover:bg-red-50 hover:text-red-600" @click="reset">
+              <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16" /><path d="M10 11v6M14 11v6" /><path d="M9 7l1-2h4l1 2" /><rect x="6" y="7" width="12" height="13" rx="2" /></svg>
+              清空
+            </button>
+          </div>
+          <button class="inline-flex h-8 items-center gap-1.5 rounded-lg bg-zinc-900 px-4 text-[11px] font-medium text-white shadow-sm transition hover:bg-zinc-800 active:scale-95" @click="handleSave">
+            <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5h11l3 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z" /><path d="M7 5v6h8" /><path d="M7 19v-6h10v6" /></svg>
             保存
-          </Button>
+          </button>
         </div>
-      </header>
+      </div>
 
-      <section class="grid gap-2 lg:grid-cols-[minmax(0,1fr)_360px]">
-        <div
-          class="rounded-2xl border border-zinc-200 bg-white px-3 py-2.5 text-zinc-900 shadow-sm"
-        >
-          <div class="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
-            <svg
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-              class="h-4 w-4"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.6"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="M3 6h18" />
-              <path d="M3 12h18" />
-              <path d="M3 18h18" />
-              <path d="M7 6v6" />
-              <path d="M17 12v6" />
-            </svg>
-            参数设置
-          </div>
-
-          <div class="mt-2 grid gap-2 md:grid-cols-[0.9fr_0.9fr_1.4fr]">
-            <label class="flex flex-col gap-1.5 text-[11px] text-zinc-500">
-              <span>栅格单位 (m)</span>
-              <input
-                type="number"
-                min="0.01"
-                step="0.01"
-                v-model.number="gridUnitM"
-                class="h-7 rounded-lg border border-zinc-200/80 bg-white px-2.5 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-sky-500/30"
-              />
-            </label>
-            <label class="flex flex-col gap-1.5 text-[11px] text-zinc-500">
-              <span>缩放 (px/m)</span>
-              <input
-                type="number"
-                min="10"
-                step="10"
-                v-model.number="pxPerM"
-                @change="redraw"
-                class="h-7 rounded-lg border border-zinc-200/80 bg-white px-2.5 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-sky-500/30"
-              />
-            </label>
-            <label class="flex flex-col gap-1.5 text-[11px] text-zinc-500">
-              <span>吸附精度 (m)</span>
-              <input
-                type="number"
-                min="0"
-                step="0.01"
-                v-model.number="snapM"
-                @change="redraw"
-                class="h-7 rounded-lg border border-zinc-200/80 bg-white px-2.5 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-sky-500/30"
-              />
-            </label>
-          </div>
-
-          <div class="mt-2 grid gap-2 md:grid-cols-[0.8fr_0.8fr_1.6fr]">
-            <div class="rounded-xl border border-zinc-200/70 bg-zinc-50/80 p-2">
-              <div class="text-[10px] uppercase tracking-[0.2em] text-zinc-500">旋转</div>
-              <div class="mt-1.5 flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  class="flex-1 h-8 gap-2 border-zinc-200 bg-white text-[12px] text-zinc-700 hover:bg-zinc-100"
-                  @click="applyRotate(10)"
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                    class="h-4 w-4"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.6"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  >
-                    <path d="M4 12a8 8 0 1 0 8-8" />
-                    <path d="M12 4v4h4" />
-                  </svg>
-                  顺时针 10°
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  class="flex-1 h-8 gap-2 border-zinc-200 bg-white text-[12px] text-zinc-700 hover:bg-zinc-100"
-                  @click="applyRotate(-10)"
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                    class="h-4 w-4"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.6"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  >
-                    <path d="M20 12a8 8 0 1 1-8-8" />
-                    <path d="M12 4v4H8" />
-                  </svg>
-                  逆时针 10°
-                </Button>
-              </div>
-            </div>
-            <div class="rounded-xl border border-zinc-200/70 bg-zinc-50/80 p-2">
-              <div class="text-[10px] uppercase tracking-[0.2em] text-zinc-500">缩放</div>
-              <div class="mt-1.5 flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  class="flex-1 h-8 gap-2 border-zinc-200 bg-white text-[12px] text-zinc-700 hover:bg-zinc-100"
-                  @click="applyScale(1.1)"
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                    class="h-4 w-4"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.6"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  >
-                    <path d="M11 5v12" />
-                    <path d="M5 11h12" />
-                    <circle cx="11" cy="11" r="8" />
-                  </svg>
-                  放大 ×1.1
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  class="flex-1 h-8 gap-2 border-zinc-200 bg-white text-[12px] text-zinc-700 hover:bg-zinc-100"
-                  @click="applyScale(1 / 1.1)"
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                    class="h-4 w-4"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.6"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  >
-                    <path d="M5 11h12" />
-                    <circle cx="11" cy="11" r="8" />
-                  </svg>
-                  缩小 ÷1.1
-                </Button>
-              </div>
-            </div>
-            <div class="rounded-xl border border-zinc-200/70 bg-zinc-50/80 p-2">
-              <div class="text-[10px] uppercase tracking-[0.2em] text-zinc-500">新增点 X/Y</div>
-              <div class="mt-1.5 grid grid-cols-[1fr_1fr_auto] gap-2">
-                <label class="flex flex-col gap-1.5 text-[11px] text-zinc-500">
-                  <input
-                    type="number"
-                    step="0.01"
-                    v-model.number="newPoint.x"
-                    @keydown.stop
-                    :min="0"
-                    class="h-7 rounded-lg border border-zinc-200/80 bg-white px-2.5 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-sky-500/30"
-                  />
-                </label>
-                <label class="flex flex-col gap-1.5 text-[11px] text-zinc-500">
-                  <input
-                    type="number"
-                    step="0.01"
-                    v-model.number="newPoint.y"
-                    @keydown.stop
-                    :min="0"
-                    class="h-7 rounded-lg border border-zinc-200/80 bg-white px-2.5 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-sky-500/30"
-                  />
-                </label>
-                <div class="flex items-end">
-                  <Button class="h-7 gap-2 px-3 text-[12px]" @click="addPointAtEnd(newPoint.x, newPoint.y)">
-                    <svg
-                      viewBox="0 0 24 24"
-                      aria-hidden="true"
-                      class="h-3.5 w-3.5"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.6"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    >
-                      <path d="M12 5v14" />
-                      <path d="M5 12h14" />
-                    </svg>
-                    新增
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div
-          class="rounded-2xl border border-zinc-200 bg-white px-3 py-2.5 text-zinc-900 shadow-sm"
-        >
-          <div class="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
-            <svg
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-              class="h-4 w-4"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.6"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="M4 6h16v12H4z" />
-              <path d="M8 10h8" />
-              <path d="M8 14h5" />
-            </svg>
-            标注与辅助
-          </div>
-
-          <div class="mt-2 rounded-xl border border-zinc-200/80 bg-zinc-50 px-2.5 py-2">
-            <div class="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
-              <span
-                class="flex h-6 w-6 items-center justify-center rounded-md bg-white ring-1 ring-black/10"
-              >
-                <svg
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
-                  class="h-3.5 w-3.5"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.6"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path d="M12 6v12" />
-                  <path d="M6 12h12" />
-                  <circle cx="12" cy="12" r="9" />
-                </svg>
-              </span>
-              点位信息
-            </div>
-            <div class="mt-2 grid gap-2 text-xs text-zinc-600 sm:grid-cols-2">
-              <div class="flex items-center justify-between rounded-lg bg-white px-2 py-1 ring-1 ring-black/5">
-                <span>数量</span>
-                <span class="font-semibold text-zinc-900">{{ points.length }}</span>
-              </div>
-              <div class="flex items-center justify-between rounded-lg bg-white px-2 py-1 ring-1 ring-black/5">
-                <span>状态</span>
-                <span
-                  class="inline-flex items-center gap-2 rounded-full border border-zinc-200 px-2 py-0.5 text-[10px]"
-                  :class="
-                    isClosed
-                      ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-600'
-                      : 'border-rose-500/40 bg-rose-500/10 text-rose-600'
-                  "
-                >
-                  <span
-                    class="h-1.5 w-1.5 rounded-full"
-                    :class="isClosed ? 'bg-emerald-400' : 'bg-rose-400'"
-                  ></span>
-                  {{ isClosed ? '已闭合' : '未闭合' }}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div class="mt-2 grid gap-2 sm:grid-cols-2">
-            <label
-              class="flex items-center justify-between gap-3 rounded-lg border border-zinc-200/80 bg-zinc-50 px-2 py-1 text-[11px] text-zinc-700"
-            >
-              <span>修改栅格单位时缩放图形</span>
-              <input
-                type="checkbox"
-                v-model="linkScaleOnGridChange"
-                class="h-4 w-4 accent-sky-500"
-              />
-            </label>
-            <label
-              class="flex items-center justify-between gap-3 rounded-lg border border-zinc-200/80 bg-zinc-50 px-2 py-1 text-[11px] text-zinc-700"
-            >
-              <span>边长标注</span>
-              <input type="checkbox" v-model="showEdgeLabels" class="h-4 w-4 accent-sky-500" />
-            </label>
-            <label
-              class="flex items-center justify-between gap-3 rounded-lg border border-zinc-200/80 bg-zinc-50 px-2 py-1 text-[11px] text-zinc-700"
-            >
-              <span>角度标注</span>
-              <input type="checkbox" v-model="showAngleLabels" class="h-4 w-4 accent-sky-500" />
-            </label>
-            <label
-              class="flex items-center justify-between gap-3 rounded-lg border border-zinc-200/80 bg-zinc-50 px-2 py-1 text-[11px] text-zinc-700"
-            >
-              <span>显示中心点图标</span>
-              <input type="checkbox" v-model="showPivot" class="h-4 w-4 accent-sky-500" />
-            </label>
-          </div>
-        </div>
-      </section>
-
-      <section class="grid min-h-0 flex-1 gap-4 lg:grid-cols-[minmax(0,1fr)_360px]">
-        <div class="relative flex min-h-[520px] flex-1 flex-col lg:min-h-[640px]">
-          <div class="relative flex-1 overflow-hidden rounded-3xl bg-transparent">
+      <!-- Canvas + Point List -->
+      <section class="grid min-h-0 flex-1 gap-3 overflow-hidden lg:grid-cols-[minmax(0,1fr)_320px]">
+        <div class="relative flex min-h-0 flex-1 flex-col">
+          <div class="relative flex-1 overflow-hidden rounded-xl border border-zinc-200 shadow-sm">
             <div ref="wrapRef" class="relative h-full w-full" @contextmenu.prevent>
               <canvas
                 ref="canvasRef"
@@ -444,115 +110,67 @@
                 {{ overlayHint }}
               </div>
 
-              <div
-                class="pointer-events-none absolute bottom-4 left-4 right-4 flex flex-wrap gap-2 text-xs text-zinc-400"
-              >
-                <div
-                  class="inline-flex items-center gap-2 rounded-full bg-zinc-800/60 px-3 py-1 ring-1 ring-white/[0.05]"
+              <!-- Status & toggle overlay -->
+              <div class="absolute bottom-3 right-3 flex items-center gap-2 rounded-full bg-zinc-800/70 px-3 py-1.5 text-[11px] text-zinc-300 ring-1 ring-white/[0.06]">
+                <span class="font-medium text-white">{{ points.length }}</span> 点
+                <span
+                  class="inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-medium"
+                  :class="isClosed ? 'bg-emerald-500/20 text-emerald-300' : 'bg-zinc-600/40 text-zinc-400'"
                 >
-                  <span
-                    class="flex h-6 w-6 items-center justify-center rounded-md bg-zinc-700/60 ring-1 ring-white/[0.08]"
-                  >
-                    <svg
-                      viewBox="0 0 24 24"
-                      aria-hidden="true"
-                      class="h-3.5 w-3.5 text-zinc-100"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.6"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    >
-                      <rect x="7" y="3" width="10" height="18" rx="5" />
-                      <path d="M12 7v4" />
-                    </svg>
+                  <span class="h-1.5 w-1.5 rounded-full" :class="isClosed ? 'bg-emerald-400' : 'bg-zinc-500'"></span>
+                  {{ isClosed ? '已闭合' : '未闭合' }}
+                </span>
+                <span class="h-3 w-px bg-zinc-600"></span>
+                <label class="pointer-events-auto flex cursor-pointer items-center gap-1">
+                  <input type="checkbox" v-model="showEdgeLabels" class="h-3 w-3 accent-sky-400" />
+                  <span>边长</span>
+                </label>
+                <label class="pointer-events-auto flex cursor-pointer items-center gap-1">
+                  <input type="checkbox" v-model="showAngleLabels" class="h-3 w-3 accent-sky-400" />
+                  <span>角度</span>
+                </label>
+                <label class="pointer-events-auto flex cursor-pointer items-center gap-1">
+                  <input type="checkbox" v-model="showPivot" class="h-3 w-3 accent-sky-400" />
+                  <span>中心点</span>
+                </label>
+                <label class="pointer-events-auto flex cursor-pointer items-center gap-1">
+                  <input type="checkbox" v-model="linkScaleOnGridChange" class="h-3 w-3 accent-sky-400" />
+                  <span>联动缩放</span>
+                </label>
+              </div>
+
+              <div class="pointer-events-none absolute bottom-3 left-3 flex flex-wrap gap-1.5 text-[11px] text-zinc-400" style="max-width: calc(100% - 24px)">
+                <div class="inline-flex items-center gap-1.5 rounded-full bg-zinc-800/60 px-2.5 py-0.5 ring-1 ring-white/[0.05]">
+                  <span class="flex h-5 w-5 items-center justify-center rounded bg-zinc-700/60 ring-1 ring-white/[0.08]">
+                    <svg viewBox="0 0 24 24" class="h-3 w-3 text-zinc-100" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="3" width="10" height="18" rx="5" /><path d="M12 7v4" /></svg>
                   </span>
                   单击加点
                 </div>
-                <div
-                  class="inline-flex items-center gap-2 rounded-full bg-zinc-800/60 px-3 py-1 ring-1 ring-white/[0.05]"
-                >
-                  <span
-                    class="flex h-6 w-6 items-center justify-center rounded-md bg-zinc-700/60 ring-1 ring-white/[0.08]"
-                  >
-                    <svg
-                      viewBox="0 0 24 24"
-                      aria-hidden="true"
-                      class="h-3.5 w-3.5 text-zinc-100"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.6"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    >
-                      <path d="M7 3v6" />
-                      <path d="M17 21v-6" />
-                      <path d="M3 7h6" />
-                      <path d="M15 17h6" />
-                      <path d="M7 7l4 4" />
-                      <path d="M17 17l-4-4" />
-                    </svg>
-                  </span>
+                <div class="inline-flex items-center gap-1.5 rounded-full bg-zinc-800/60 px-2.5 py-0.5 ring-1 ring-white/[0.05]">
                   拖动平移
                 </div>
-                <div
-                  class="inline-flex items-center gap-2 rounded-full bg-zinc-800/60 px-3 py-1 ring-1 ring-white/[0.05]"
-                >
-                  <kbd
-                    class="rounded-md bg-zinc-700/60 px-1.5 py-0.5 text-[10px] font-semibold text-zinc-100 ring-1 ring-white/[0.08]"
-                  >
-                    Alt
-                  </kbd>
+                <div class="inline-flex items-center gap-1.5 rounded-full bg-zinc-800/60 px-2.5 py-0.5 ring-1 ring-white/[0.05]">
+                  <kbd class="rounded bg-zinc-700/60 px-1 py-px text-[9px] font-semibold text-zinc-100 ring-1 ring-white/[0.08]">Alt</kbd>
                   旋转
                 </div>
-                <div
-                  class="inline-flex items-center gap-2 rounded-full bg-zinc-800/60 px-3 py-1 ring-1 ring-white/[0.05]"
-                >
-                  <kbd
-                    class="rounded-md bg-zinc-700/60 px-1.5 py-0.5 text-[10px] font-semibold text-zinc-100 ring-1 ring-white/[0.08]"
-                  >
-                    Ctrl/⌘
-                  </kbd>
+                <div class="inline-flex items-center gap-1.5 rounded-full bg-zinc-800/60 px-2.5 py-0.5 ring-1 ring-white/[0.05]">
+                  <kbd class="rounded bg-zinc-700/60 px-1 py-px text-[9px] font-semibold text-zinc-100 ring-1 ring-white/[0.08]">Ctrl/⌘</kbd>
                   缩放
                 </div>
-                <div
-                  class="inline-flex items-center gap-2 rounded-full bg-zinc-800/60 px-3 py-1 ring-1 ring-white/[0.05]"
-                >
-                  <kbd
-                    class="rounded-md bg-zinc-700/60 px-1.5 py-0.5 text-[10px] font-semibold text-zinc-100 ring-1 ring-white/[0.08]"
-                  >
-                    Shift
-                  </kbd>
+                <div class="inline-flex items-center gap-1.5 rounded-full bg-zinc-800/60 px-2.5 py-0.5 ring-1 ring-white/[0.05]">
+                  <kbd class="rounded bg-zinc-700/60 px-1 py-px text-[9px] font-semibold text-zinc-100 ring-1 ring-white/[0.08]">Shift</kbd>
                   禁吸附
                 </div>
-                <div
-                  class="inline-flex items-center gap-2 rounded-full bg-zinc-800/60 px-3 py-1 ring-1 ring-white/[0.05]"
-                >
-                  <kbd
-                    class="rounded-md bg-zinc-700/60 px-1.5 py-0.5 text-[10px] font-semibold text-zinc-100 ring-1 ring-white/[0.08]"
-                  >
-                    双击
-                  </kbd>
+                <div class="inline-flex items-center gap-1.5 rounded-full bg-zinc-800/60 px-2.5 py-0.5 ring-1 ring-white/[0.05]">
+                  <kbd class="rounded bg-zinc-700/60 px-1 py-px text-[9px] font-semibold text-zinc-100 ring-1 ring-white/[0.08]">双击</kbd>
                   闭合
                 </div>
-                <div
-                  class="inline-flex items-center gap-2 rounded-full bg-zinc-800/60 px-3 py-1 ring-1 ring-white/[0.05]"
-                >
-                  <kbd
-                    class="rounded-md bg-zinc-700/60 px-1.5 py-0.5 text-[10px] font-semibold text-zinc-100 ring-1 ring-white/[0.08]"
-                  >
-                    右键
-                  </kbd>
+                <div class="inline-flex items-center gap-1.5 rounded-full bg-zinc-800/60 px-2.5 py-0.5 ring-1 ring-white/[0.05]">
+                  <kbd class="rounded bg-zinc-700/60 px-1 py-px text-[9px] font-semibold text-zinc-100 ring-1 ring-white/[0.08]">右键</kbd>
                   撤销
                 </div>
-                <div
-                  class="inline-flex items-center gap-2 rounded-full bg-zinc-800/60 px-3 py-1 ring-1 ring-white/[0.05]"
-                >
-                  <kbd
-                    class="rounded-md bg-zinc-700/60 px-1.5 py-0.5 text-[10px] font-semibold text-zinc-100 ring-1 ring-white/[0.08]"
-                  >
-                    Del
-                  </kbd>
+                <div class="inline-flex items-center gap-1.5 rounded-full bg-zinc-800/60 px-2.5 py-0.5 ring-1 ring-white/[0.05]">
+                  <kbd class="rounded bg-zinc-700/60 px-1 py-px text-[9px] font-semibold text-zinc-100 ring-1 ring-white/[0.08]">Del</kbd>
                   删除
                 </div>
               </div>
@@ -560,116 +178,63 @@
           </div>
         </div>
 
-        <aside class="flex h-full w-full min-h-0 flex-col gap-4 lg:pr-1 lg:overflow-y-auto">
-
-          <Card class="flex min-h-0 flex-1 flex-col border border-zinc-200 bg-white text-zinc-900 shadow-sm">
-            <CardHeader class="px-4 py-3">
-              <CardTitle class="flex items-center gap-2 text-base">
-                <span
-                  class="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-100 ring-1 ring-black/10"
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                    class="h-4 w-4"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.6"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
+        <!-- Point List -->
+        <aside class="flex min-h-0 flex-col rounded-xl border border-zinc-200 bg-white shadow-sm lg:overflow-hidden">
+          <div class="flex items-center gap-2 border-b border-zinc-100 px-4 py-3">
+            <svg viewBox="0 0 24 24" class="h-4 w-4 text-zinc-400" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="16" rx="2" /><path d="M9 8h6" /><path d="M9 12h6" /><path d="M9 16h6" /></svg>
+            <span class="text-sm font-medium text-zinc-900">点列表</span>
+          </div>
+          <div class="flex-1 overflow-y-auto p-3">
+            <div v-if="!points.length" class="py-8 text-center text-sm text-zinc-400">暂无点位</div>
+            <div class="flex flex-col gap-2">
+              <div
+                v-for="(p, i) in points"
+                :key="i"
+                class="rounded-lg border px-3 py-2.5 transition"
+                :class="
+                  i === selectedIndex
+                    ? 'border-emerald-500/60 bg-emerald-50'
+                    : 'border-zinc-200 bg-white hover:border-zinc-300'
+                "
+              >
+                <div class="flex items-center justify-between">
+                  <button type="button" class="text-sm font-semibold text-zinc-700" @click="selectedIndex = i">
+                    #{{ i + 1 }}
+                  </button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    class="h-7 w-7 text-red-500 hover:bg-red-50 hover:text-red-600"
+                    @click="deletePoint(i)"
                   >
-                    <rect x="5" y="4" width="14" height="16" rx="2" />
-                    <path d="M9 8h6" />
-                    <path d="M9 12h6" />
-                    <path d="M9 16h6" />
-                  </svg>
-                </span>
-                点列表
-              </CardTitle>
-            </CardHeader>
-            <CardContent class="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden px-4 pb-4 pt-0">
-              <div v-if="!points.length" class="text-sm text-zinc-500">暂无点位</div>
-              <div class="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pr-1">
-                <div
-                  v-for="(p, i) in points"
-                  :key="i"
-                  class="rounded-xl border px-3 py-3 transition"
-                  :class="
-                    i === selectedIndex
-                      ? 'border-emerald-500/60 bg-emerald-50'
-                      : 'border-zinc-200 bg-white hover:border-zinc-300'
-                  "
-                >
+                    <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16" /><path d="M10 11v6M14 11v6" /><path d="M9 7l1-2h4l1 2" /><rect x="6" y="7" width="12" height="13" rx="2" /></svg>
+                  </Button>
+                </div>
+
+                <div class="mt-2 grid grid-cols-2 gap-2" @click="selectedIndex = i">
+                  <label class="flex flex-col gap-1 text-[11px] text-zinc-500">
+                    <span>X</span>
+                    <input type="number" step="0.01" v-model.number="points[i].x" @input="onPointInput(i)" @keydown.stop class="h-7 rounded-md border border-zinc-200 bg-zinc-50 px-2 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-sky-500/30" />
+                  </label>
+                  <label class="flex flex-col gap-1 text-[11px] text-zinc-500">
+                    <span>Y</span>
+                    <input type="number" step="0.01" v-model.number="points[i].y" @input="onPointInput(i)" @keydown.stop class="h-7 rounded-md border border-zinc-200 bg-zinc-50 px-2 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-sky-500/30" />
+                  </label>
+                </div>
+
+                <div v-if="edgeLengths[i] !== undefined" class="mt-2 text-[11px] text-zinc-500">
                   <div class="flex items-center justify-between">
-                    <button type="button" class="text-sm font-semibold" @click="selectedIndex = i">
-                      #{{ i + 1 }}
-                    </button>
-                    <Button
-                      variant="destructive"
-                      size="icon"
-                      class="h-8 w-8"
-                      @click="deletePoint(i)"
-                    >
-                      <svg
-                        viewBox="0 0 24 24"
-                        aria-hidden="true"
-                        class="h-4 w-4"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="1.6"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      >
-                        <path d="M4 7h16" />
-                        <path d="M10 11v6M14 11v6" />
-                        <path d="M9 7l1-2h4l1 2" />
-                        <rect x="6" y="7" width="12" height="13" rx="2" />
-                      </svg>
-                    </Button>
+                    <span>长度</span>
+                    <span class="text-zinc-700">{{ edgeLengths[i].toFixed(2) }} m</span>
                   </div>
-
-                  <div class="mt-3 grid grid-cols-2 gap-2" @click="selectedIndex = i">
-                    <label class="flex flex-col gap-1 text-xs text-zinc-500">
-                      <span>X</span>
-                      <input
-                        type="number"
-                        step="0.01"
-                        v-model.number="points[i].x"
-                        @input="onPointInput(i)"
-                        @keydown.stop
-                        class="h-8 rounded-lg border border-zinc-200/80 bg-white px-3 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-sky-500/30"
-                      />
-                    </label>
-                    <label class="flex flex-col gap-1 text-xs text-zinc-500">
-                      <span>Y</span>
-                      <input
-                        type="number"
-                        step="0.01"
-                        v-model.number="points[i].y"
-                        @input="onPointInput(i)"
-                        @keydown.stop
-                        class="h-8 rounded-lg border border-zinc-200/80 bg-white px-3 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-sky-500/30"
-                      />
-                    </label>
-                  </div>
-
-                  <div v-if="edgeLengths[i] !== undefined" class="mt-3 text-xs text-zinc-500">
-                    <div class="flex items-center justify-between">
-                      <span>长度</span>
-                      <span class="text-zinc-800">{{ edgeLengths[i].toFixed(2) }} m</span>
-                    </div>
-                    <div
-                      v-if="showAngleLabels && vertexAngles[i] !== undefined"
-                      class="mt-1 flex items-center justify-between"
-                    >
-                      <span>角度</span>
-                      <span class="text-zinc-800">{{ vertexAngles[i].toFixed(2) }}°</span>
-                    </div>
+                  <div v-if="showAngleLabels && vertexAngles[i] !== undefined" class="mt-0.5 flex items-center justify-between">
+                    <span>角度</span>
+                    <span class="text-zinc-700">{{ vertexAngles[i].toFixed(2) }}°</span>
                   </div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </aside>
       </section>
     </div>
@@ -677,7 +242,7 @@
 </template>
 
 <script setup>
-import { Button, Card, CardContent, CardHeader, CardTitle } from '@/components/ui';
+import { Button } from '@/components/ui';
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
 
 /** ===== 全屏 ===== */
