@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Card, CardContent, CardHeader } from '@/components/ui'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
@@ -62,34 +63,34 @@ const milestones = reactive([
 // ===================== 颜色常量 =====================
 const COLORS = {
   ZONE: {
-    A: '#60a5fa',
-    B: '#34d399',
-    E: '#fbbf24',
-    F: '#f472b6',
-    S: '#a78bfa',
-    FORE: '#3b82f6',
-    FORE_MID: '#06b6d4',
-    MID: '#10b981',
-    ENGINE: '#f59e0b',
-    AFT: '#ef4444',
-    SUPERSTRUCTURE: '#8b5cf6',
-    DEFAULT: '#6BAFCF',
+    A: '#2a9d8f',
+    B: '#e9c46a',
+    E: '#f4a261',
+    F: '#e76f51',
+    S: '#264653',
+    FORE: '#2a9d8f',
+    FORE_MID: '#3bb7a5',
+    MID: '#e9c46a',
+    ENGINE: '#f4a261',
+    AFT: '#e76f51',
+    SUPERSTRUCTURE: '#264653',
+    DEFAULT: '#2a9d8f',
   } as Record<string, string>,
   STATUS: {
-    MISSING: '#ef4444',
-    IN_PROGRESS_LIGHT: '#fef3c7',
-    IN_PROGRESS_DEEP: '#f59e0b',
-    DONE_GREEN: '#22c55e',
+    MISSING: '#e76f51',
+    IN_PROGRESS_LIGHT: '#e9c46a',
+    IN_PROGRESS_DEEP: '#f4a261',
+    DONE_GREEN: '#2a9d8f',
   },
 }
 
 const ZONE_COLORS: Record<string, string> = {
-  fore: '#3b82f6',
-  foreMid: '#06b6d4',
-  mid: '#10b981',
-  engine: '#f59e0b',
-  aft: '#ef4444',
-  super: '#8b5cf6',
+  fore: '#2a9d8f',
+  foreMid: '#3bb7a5',
+  mid: '#e9c46a',
+  engine: '#f4a261',
+  aft: '#e76f51',
+  super: '#264653',
 }
 
 // ===================== 阈值/发光 =====================
@@ -741,12 +742,12 @@ const progressRingDash = computed(() => {
 </script>
 
 <template>
-  <div class="mx-auto h-full w-full max-w-[1600px] overflow-auto p-5 space-y-5 bg-muted/40">
+  <div class="home-theme mx-auto h-full w-full max-w-[1600px] overflow-auto p-5 space-y-5 bg-background text-foreground">
     <!-- 主体：3D + 右侧面板 -->
     <div class="grid grid-cols-[1fr_300px] gap-5" style="min-height: 620px">
 
       <!-- 3D 查看器 -->
-      <div ref="viewerContainerRef" class="relative p-5 rounded-2xl overflow-hidden flex flex-col bg-zinc-900 shadow-[0_8px_40px_-12px_rgba(0,0,0,0.3)] ring-1 ring-white/[0.06]">
+      <div ref="viewerContainerRef" class="relative rounded-2xl overflow-hidden flex flex-col">
 
         <!-- Canvas 区域 -->
         <div ref="canvasWrapRef" class="flex-1 relative min-h-0" @contextmenu.prevent>
@@ -756,27 +757,27 @@ const progressRingDash = computed(() => {
           <div class="absolute top-0 inset-x-0 p-3.5 flex items-start justify-between pointer-events-none">
             <!-- 左上：标题 -->
             <div class="pointer-events-auto">
-              <div class="bg-zinc-800/70 backdrop-blur-xl rounded-lg px-3.5 py-2 flex items-center gap-2.5 ring-1 ring-white/[0.08] shadow-xl">
-                <div class="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.6)] animate-pulse" />
-                <h2 class="text-[13px] font-semibold text-zinc-100 tracking-tight">{{ shipTitle }}</h2>
-                <div class="h-3.5 w-px bg-zinc-600/80" />
-                <span class="text-[11px] text-zinc-500 tabular-nums font-medium">{{ kpi.totalCount }} 分段</span>
+              <div class="bg-foreground/80 backdrop-blur-xl rounded-lg px-3.5 py-2 flex items-center gap-2.5 ring-1 ring-foreground/20 shadow-xl">
+                <div class="w-1.5 h-1.5 rounded-full bg-accent shadow-[0_0_6px_rgba(244,162,97,0.6)] animate-pulse" />
+                <h2 class="ui-title text-secondary tracking-tight">{{ shipTitle }}</h2>
+                <div class="h-3.5 w-px bg-secondary/40" />
+                <span class="ui-meta text-secondary/70 tabular-nums font-medium">{{ kpi.totalCount }} 分段</span>
               </div>
             </div>
 
             <!-- 右上：视图切换 + 全屏 -->
             <div class="pointer-events-auto flex items-center gap-1.5">
-              <div class="bg-zinc-800/70 backdrop-blur-xl rounded-lg p-0.5 flex items-center ring-1 ring-white/[0.08] shadow-xl">
+              <div class="bg-foreground/80 backdrop-blur-xl rounded-lg p-0.5 flex items-center ring-1 ring-foreground/20 shadow-xl">
                 <button
                   v-for="v in [
                     { key: 'complete' as const, label: '船体概览', icon: 'M2.25 12l8.954-8.955a1.126 1.126 0 0 1 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25' },
                     { key: 'progress' as const, label: '建造进度', icon: 'M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125z' },
                   ]"
                   :key="v.key"
-                  class="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium rounded-md transition-all duration-200"
+                  class="flex items-center gap-1.5 px-3 py-1.5 ui-meta font-medium rounded-md transition-all duration-200"
                   :class="currentView === v.key
-                    ? 'bg-white/[0.12] text-white ring-1 ring-white/[0.08]'
-                    : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'"
+                    ? 'bg-destructive/15 text-destructive ring-1 ring-destructive/40'
+                    : 'text-secondary/60 hover:text-destructive hover:bg-destructive/10'"
                   @click="setView(v.key)"
                 >
                   <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
@@ -786,7 +787,7 @@ const progressRingDash = computed(() => {
                 </button>
               </div>
               <button
-                class="bg-zinc-800/70 backdrop-blur-xl rounded-lg w-8 h-8 flex items-center justify-center text-zinc-500 hover:text-white hover:bg-zinc-700/80 transition-all ring-1 ring-white/[0.08] shadow-xl"
+                class="bg-foreground/80 backdrop-blur-xl rounded-lg w-8 h-8 flex items-center justify-center text-secondary/60 hover:text-destructive hover:bg-foreground/70 transition-all ring-1 ring-foreground/20 shadow-xl"
                 :title="isFullscreen ? '退出全屏' : '全屏显示'"
                 @click="toggleFullscreen"
               >
@@ -803,30 +804,30 @@ const progressRingDash = computed(() => {
           <!-- 左下：操作提示 -->
           <div class="absolute bottom-3.5 left-3.5 pointer-events-none">
             <div class="flex items-center gap-1.5 select-none">
-              <div class="flex items-center gap-1 bg-zinc-800/50 backdrop-blur-lg rounded-md px-2 py-1 ring-1 ring-white/[0.05]">
-                <kbd class="text-[10px] font-mono text-zinc-500 bg-zinc-700/60 rounded px-1 py-px ring-1 ring-white/[0.06]">LMB</kbd>
-                <span class="text-[10px] text-zinc-500">旋转</span>
+              <div class="flex items-center gap-1 bg-foreground/70 backdrop-blur-lg rounded-md px-2 py-1 ring-1 ring-foreground/20">
+                <kbd class="ui-micro font-mono text-secondary/80 bg-foreground/60 rounded px-1 py-px ring-1 ring-foreground/20">LMB</kbd>
+                <span class="ui-micro text-secondary/70">旋转</span>
               </div>
-              <div class="flex items-center gap-1 bg-zinc-800/50 backdrop-blur-lg rounded-md px-2 py-1 ring-1 ring-white/[0.05]">
-                <kbd class="text-[10px] font-mono text-zinc-500 bg-zinc-700/60 rounded px-1 py-px ring-1 ring-white/[0.06]">RMB</kbd>
-                <span class="text-[10px] text-zinc-500">平移</span>
+              <div class="flex items-center gap-1 bg-foreground/70 backdrop-blur-lg rounded-md px-2 py-1 ring-1 ring-foreground/20">
+                <kbd class="ui-micro font-mono text-secondary/80 bg-foreground/60 rounded px-1 py-px ring-1 ring-foreground/20">RMB</kbd>
+                <span class="ui-micro text-secondary/70">平移</span>
               </div>
-              <div class="flex items-center gap-1 bg-zinc-800/50 backdrop-blur-lg rounded-md px-2 py-1 ring-1 ring-white/[0.05]">
-                <kbd class="text-[10px] font-mono text-zinc-500 bg-zinc-700/60 rounded px-1 py-px ring-1 ring-white/[0.06]">Scroll</kbd>
-                <span class="text-[10px] text-zinc-500">缩放</span>
+              <div class="flex items-center gap-1 bg-foreground/70 backdrop-blur-lg rounded-md px-2 py-1 ring-1 ring-foreground/20">
+                <kbd class="ui-micro font-mono text-secondary/80 bg-foreground/60 rounded px-1 py-px ring-1 ring-foreground/20">Scroll</kbd>
+                <span class="ui-micro text-secondary/70">缩放</span>
               </div>
             </div>
           </div>
 
           <!-- 右下：推演控制浮层 -->
           <div class="absolute bottom-3.5 right-3.5 pointer-events-auto">
-            <div class="bg-zinc-800/70 backdrop-blur-xl rounded-xl px-3.5 py-2.5 ring-1 ring-white/[0.08] shadow-xl w-[320px]">
+            <div class="bg-foreground/80 backdrop-blur-xl rounded-xl px-3.5 py-2.5 ring-1 ring-foreground/20 shadow-xl w-[320px]">
               <div class="flex items-center gap-2.5">
                 <button
                   class="shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200"
                   :class="simPlaying
-                    ? 'bg-emerald-500/90 text-white shadow-lg shadow-emerald-500/25 ring-1 ring-emerald-400/30'
-                    : 'bg-zinc-700/60 text-zinc-400 hover:bg-zinc-600/60 hover:text-zinc-200 ring-1 ring-white/[0.06]'"
+                    ? 'bg-destructive text-destructive-foreground shadow-lg shadow-destructive/25 ring-1 ring-destructive/40'
+                    : 'bg-foreground/60 text-secondary/60 hover:bg-foreground/70 hover:text-destructive ring-1 ring-foreground/20'"
                   :title="simPlaying ? '暂停推演' : '播放推演'"
                   @click="toggleSimPlay"
                 >
@@ -839,17 +840,17 @@ const progressRingDash = computed(() => {
                 </button>
                 <div class="flex-1 min-w-0">
                   <div class="flex items-baseline justify-between mb-1">
-                    <span class="text-[10px] text-zinc-500 font-medium uppercase tracking-wider">推演进度</span>
+                    <span class="ui-micro text-secondary/70 font-medium uppercase tracking-wider">推演进度</span>
                     <div class="flex items-baseline gap-1">
-                      <span class="text-[11px] font-semibold text-zinc-200 tabular-nums font-mono">{{ simDateText }}</span>
-                      <span class="text-[9px] text-zinc-600 tabular-nums font-mono">D{{ simIndex }}/{{ SIM.days }}</span>
+                      <span class="ui-meta font-semibold text-secondary tabular-nums font-mono">{{ simDateText }}</span>
+                      <span class="ui-micro text-secondary/50 tabular-nums font-mono">D{{ simIndex }}/{{ SIM.days }}</span>
                     </div>
                   </div>
                   <div class="relative h-4 flex items-center">
-                    <div class="w-full h-[3px] bg-zinc-700/80 rounded-full overflow-hidden">
+                    <div class="w-full h-[3px] bg-foreground/60 rounded-full overflow-hidden">
                       <div
                         class="h-full rounded-full transition-all duration-200"
-                        :class="simPlaying ? 'bg-emerald-400' : 'bg-zinc-500'"
+                        :class="simPlaying ? 'bg-destructive' : 'bg-secondary/70'"
                         :style="{ width: (simIndex / SIM.days * 100) + '%' }"
                       />
                     </div>
@@ -866,22 +867,22 @@ const progressRingDash = computed(() => {
 
           <!-- 全屏时叠加进度 -->
           <div v-if="isFullscreen" class="absolute top-20 left-4 pointer-events-none">
-            <div class="bg-zinc-800/80 backdrop-blur-xl rounded-xl p-4 shadow-xl ring-1 ring-white/[0.08]">
+            <div class="bg-foreground/85 backdrop-blur-xl rounded-xl p-4 shadow-xl ring-1 ring-foreground/20">
               <div class="flex items-center gap-3">
                 <div class="relative w-14 h-14 shrink-0">
                   <svg viewBox="0 0 80 80" class="w-full h-full -rotate-90">
-                    <circle cx="40" cy="40" r="34" fill="none" stroke-width="6" class="stroke-zinc-700" />
+                    <circle cx="40" cy="40" r="34" fill="none" stroke-width="6" class="stroke-secondary/20" />
                     <circle cx="40" cy="40" r="34" fill="none" stroke-width="6" stroke-linecap="round"
-                      class="stroke-emerald-400 transition-all duration-500"
+                      class="stroke-destructive transition-all duration-500"
                       :stroke-dasharray="progressRingDash.array" :stroke-dashoffset="progressRingDash.offset" />
                   </svg>
-                  <span class="absolute inset-0 flex items-center justify-center text-xs font-bold text-zinc-100">{{ kpi.overallProgress }}%</span>
+                  <span class="absolute inset-0 flex items-center justify-center ui-meta font-bold text-secondary">{{ kpi.overallProgress }}%</span>
                 </div>
                 <div class="text-xs space-y-1">
-                  <div class="font-semibold text-sm text-zinc-100">整体装配</div>
-                  <div class="flex gap-3 text-zinc-400">
-                    <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400" />{{ kpi.installedCount }} 已装</span>
-                    <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-zinc-500" />{{ kpi.remainingCount }} 剩余</span>
+                  <div class="ui-title text-secondary">整体装配</div>
+                  <div class="ui-meta flex gap-3 text-secondary/70">
+                    <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-primary" />{{ kpi.installedCount }} 已装</span>
+                    <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-secondary" />{{ kpi.remainingCount }} 剩余</span>
                   </div>
                 </div>
               </div>
@@ -889,9 +890,9 @@ const progressRingDash = computed(() => {
           </div>
 
           <!-- Loading -->
-          <div v-if="loading" class="absolute inset-0 flex flex-col items-center justify-center bg-zinc-900/80 backdrop-blur-sm gap-3">
-            <div class="w-10 h-10 rounded-full border-2 border-white/20 border-t-white animate-spin" />
-            <span class="text-sm text-white/70 font-medium">加载 3D 场景...</span>
+          <div v-if="loading" class="absolute inset-0 flex flex-col items-center justify-center bg-foreground/85 backdrop-blur-sm gap-3">
+            <div class="w-10 h-10 rounded-full border-2 border-secondary/30 border-t-secondary animate-spin" />
+            <span class="ui-body text-secondary/70 font-medium">加载 3D 场景...</span>
           </div>
         </div>
       </div>
@@ -899,109 +900,123 @@ const progressRingDash = computed(() => {
       <!-- 右侧面板 -->
       <div class="space-y-3.5">
         <!-- 整体进度 -->
-        <div class="rounded-xl border bg-card p-4 shadow-sm">
-          <div class="flex items-center gap-2 mb-3">
-            <svg class="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+        <Card class="shadow-sm">
+          <CardHeader class="ui-card-header relative z-10 flex-row items-center space-y-0 text-foreground">
+            <svg class="ui-icon text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
               <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6a7.5 7.5 0 1 0 7.5 7.5h-7.5V6z" />
               <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0 0 13.5 3v7.5z" />
             </svg>
-            <span class="text-xs font-semibold text-foreground">整体装配进度</span>
-          </div>
-          <div class="flex items-center gap-4">
-            <div class="relative w-16 h-16 shrink-0">
-              <svg viewBox="0 0 80 80" class="w-full h-full -rotate-90">
-                <circle cx="40" cy="40" r="34" fill="none" stroke-width="6" class="stroke-muted" />
-                <circle cx="40" cy="40" r="34" fill="none" stroke-width="6" stroke-linecap="round"
-                  class="stroke-primary transition-all duration-500"
-                  :stroke-dasharray="progressRingDash.array" :stroke-dashoffset="progressRingDash.offset" />
-              </svg>
-              <span class="absolute inset-0 flex items-center justify-center text-sm font-bold tabular-nums">{{ kpi.overallProgress }}%</span>
-            </div>
-            <div class="flex-1 space-y-2">
-              <div class="flex items-center justify-between text-xs">
-                <span class="flex items-center gap-1.5 text-muted-foreground">
-                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500" />已安装
-                </span>
-                <span class="font-semibold tabular-nums">{{ kpi.installedCount }}</span>
+            <span class="ui-title text-foreground">整体装配进度</span>
+          </CardHeader>
+          <CardContent class="ui-card-content ui-body flex-1 overflow-y-auto">
+            <div class="flex items-center gap-4">
+              <div class="relative h-16 w-16 shrink-0">
+                <svg viewBox="0 0 80 80" class="h-full w-full -rotate-90">
+                  <circle cx="40" cy="40" r="34" fill="none" stroke-width="6" class="stroke-muted" />
+                  <circle
+                    cx="40"
+                    cy="40"
+                    r="34"
+                    fill="none"
+                    stroke-width="6"
+                    stroke-linecap="round"
+                    class="stroke-primary transition-all duration-500"
+                    :stroke-dasharray="progressRingDash.array"
+                    :stroke-dashoffset="progressRingDash.offset"
+                  />
+                </svg>
+                <span class="absolute inset-0 flex items-center justify-center text-sm font-bold tabular-nums">{{ kpi.overallProgress }}%</span>
               </div>
-              <div class="flex items-center justify-between text-xs">
-                <span class="flex items-center gap-1.5 text-muted-foreground">
-                  <span class="w-1.5 h-1.5 rounded-full bg-zinc-300" />剩余
-                </span>
-                <span class="font-semibold tabular-nums">{{ kpi.remainingCount }}</span>
+              <div class="flex-1 space-y-2">
+                <div class="flex items-center justify-between">
+                  <span class="ui-meta flex items-center gap-1.5 text-muted-foreground">
+                    <span class="h-1.5 w-1.5 rounded-full bg-primary" />已安装
+                  </span>
+                  <span class="ui-body font-semibold tabular-nums">{{ kpi.installedCount }}</span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="ui-meta flex items-center gap-1.5 text-muted-foreground">
+                    <span class="h-1.5 w-1.5 rounded-full bg-secondary/70" />剩余
+                  </span>
+                  <span class="ui-body font-semibold tabular-nums">{{ kpi.remainingCount }}</span>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         <!-- 区域进度 -->
-        <div class="rounded-xl border bg-card p-4 shadow-sm">
-          <div class="flex items-center gap-2 mb-3">
-            <svg class="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+        <Card class="shadow-sm">
+          <CardHeader class="ui-card-header relative z-10 flex-row items-center space-y-0 text-foreground">
+            <svg class="ui-icon text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
               <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25zM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25z" />
             </svg>
-            <span class="text-xs font-semibold text-foreground">区域进度</span>
-          </div>
-          <div class="space-y-2.5">
-            <div v-for="z in manufacturingZoneCards" :key="z.key">
-              <div class="flex items-center justify-between mb-0.5">
-                <div class="flex items-center gap-1.5 text-[11px]">
-                  <span class="w-1.5 h-1.5 rounded-sm shrink-0" :style="{ background: ZONE_COLORS[z.cls] }" />
-                  <span class="text-muted-foreground">{{ z.name }}</span>
+            <span class="ui-title text-foreground">区域进度</span>
+          </CardHeader>
+          <CardContent class="ui-card-content ui-body flex-1 overflow-y-auto">
+            <div class="space-y-2.5">
+              <div v-for="z in manufacturingZoneCards" :key="z.key">
+                <div class="flex items-center justify-between mb-0.5">
+                  <div class="flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-sm shrink-0" :style="{ background: ZONE_COLORS[z.cls] }" />
+                    <span class="ui-meta text-muted-foreground">{{ z.name }}</span>
+                  </div>
+                  <span class="ui-meta font-semibold tabular-nums">{{ kpi.zones[z.key] }}%</span>
                 </div>
-                <span class="text-[11px] font-semibold tabular-nums">{{ kpi.zones[z.key] }}%</span>
-              </div>
-              <div class="h-1 bg-muted rounded-full overflow-hidden">
-                <div
-                  class="h-full rounded-full transition-all duration-500 ease-out"
-                  :style="{ width: kpi.zones[z.key] + '%', background: ZONE_COLORS[z.cls] }"
-                />
+                <div class="h-1 bg-muted rounded-full overflow-hidden">
+                  <div
+                    class="h-full rounded-full transition-all duration-500 ease-out"
+                    :style="{ width: kpi.zones[z.key] + '%', background: ZONE_COLORS[z.cls] }"
+                  />
+                </div>
               </div>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         <!-- 选中分段 -->
-        <div class="rounded-xl border bg-card p-4 shadow-sm">
-          <div class="flex items-center gap-2 mb-3">
-            <svg class="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+        <Card class="shadow-sm">
+          <CardHeader class="ui-card-header relative z-10 flex-row items-center space-y-0 text-foreground">
+            <svg class="ui-icon text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
               <path stroke-linecap="round" stroke-linejoin="round" d="M15.042 21.672L13.684 16.6m0 0l-2.51 2.225.569-9.47 5.227 7.917-3.286-.672zM12 2.25V4.5m5.834.166l-1.591 1.591M20.25 10.5H18M7.757 14.743l-1.59 1.59M6 10.5H3.75m4.007-4.243l-1.59-1.59" />
             </svg>
-            <span class="text-xs font-semibold text-foreground">选中总段</span>
-          </div>
-          <template v-if="selected">
-            <div class="flex items-center gap-2 mb-3">
-              <span class="px-2 py-0.5 text-[11px] font-bold rounded bg-primary/10 text-primary font-mono">{{ selected.id }}</span>
-              <span class="text-[11px] font-medium px-2 py-0.5 rounded-full" :class="{
-                'bg-emerald-50 text-emerald-700': selected.progress >= 80,
-                'bg-amber-50 text-amber-700': selected.progress >= 20 && selected.progress < 80,
-                'bg-red-50 text-red-600': selected.progress < 20,
-              }">
-                {{ getStatusText(selected.progress) }}
-              </span>
+            <span class="ui-title text-foreground">选中总段</span>
+          </CardHeader>
+          <CardContent class="ui-card-content ui-body flex-1 overflow-y-auto">
+            <template v-if="selected">
+              <div class="flex items-center gap-2 mb-3">
+                <span class="px-2 py-0.5 text-[11px] font-bold rounded bg-primary/10 text-primary font-mono">{{ selected.id }}</span>
+                <span class="text-[11px] font-medium px-2 py-0.5 rounded-full" :class="{
+                  'bg-primary/15 text-primary': selected.progress >= 80,
+                  'bg-secondary/45 text-foreground': selected.progress >= 20 && selected.progress < 80,
+                  'bg-destructive/15 text-destructive': selected.progress < 20,
+                }">
+                  {{ getStatusText(selected.progress) }}
+                </span>
+              </div>
+              <div class="grid grid-cols-3 gap-2">
+                <div class="text-center p-2 rounded-lg bg-muted/50">
+                  <div class="ui-micro text-muted-foreground mb-0.5">区域</div>
+                  <div class="ui-meta font-semibold">{{ getZoneName(selected.zone) }}</div>
+                </div>
+                <div class="text-center p-2 rounded-lg bg-muted/50">
+                  <div class="ui-micro text-muted-foreground mb-0.5">进度</div>
+                  <div class="ui-meta font-semibold text-primary tabular-nums">{{ Math.round(selected.progress) }}%</div>
+                </div>
+                <div class="text-center p-2 rounded-lg bg-muted/50">
+                  <div class="ui-micro text-muted-foreground mb-0.5">制造区</div>
+                  <div class="ui-meta font-semibold">{{ selected.mZone || '-' }}</div>
+                </div>
+              </div>
+            </template>
+            <div v-else class="flex flex-col items-center justify-center py-5 text-muted-foreground/40">
+              <svg class="w-7 h-7 mb-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.042 21.672L13.684 16.6m0 0l-2.51 2.225.569-9.47 5.227 7.917-3.286-.672zM12 2.25V4.5m5.834.166l-1.591 1.591M20.25 10.5H18M7.757 14.743l-1.59 1.59M6 10.5H3.75m4.007-4.243l-1.59-1.59" />
+              </svg>
+              <span class="ui-meta">点击模型选择分段</span>
             </div>
-            <div class="grid grid-cols-3 gap-2">
-              <div class="text-center p-2 rounded-lg bg-muted/50">
-                <div class="text-[9px] text-muted-foreground mb-0.5 uppercase tracking-wider">区域</div>
-                <div class="text-[11px] font-semibold">{{ getZoneName(selected.zone) }}</div>
-              </div>
-              <div class="text-center p-2 rounded-lg bg-muted/50">
-                <div class="text-[9px] text-muted-foreground mb-0.5 uppercase tracking-wider">进度</div>
-                <div class="text-[11px] font-semibold text-primary tabular-nums">{{ Math.round(selected.progress) }}%</div>
-              </div>
-              <div class="text-center p-2 rounded-lg bg-muted/50">
-                <div class="text-[9px] text-muted-foreground mb-0.5 uppercase tracking-wider">制造区</div>
-                <div class="text-[11px] font-semibold">{{ selected.mZone || '-' }}</div>
-              </div>
-            </div>
-          </template>
-          <div v-else class="flex flex-col items-center justify-center py-5 text-muted-foreground/40">
-            <svg class="w-7 h-7 mb-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M15.042 21.672L13.684 16.6m0 0l-2.51 2.225.569-9.47 5.227 7.917-3.286-.672zM12 2.25V4.5m5.834.166l-1.591 1.591M20.25 10.5H18M7.757 14.743l-1.59 1.59M6 10.5H3.75m4.007-4.243l-1.59-1.59" />
-            </svg>
-            <span class="text-[11px]">点击模型选择分段</span>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
 
@@ -1009,3 +1024,59 @@ const progressRingDash = computed(() => {
     <ShipMilestonePanel :milestones="milestones" :extra-kpi="extraKpi" />
   </div>
 </template>
+
+<style scoped>
+.home-theme {
+  --background: 0 0% 100%;
+  --foreground: 197 37% 24%;
+  --card: 0 0% 100%;
+  --card-foreground: 197 37% 24%;
+  --primary: 173 58% 39%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 42 74% 66%;
+  --secondary-foreground: 197 37% 24%;
+  --muted: 0 0% 97%;
+  --muted-foreground: 197 20% 35%;
+  --accent: 27 87% 67%;
+  --accent-foreground: 197 37% 24%;
+  --destructive: 12 76% 61%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 197 22% 85%;
+}
+
+.ui-card-header {
+  padding: 10px 16px;
+  gap: 8px;
+}
+
+.ui-card-content {
+  padding: 12px;
+}
+
+.ui-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.ui-title {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.ui-body {
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.ui-meta {
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.ui-micro {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+</style>

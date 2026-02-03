@@ -255,17 +255,17 @@ const getTaskTitle = (task: SegmentTask) => {
 const getStatusDotClass = (val?: TaskStatus) => {
   switch (val) {
     case 0:
-      return 'bg-slate-400';
+      return 'bg-secondary';
     case 1:
-      return 'bg-amber-500';
+      return 'bg-primary';
     case 2:
-      return 'bg-emerald-500';
+      return 'bg-accent';
     case 3:
-      return 'bg-sky-500';
+      return 'bg-foreground';
     case 4:
-      return 'bg-rose-500';
+      return 'bg-destructive';
     default:
-      return 'bg-slate-300';
+      return 'bg-muted-foreground/70';
   }
 };
 
@@ -317,24 +317,23 @@ const saveGeo = async (val: any) => {
 
 // ---------- 分段颜色（看板视图用） ----------
 const segmentColorPalette = [
-  '#42a5f5',
-  '#66bb6a',
-  '#ffca28',
-  '#ab47bc',
-  '#26a69a',
-  '#ffa726',
-  '#8d6e63',
-  '#29b6f6',
-  '#9ccc65',
-  '#ff7043',
-  '#5c6bc0',
+  '#2a9d8f',
+  '#3bb7a5',
+  '#e9c46a',
+  '#f1d080',
+  '#f4a261',
+  '#f7b37e',
+  '#e76f51',
+  '#ef8a6d',
+  '#264653',
+  '#3a5f6c',
 ];
 
 const segmentColorMap = ref<Map<string, string>>(new Map());
 
 const getSegmentColor = (task: SegmentTask) => {
   const key = task.segmentNo || task.id || '';
-  if (!key) return '#eaeaea';
+  if (!key) return '#f2f2f2';
 
   if (segmentColorMap.value.has(key)) return segmentColorMap.value.get(key);
 
@@ -434,27 +433,22 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex h-full flex-col gap-4 bg-gradient-to-br from-slate-50 via-sky-50/40 to-indigo-50/30 p-6 text-slate-800">
-    <div class="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-xl shadow-slate-200/50">
-      <!-- 表头：左"船型" + 右时间轴 -->
-      <div class="flex shrink-0 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-white">
-        <div class="flex w-[168px] shrink-0 items-center justify-center border-r border-slate-200 bg-slate-50 text-sm font-semibold tracking-wide text-slate-700">
+  <div class="surface-plan-theme flex h-full min-h-0 flex-1   bg-background gap-3 p-4 text-foreground">
+    <!-- 表头：左"船型" + 右时间轴 -->
+    <Card class="flex min-w-0 flex-1 flex-col overflow-hidden rounded-2xl">
+      <div class="flex shrink-0 border-b border-border bg-muted/40">
+        <div
+          class="flex w-[168px] shrink-0 items-center justify-center border-r border-border bg-destructive text-sm font-semibold tracking-wide text-destructive-foreground">
           船型
         </div>
-        <div class="min-w-0 flex-1 px-2 py-2">
-          <calendarHeader
-            ref="headerRef"
-            :start-date="startDate"
-            :end-date="endDate"
-            :cell-width="cellWidth"
-          />
+        <div class="min-w-0 flex-1">
+          <calendarHeader ref="headerRef" :start-date="startDate" :end-date="endDate" :cell-width="cellWidth" />
         </div>
       </div>
 
-      <!-- 表格主体：左侧固定船型列 + 右侧日期网格 -->
       <div class="flex min-h-0 flex-1 overflow-hidden">
         <!-- 左侧固定列 -->
-        <div class="w-[168px] shrink-0 border-r border-slate-200 bg-slate-50/80">
+        <div class="w-[168px] shrink-0 border-r border-border bg-muted/40">
           <div
             ref="fixedColRef"
             class="h-full overflow-y-auto px-2 py-2"
@@ -463,12 +457,12 @@ onMounted(() => {
             <div
               v-for="(item, rowIndex) in tableData"
               :key="item.lineName || item.id || rowIndex"
-              class="flex min-h-[40px] items-center border-b border-slate-100 px-3 text-sm font-medium text-slate-700 transition-colors odd:bg-white even:bg-slate-50/60 hover:bg-indigo-50 hover:text-indigo-700"
+              class="flex min-h-[40px] items-center border-b border-border/60 px-3 text-sm font-medium text-foreground transition-colors odd:bg-card even:bg-muted/40 hover:bg-destructive/10"
               :ref="(el) => (lineCellRefs[rowIndex] = el)"
             >
               {{ item.lineName }}
             </div>
-            <div v-if="!tableData.length" class="px-2 py-8 text-sm text-slate-400">
+            <div v-if="!tableData.length" class="px-2 py-8 text-sm text-muted-foreground">
               暂无船型
             </div>
           </div>
@@ -477,87 +471,57 @@ onMounted(() => {
         <!-- 右侧可滚动内容 -->
         <div ref="contentMainRef" class="min-w-0 flex-1 overflow-auto" @scroll="handleContentScroll">
           <div class="flex min-w-max flex-col">
-            <div
-              v-for="(item, rowIndex) in tableData"
-              :key="item.lineName || item.id || rowIndex"
-              class="flex min-h-[40px]"
-              :ref="(el) => (rowRefs[rowIndex] = el)"
-            >
-              <div
-                v-for="day in days"
-                :key="day.key"
-                class="relative shrink-0 border-b border-r border-slate-100 p-2 text-xs transition-colors"
-                :class="
-                  day.isWeekend
-                    ? 'bg-violet-50/50 hover:bg-violet-50'
+            <div v-for="(item, rowIndex) in tableData" :key="item.lineName || item.id || rowIndex"
+              class="flex min-h-[40px]" :ref="(el) => (rowRefs[rowIndex] = el)">
+              <div v-for="day in days" :key="day.key"
+                class="relative shrink-0 border-b border-r border-border/60 p-2 text-xs transition-colors" :class="day.isWeekend
+                    ? 'bg-secondary/25 hover:bg-secondary/35'
                     : rowIndex % 2 === 0
-                      ? 'bg-white hover:bg-slate-50/80'
-                      : 'bg-slate-50/40 hover:bg-slate-50'
-                "
-                :style="{ width: cellWidth + 'px' }"
-              >
-                <div
-                  v-for="(task, tIndex) in taskMap[item.lineName]?.[day.dateStr] || []"
-                  :key="(task.id || task.segmentNo || 't') + '-' + tIndex"
-                  class="mb-2 last:mb-0"
-                >
+                      ? 'bg-card hover:bg-muted/50'
+                      : 'bg-muted/30 hover:bg-muted/40'
+                  " :style="{ width: cellWidth + 'px' }">
+                <div v-for="(task, tIndex) in taskMap[item.lineName]?.[day.dateStr] || []"
+                  :key="(task.id || task.segmentNo || 't') + '-' + tIndex" class="mb-2 last:mb-0">
                   <div
-                    class="rounded-lg border border-slate-200/80 border-l-4 bg-white p-2.5 shadow-sm transition hover:shadow-md"
-                    :style="getTaskStyle(task)"
-                    :title="getTaskTitle(task)"
-                  >
-                    <div
-                      v-if="Number(task.isAuto) === 1"
-                      class="mb-1 inline-flex h-5 items-center rounded-full bg-sky-50 px-2 text-[10px] font-semibold text-sky-600 ring-1 ring-sky-200/80"
-                    >
+                    class="rounded-lg border border-border border-l-4 bg-card p-2.5 shadow-sm transition hover:shadow-md"
+                    :style="getTaskStyle(task)" :title="getTaskTitle(task)">
+                    <div v-if="Number(task.isAuto) === 1"
+                      class="mb-1 inline-flex h-5 items-center rounded-full bg-secondary/50 px-2 text-[10px] font-semibold text-foreground ring-1 ring-secondary/60">
                       APS
                     </div>
 
-                    <div class="text-sm font-semibold leading-tight text-slate-800">
+                    <div class="text-sm font-semibold leading-tight text-foreground">
                       {{ task.segmentName }}
                     </div>
 
-                    <div class="mt-1 text-[11px] text-slate-500">
+                    <div class="mt-1 text-[11px] text-muted-foreground">
                       {{ getTaskMeta(task) }}
                     </div>
 
-                    <div class="mt-1 text-[11px] text-slate-400">
+                    <div class="mt-1 text-[11px] text-muted-foreground/80">
                       {{ formatDate(task.planStart) }} ~ {{ formatDate(task.planFinish) }}
                     </div>
 
                     <div v-if="Number(task.status) === 1" class="mt-2 flex items-center gap-2">
-                      <div class="h-1.5 flex-1 rounded-full bg-slate-100">
-                        <div
-                          class="h-1.5 rounded-full bg-gradient-to-r from-amber-400 to-orange-400"
-                          :style="{ width: getTaskProgress(task) + '%' }"
-                        ></div>
+                      <div class="h-1.5 flex-1 rounded-full bg-muted">
+                        <div class="h-1.5 rounded-full bg-gradient-to-r from-secondary to-accent"
+                          :style="{ width: getTaskProgress(task) + '%' }"></div>
                       </div>
-                      <div class="w-10 text-right text-[10px] text-slate-500">
+                      <div class="w-10 text-right text-[10px] text-muted-foreground">
                         {{ getTaskProgress(task) }}%
                       </div>
                     </div>
 
                     <div class="mt-2 flex items-center justify-between">
-                      <div class="flex items-center gap-2 text-[11px] text-slate-500">
+                      <div class="flex items-center gap-2 text-[11px] text-muted-foreground">
                         <span class="h-2 w-2 rounded-full" :class="getStatusDotClass(task.status)"></span>
                         {{ getStatusLabel(task.status) }}
                       </div>
-                      <button
-                        type="button"
-                        class="flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-500 shadow-sm transition hover:bg-slate-50 hover:text-slate-700 hover:shadow"
-                        @click.stop="openGeo(task)"
-                        aria-label="场地地形"
-                      >
-                        <svg
-                          viewBox="0 0 24 24"
-                          aria-hidden="true"
-                          class="h-4 w-4"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="1.6"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                        >
+                      <button type="button"
+                        class="flex h-7 w-7 items-center justify-center rounded-md border border-border bg-card text-muted-foreground shadow-sm transition hover:bg-muted hover:text-foreground hover:shadow"
+                        @click.stop="openGeo(task)" aria-label="场地地形">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor"
+                          stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
                           <path d="M12 21s7-6.5 7-12a7 7 0 0 0-14 0c0 5.5 7 12 7 12z" />
                           <circle cx="12" cy="9" r="2.5" />
                         </svg>
@@ -570,14 +534,28 @@ onMounted(() => {
           </div>
         </div>
       </div>
-    </div>
+    </Card>
 
-    <!-- <PolygonEditor
-      ref="polygonEditor"
-      v-model="geoDialog"
-      title="场地地形编辑"
-      @save="saveGeo"
-      :data="graphJson"
-    /> -->
+
   </div>
 </template>
+
+<style scoped>
+.surface-plan-theme {
+  --background: 0 0% 100%;
+  --foreground: 197 37% 24%;
+  --card: 0 0% 100%;
+  --card-foreground: 197 37% 24%;
+  --primary: 173 58% 39%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 42 74% 66%;
+  --secondary-foreground: 197 37% 24%;
+  --muted: 0 0% 97%;
+  --muted-foreground: 197 20% 35%;
+  --accent: 27 87% 67%;
+  --accent-foreground: 197 37% 24%;
+  --destructive: 12 76% 61%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 197 22% 85%;
+}
+</style>

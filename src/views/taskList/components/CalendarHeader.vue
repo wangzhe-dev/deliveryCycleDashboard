@@ -182,8 +182,8 @@ const months = computed(() => {
 
 /* 通用单元格样式 */
 .cell {
-  border-left: 1px solid #ebeef5;
-  border-bottom: 1px solid #ebeef5;
+  border-left: 1px solid hsl(var(--border));
+  border-bottom: 1px solid hsl(var(--border));
   padding: 4px 0;
   text-align: center;
   white-space: nowrap;
@@ -193,23 +193,23 @@ const months = computed(() => {
 
 /* 年/月行 */
 .row-month .cell-month {
-  background-color: #f5f7fa;
+  background-color: hsl(var(--muted));
   font-weight: 600;
 }
 
 /* 日行 */
 .row-day .cell-day {
-  background-color: #ffffff;
+  background-color: hsl(var(--background));
 }
 
 /* 星期行 */
 .row-week .cell-week {
-  background-color: #ffffff;
+  background-color: hsl(var(--background));
 }
 
 /* 周末高亮（淡一点） */
 .weekend {
-  background-color: #fdf6ec;
-  color: #e6a23c;
+  background-color: hsl(var(--secondary) / 0.25);
+  color: hsl(var(--foreground));
 }
 </style>
