@@ -1,13 +1,11 @@
 <template>
   <header class="flex flex-wrap items-center gap-3">
     <div class="flex items-center gap-2">
-      <span
-        class="w-12 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground"
-      >
+      <span class="w-12 text-[13px] font-semibold text-muted-foreground">
         船号
       </span>
       <NativeSelect
-        class="h-9 min-w-[140px]"
+        class="h-9 min-w-[140px] text-[13px]"
         :value="selectedShip"
         @change="emit('update:selected-ship', $event.target.value)"
       >
@@ -18,13 +16,11 @@
     </div>
 
     <div class="flex items-center gap-2">
-      <span
-        class="w-14 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground"
-      >
+      <span class="w-14 text-[13px] font-semibold text-muted-foreground">
         分段号
       </span>
       <NativeSelect
-        class="h-9 min-w-[180px]"
+        class="h-9 min-w-[180px] text-[13px]"
         :value="selectedPart"
         @change="emit('update:selected-part', $event.target.value)"
       >
@@ -35,28 +31,20 @@
     </div>
 
     <div class="flex flex-1 items-center gap-2">
-      <span
-        class="w-10 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground"
-      >
+      <span class="w-10 text-[13px] font-semibold text-muted-foreground">
         流向
       </span>
       <div class="flex flex-wrap gap-2">
-        <Button
+        <button
           v-for="o in flowOptions"
           :key="o"
-          size="sm"
-          :variant="selectedFlow === o ? 'default' : 'outline'"
-          class="h-8 rounded-full px-3 text-xs"
-          :class="
-            selectedFlow === o
-              ? '!bg-primary !text-primary-foreground shadow-md shadow-primary/25 ring-1 ring-primary/30'
-              : ''
-          "
           type="button"
+          class="flow-btn h-8 rounded-full px-4 text-[13px] font-medium transition-all"
+          :class="selectedFlow === o ? 'flow-btn--active' : 'flow-btn--inactive'"
           @click="emit('flow-toggle', o)"
         >
           {{ o }}
-        </Button>
+        </button>
       </div>
     </div>
   </header>
@@ -76,3 +64,38 @@ const props = defineProps({
 
 const emit = defineEmits(['update:selected-ship', 'update:selected-part', 'flow-toggle']);
 </script>
+
+<style scoped>
+.flow-btn {
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+/* 选中状态 - 主题色 #e76f51 */
+.flow-btn--active {
+  background: #e76f51;
+  color: #fff;
+  border-color: #e76f51;
+  box-shadow:
+    0 4px 12px rgba(231, 111, 81, 0.35),
+    0 2px 4px rgba(231, 111, 81, 0.2);
+}
+
+.flow-btn--active:hover {
+  background: #d95f43;
+  border-color: #d95f43;
+}
+
+/* 未选中状态 */
+.flow-btn--inactive {
+  background: transparent;
+  color: #64748b;
+  border-color: #e2e8f0;
+}
+
+.flow-btn--inactive:hover {
+  background: rgba(231, 111, 81, 0.08);
+  color: #e76f51;
+  border-color: rgba(231, 111, 81, 0.4);
+}
+</style>

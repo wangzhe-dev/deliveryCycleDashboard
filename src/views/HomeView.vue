@@ -64,18 +64,18 @@ const milestones = reactive([
 // 柔和工业色系 - 平衡的饱和度
 const COLORS = {
   ZONE: {
-    A: '#2dd4bf',          // 青绿
-    B: '#fbbf24',          // 琥珀
-    E: '#fb923c',          // 橙色
-    F: '#f87171',          // 珊瑚红
-    S: '#a78bfa',          // 薰衣草紫
-    FORE: '#2dd4bf',       // 青绿 - 船艏
-    FORE_MID: '#5eead4',   // 浅青 - 前舷
-    MID: '#fbbf24',        // 琥珀 - 中舷
-    ENGINE: '#fb923c',     // 橙色 - 机舱
-    AFT: '#f87171',        // 珊瑚红 - 船艉
-    SUPERSTRUCTURE: '#a78bfa', // 薰衣草紫 - 上建
-    DEFAULT: '#2dd4bf',
+    A: '#0ea5e9',          // 天蓝
+    B: '#3b82f6',          // 蓝
+    E: '#facc15',          // 黄
+    F: '#84cc16',          // 绿
+    S: '#10b981',          // 青绿
+    FORE: '#e11d48',       // 红 - 船艏
+    FORE_MID: '#f472b6',   // 粉 - 前舷
+    MID: '#fb923c',        // 橙 - 中舷
+    ENGINE: '#facc15',     // 黄 - 机舱
+    AFT: '#84cc16',        // 绿 - 船艉
+    SUPERSTRUCTURE: '#10b981', // 青绿 - 上建
+    DEFAULT: '#0ea5e9',
   } as Record<string, string>,
   STATUS: {
     MISSING: '#f87171',
@@ -86,17 +86,17 @@ const COLORS = {
 }
 
 const ZONE_COLORS: Record<string, string> = {
-  fore: '#2dd4bf',
-  foreMid: '#5eead4',
-  mid: '#fbbf24',
-  engine: '#fb923c',
-  aft: '#f87171',
-  super: '#a78bfa',
+  fore: '#e11d48',
+  foreMid: '#f472b6',
+  mid: '#fb923c',
+  engine: '#facc15',
+  aft: '#84cc16',
+  super: '#10b981',
 }
 
 // ===================== 阈值/发光 =====================
 const THRESHOLDS = { MISSING: 20, DONE: 80 }
-const EMISSIVE = { BASE: 0.15, HOVER_BOOST: 0.15, HOVER_MAX: 0.35 }
+const EMISSIVE = { BASE: 0.06, HOVER_BOOST: 0.12, HOVER_MAX: 0.26 }
 
 // ===================== 推演 =====================
 const SIM = { days: 90, msPerDay: 260 }
@@ -147,6 +147,9 @@ let controls: OrbitControls
 let rafId = 0
 let resizeObserver: ResizeObserver | null = null
 
+let waterPlane: THREE.Mesh | null = null
+let gridHelper: THREE.GridHelper | null = null
+
 const segmentGroups = new Map<string, THREE.Group>()
 const raycaster = new THREE.Raycaster()
 const mouse = new THREE.Vector2()
@@ -186,6 +189,24 @@ function mulberry32(seed: number) {
     t ^= t + Math.imul(t ^ (t >>> 7), t | 61)
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296
   }
+}
+
+const tunedZoneColorCache = new Map<string, THREE.Color>()
+function tuneZoneColor(hex: string) {
+  const cached = tunedZoneColorCache.get(hex)
+  if (cached) return cached
+  const base = new THREE.Color(hex)
+  const hsl = { h: 0, s: 0, l: 0 }
+  base.getHSL(hsl)
+  // 轻微提升：对比度 + 饱和 + 提亮
+  const contrast = 1.08
+  const lift = 0.03
+  const sBoost = 1.12
+  const l = Math.min(1, Math.max(0, 0.5 + (hsl.l - 0.5) * contrast + lift))
+  const s = Math.min(1, Math.max(0, hsl.s * sBoost))
+  const tuned = new THREE.Color().setHSL(hsl.h, s, l)
+  tunedZoneColorCache.set(hex, tuned)
+  return tuned
 }
 
 function planForSegment(id: string) {
@@ -254,7 +275,8 @@ function initThree() {
   if (!canvas || !wrap) return
 
   scene = new THREE.Scene()
-  scene.background = new THREE.Color(0xe7e7e7)
+  // 让背景由容器样式控制（保持 #e7e7e7 但不发白）
+  scene.background = null
   // 关闭雾效，避免颜色被冲淡
   scene.fog = null
 
@@ -264,18 +286,31 @@ function initThree() {
   renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1))
   renderer.setClearAlpha(0)
   renderer.toneMapping = THREE.NoToneMapping  // 关闭色调映射，保持原色
+  renderer.toneMappingExposure = 0.9
   renderer.shadowMap.enabled = true
   renderer.shadowMap.type = THREE.PCFSoftShadowMap
   if ('outputColorSpace' in renderer) renderer.outputColorSpace = THREE.SRGBColorSpace
+  renderer.domElement.style.touchAction = 'none'
 
   controls = new OrbitControls(camera, renderer.domElement)
   controls.enableDamping = true
-  controls.dampingFactor = 0.06
+  controls.dampingFactor = 0.08
   controls.enableZoom = true
-  controls.zoomSpeed = 1.0
+  controls.zoomSpeed = 0.9
   controls.enablePan = true
+  controls.panSpeed = 0.85
+  controls.rotateSpeed = 0.7
   controls.screenSpacePanning = true
-  controls.maxPolarAngle = Math.PI / 2
+  controls.maxPolarAngle = Math.PI * 0.6
+  controls.mouseButtons = {
+    LEFT: THREE.MOUSE.ROTATE,
+    MIDDLE: THREE.MOUSE.DOLLY,
+    RIGHT: THREE.MOUSE.PAN,
+  }
+  controls.touches = {
+    ONE: THREE.TOUCH.ROTATE,
+    TWO: THREE.TOUCH.DOLLY_PAN,
+  }
 
   resizeObserver = new ResizeObserver(() => resizeToWrap())
   resizeObserver.observe(wrap)
@@ -296,7 +331,7 @@ function buildScene() {
   createWaterPlane()
   createAllSegments()
   applySimulation(simIndex.value)
-  frameAll(0.8)
+  frameAll()
   updateViewAppearance()
 }
 
@@ -307,14 +342,14 @@ function createEnvironment() {
 
   // 中性灰环境球 - 避免过亮
   const skyGeo = new THREE.SphereGeometry(100, 32, 16)
-  const skyMat = new THREE.MeshBasicMaterial({ color: 0xcccccc, side: THREE.BackSide })
+  const skyMat = new THREE.MeshBasicMaterial({ color: 0xb0b0b0, side: THREE.BackSide })
   envScene.add(new THREE.Mesh(skyGeo, skyMat))
 
   // 柔和环境光
-  envScene.add(new THREE.AmbientLight(0xffffff, 0.3))
+  envScene.add(new THREE.AmbientLight(0xffffff, 0.1))
 
   // 主光源
-  const envLight = new THREE.DirectionalLight(0xffffff, 0.5)
+  const envLight = new THREE.DirectionalLight(0xffffff, 0.22)
   envLight.position.set(1, 1, 1)
   envScene.add(envLight)
 
@@ -329,7 +364,7 @@ function addLights() {
   toRemove.forEach((l) => scene.remove(l))
 
   // 主光源
-  const key = new THREE.DirectionalLight(0xffffff, 1.2)
+  const key = new THREE.DirectionalLight(0xffffff, 0.85)
   key.position.set(80, 160, 120)
   key.castShadow = true
   key.shadow.mapSize.set(2048, 2048)
@@ -343,20 +378,20 @@ function addLights() {
   scene.add(key)
 
   // 补光
-  const fill = new THREE.DirectionalLight(0xffffff, 0.5)
+  const fill = new THREE.DirectionalLight(0xffffff, 0.28)
   fill.position.set(-120, 90, -80)
   scene.add(fill)
 
   // 轮廓光
-  const rim = new THREE.DirectionalLight(0xffffff, 0.4)
+  const rim = new THREE.DirectionalLight(0xffffff, 0.2)
   rim.position.set(-60, 80, 160)
   scene.add(rim)
 
   // 环境光
-  scene.add(new THREE.AmbientLight(0xffffff, 0.6))
+  scene.add(new THREE.AmbientLight(0xffffff, 0.28))
 
   // 半球光
-  scene.add(new THREE.HemisphereLight(0xffffff, 0xe7e7e7, 0.4))
+  scene.add(new THREE.HemisphereLight(0xffffff, 0xe7e7e7, 0.18))
 }
 
 function createWaterPlane() {
@@ -373,20 +408,22 @@ function createWaterPlane() {
     depthWrite: false,
     metalness: 0.1,
     roughness: 0.8,
-    envMapIntensity: 0.3,
+    envMapIntensity: 0.15,
   })
   const water = new THREE.Mesh(geometry, material)
   water.rotation.x = -Math.PI / 2
   water.position.y = -SHIP.height * scale * 0.3
   water.receiveShadow = true
   water.renderOrder = -10
+  waterPlane = water
   scene.add(water)
 
   const gridSize = Math.max(L, B) * 2.5
-  const gridHelper = new THREE.GridHelper(gridSize, 40, 0xc5c5c5, 0xd4d4d4)
-  ;(gridHelper.material as THREE.Material).transparent = true
-  ;(gridHelper.material as THREE.Material).opacity = 0.5
-  scene.add(gridHelper)
+  const grid = new THREE.GridHelper(gridSize, 40, 0xc5c5c5, 0xd4d4d4)
+  ;(grid.material as THREE.Material).transparent = true
+  ;(grid.material as THREE.Material).opacity = 0.5
+  gridHelper = grid
+  scene.add(grid)
 }
 
 function createAllSegments() {
@@ -423,15 +460,16 @@ function createAllSegments() {
 
     const mZoneKey = getManufacturingZoneKey(cfg)
     const zoneColor = COLORS.ZONE[mZoneKey || ''] || COLORS.ZONE[cfg.zone] || COLORS.ZONE.DEFAULT
+    const tunedZoneColor = tuneZoneColor(zoneColor)
 
     // 柔和质感材质 - 适度金属感和粗糙度
     const baseMat = new THREE.MeshStandardMaterial({
-      color: zoneColor,
-      emissive: zoneColor,
+      color: tunedZoneColor,
+      emissive: tunedZoneColor,
       emissiveIntensity: EMISSIVE.BASE,
       metalness: 0.2,
       roughness: 0.5,
-      envMapIntensity: 0.6,
+      envMapIntensity: 0.28,
     })
 
     const fillMat = new THREE.MeshStandardMaterial({
@@ -443,7 +481,7 @@ function createAllSegments() {
       polygonOffset: true,
       polygonOffsetFactor: -1,
       polygonOffsetUnits: -1,
-      envMapIntensity: 0.6,
+      envMapIntensity: 0.28,
     })
 
     const baseMesh = new THREE.Mesh(baseGeo, baseMat)
@@ -461,7 +499,7 @@ function createAllSegments() {
 
     // 更深的边缘线增加立体感
     const edgeGeo = new THREE.EdgesGeometry(baseGeo, 15)
-    const edgeMat = new THREE.LineBasicMaterial({ color: 0x555555, transparent: true, opacity: 0.35 })
+    const edgeMat = new THREE.LineBasicMaterial({ color: 0x64748b, transparent: true, opacity: 0.25 })
     const edgeLine = new THREE.LineSegments(edgeGeo, edgeMat)
     edgeLine.renderOrder = 3
 
@@ -514,10 +552,11 @@ function setGroupEmissive(group: THREE.Group, intensity: number) {
 function applyZoneView(group: THREE.Group) {
   const { zone, mZoneKey, baseMesh, fillMesh } = group.userData
   const c = COLORS.ZONE[mZoneKey] || COLORS.ZONE[zone] || COLORS.ZONE.DEFAULT
+  const tuned = tuneZoneColor(c)
   baseMesh.visible = true
   fillMesh.visible = false
-  baseMesh.material.color.set(c)
-  baseMesh.material.emissive.set(c)
+  baseMesh.material.color.copy(tuned)
+  baseMesh.material.emissive.copy(tuned)
   setGroupEmissive(group, EMISSIVE.BASE)
 }
 
@@ -574,7 +613,18 @@ function updateViewAppearance() {
 }
 
 // ===================== 相机 =====================
-function frameAll(tight = 0.8) {
+function positionEnvironment(center: THREE.Vector3) {
+  if (waterPlane) {
+    waterPlane.position.x = center.x
+    waterPlane.position.z = center.z
+  }
+  if (gridHelper) {
+    gridHelper.position.x = center.x
+    gridHelper.position.z = center.z
+  }
+}
+
+function frameAll(padding = 1.15) {
   const box = new THREE.Box3()
   segmentGroups.forEach((g) => g.visible && box.expandByObject(g))
   if (box.isEmpty()) return
@@ -582,21 +632,26 @@ function frameAll(tight = 0.8) {
   const size = box.getSize(new THREE.Vector3())
   const center = box.getCenter(new THREE.Vector3())
   const maxDim = Math.max(size.x, size.y, size.z)
-  const fov = (camera.fov * Math.PI) / 180
-  const dist = maxDim / 2 / Math.tan(fov / 2)
-  const desired = dist * tight
+  const vFov = THREE.MathUtils.degToRad(camera.fov)
+  const hFov = 2 * Math.atan(Math.tan(vFov / 2) * camera.aspect)
+  const height = Math.max(0.001, size.y)
+  const width = Math.max(0.001, Math.max(size.x, size.z))
+  const distHeight = (height * 0.5) / Math.tan(vFov / 2)
+  const distWidth = (width * 0.5) / Math.tan(hFov / 2)
+  const desired = padding * Math.max(distHeight, distWidth)
 
   const dir = new THREE.Vector3(1, 0.55, 1).normalize()
   controls.target.copy(center)
   camera.position.copy(center.clone().add(dir.multiplyScalar(desired)))
-  camera.near = Math.max(0.2, maxDim / 20)
-  camera.far = Math.max(200, desired * 15)
+  camera.near = Math.max(0.05, desired / 60)
+  camera.far = Math.max(200, desired * 20)
   camera.updateProjectionMatrix()
 
-  controls.minDistance = Math.max(0.8, maxDim * 0.12)
-  controls.maxDistance = Math.max(50, maxDim * 30)
+  controls.minDistance = Math.max(0.3, desired * 0.25)
+  controls.maxDistance = Math.max(50, desired * 6)
   controls.update()
   updateFogAfterFrame(maxDim)
+  positionEnvironment(center)
 }
 
 const isFullscreen = ref(false)
@@ -639,7 +694,7 @@ function unbindEvents() {
 function onKeyDown(e: KeyboardEvent) {
   if (e.key === '1') setView('complete')
   if (e.key === '2') setView('progress')
-  if (e.key === 'r' || e.key === 'R' || e.key === '0') frameAll(0.8)
+  if (e.key === 'r' || e.key === 'R' || e.key === '0') frameAll()
 }
 
 function getPickables() {
@@ -766,11 +821,11 @@ const progressRingDash = computed(() => {
       <div ref="viewerContainerRef" class="relative rounded-2xl overflow-hidden flex flex-col">
 
         <!-- Canvas 区域 -->
-        <div ref="canvasWrapRef" class="flex-1 relative min-h-0" @contextmenu.prevent>
+        <div ref="canvasWrapRef" class="three-stage flex-1 relative min-h-0" @contextmenu.prevent>
           <canvas ref="canvasRef" class="w-full h-full block" />
 
           <!-- 顶部浮层工具栏 -->
-          <div class="absolute top-0 inset-x-0 p-4 flex items-start justify-between pointer-events-none">
+          <div class="overlay-layer absolute top-0 inset-x-0 p-4 flex items-start justify-between pointer-events-none">
             <!-- 左上：标题 -->
             <div class="pointer-events-auto">
               <div class="clay-panel px-4 py-2.5 flex items-center gap-3">
@@ -817,7 +872,7 @@ const progressRingDash = computed(() => {
           </div>
 
           <!-- 左下：操作提示 -->
-          <div class="absolute bottom-4 left-4 pointer-events-none">
+          <div class="overlay-layer absolute bottom-4 left-4 pointer-events-none">
             <div class="flex items-center gap-2 select-none">
               <div class="clay-hint flex items-center gap-1.5 px-2.5 py-1.5">
                 <kbd class="clay-kbd">LMB</kbd>
@@ -835,7 +890,7 @@ const progressRingDash = computed(() => {
           </div>
 
           <!-- 右下：推演控制浮层 -->
-          <div class="absolute bottom-4 right-4 pointer-events-auto">
+          <div class="overlay-layer absolute bottom-4 right-4 pointer-events-auto">
             <div class="clay-panel px-4 py-3 w-[340px]">
               <div class="flex items-center gap-3">
                 <button
@@ -879,7 +934,7 @@ const progressRingDash = computed(() => {
           </div>
 
           <!-- 全屏时叠加进度 -->
-          <div v-if="isFullscreen" class="absolute top-24 left-4 pointer-events-none">
+          <div v-if="isFullscreen" class="overlay-layer absolute top-24 left-4 pointer-events-none">
             <div class="clay-panel p-4">
               <div class="flex items-center gap-4">
                 <div class="clay-progress-ring relative w-16 h-16 shrink-0">
@@ -904,7 +959,7 @@ const progressRingDash = computed(() => {
           </div>
 
           <!-- Loading -->
-          <div v-if="loading" class="absolute inset-0 flex flex-col items-center justify-center bg-foreground/85 backdrop-blur-sm gap-3">
+          <div v-if="loading" class="overlay-layer overlay-layer--top absolute inset-0 flex flex-col items-center justify-center bg-foreground/85 backdrop-blur-sm gap-3">
             <div class="w-10 h-10 rounded-full border-2 border-secondary/30 border-t-secondary animate-spin" />
             <span class="ui-body text-secondary/70 font-medium">加载 3D 场景...</span>
           </div>
@@ -1092,6 +1147,33 @@ const progressRingDash = computed(() => {
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
+}
+
+.three-stage {
+  background: #e7e7e7;
+}
+
+.three-stage::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(120% 120% at 70% 20%, rgba(255, 255, 255, 0.28), rgba(0, 0, 0, 0.12));
+  pointer-events: none;
+  z-index: 0;
+}
+
+.three-stage > canvas {
+  position: relative;
+  z-index: 1;
+}
+
+.overlay-layer {
+  z-index: 2;
+}
+
+.overlay-layer--top {
+  z-index: 3;
 }
 
 /* ===================== 液态玻璃样式 ===================== */

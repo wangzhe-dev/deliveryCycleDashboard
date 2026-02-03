@@ -1739,38 +1739,41 @@ watch(
   z-index: 9;
   display: inline-flex;
   gap: 6px;
-  padding: 5px;
+  padding: 6px;
   border-radius: 999px;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  background: rgba(255, 255, 255, 0.88);
-  backdrop-filter: blur(12px);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(16px) saturate(120%);
+  -webkit-backdrop-filter: blur(16px) saturate(120%);
   box-shadow:
-    0 4px 16px rgba(0, 0, 0, 0.08),
+    0 10px 22px rgba(15, 23, 42, 0.08),
     inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 .mv-info-tab {
   height: 32px;
   padding: 0 16px;
-  border: none;
+  border: 1px solid rgba(148, 163, 184, 0.35);
   border-radius: 999px;
-  background: transparent;
+  background: rgba(255, 255, 255, 0.65);
   color: #64748b;
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
   text-shadow: none;
-  transition: color 0.2s, background 0.2s;
+  transition: color 0.2s, background 0.2s, box-shadow 0.2s, border-color 0.2s;
 }
 .mv-info-tab:hover {
-  color: #1e293b;
-  background: rgba(0, 0, 0, 0.04);
+  color: #334155;
+  background: rgba(15, 23, 42, 0.04);
+  border-color: rgba(148, 163, 184, 0.55);
 }
 .mv-info-tab.is-active {
-  background: linear-gradient(180deg, #d4722a 0%, #b5622a 100%);
+  background: linear-gradient(180deg, rgba(247, 175, 150, 0.95) 0%, rgba(231, 111, 81, 0.95) 100%);
   color: #ffffff;
+  border-color: rgba(231, 111, 81, 0.45);
   box-shadow:
-    0 4px 12px rgba(181, 98, 42, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    0 6px 16px rgba(231, 111, 81, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
 }
 .mv-host {
   position: absolute;

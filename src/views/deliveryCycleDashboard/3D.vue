@@ -3,7 +3,7 @@
     ref="stageRef"
     class="relative h-[100dvh] min-h-screen w-full overflow-hidden bg-background text-slate-900 font-['Sora','Noto_Sans_SC','PingFang_SC','Microsoft_YaHei',sans-serif]"
   >
-    <div class="relative mx-auto flex h-full min-h-0 w-full max-w-[1680px] flex-col gap-4 px-4 py-4 lg:px-6 lg:py-6">
+    <div class="relative mx-auto flex h-full min-h-0 w-full max-w-[1680px] flex-col gap-2 p-5 space-y-2 bg-background">
       <Card class="animate-[panelIn_0.6s_ease] border-border/70 bg-card/80 shadow-sm backdrop-blur-xl [animation-delay:30ms]">
         <CardContent class="p-4">
           <TopBar
@@ -42,30 +42,40 @@
           @clear-marks="handleClearAllMarks"
         />
 
-        <Card
-          class="relative flex h-full flex-col overflow-hidden bg-slate-50/90 text-slate-900 shadow-[0_16px_32px_rgba(15,23,42,0.12)]"
-        >
+          <Card
+            class="relative flex h-full flex-col overflow-hidden bg-[#fffaf8]/95 text-slate-900 shadow-[0_12px_28px_rgba(15,23,42,0.1)]"
+          >
           <div
-            class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_35%_25%,rgba(56,189,248,0.14),transparent_55%),radial-gradient(circle_at_70%_80%,rgba(251,191,36,0.16),transparent_55%)]"
+            class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_28%_18%,rgba(231,111,81,0.2),transparent_55%),radial-gradient(circle_at_78%_80%,rgba(244,162,97,0.16),transparent_55%)]"
           ></div>
 
-          <CardHeader class="relative z-10 flex-row items-center justify-between px-4 py-3 text-slate-900">
+          <CardHeader
+            class="relative z-10 flex-row items-center justify-between border-b border-[#e76f51]/12 bg-[linear-gradient(120deg,rgba(255,250,248,0.98),rgba(255,255,255,0.96),rgba(255,248,244,0.98))] px-4 py-3 text-slate-900"
+          >
             <div class="flex flex-wrap items-center gap-2">
-              <span class="rounded-full bg-slate-900/5 px-3 py-1 text-[11px] font-semibold text-slate-600">
+              <span
+                class="rounded-full border border-[#e76f51]/18 bg-[#e76f51]/08 px-3 py-1 text-[13px] font-semibold text-[#9a4a38]"
+              >
                 分段 {{ selectedPart }}
               </span>
-              <span class="rounded-full bg-slate-900/5 px-3 py-1 text-[11px] font-semibold text-slate-600">
+              <span
+                class="rounded-full border border-[#e76f51]/18 bg-[#e76f51]/08 px-3 py-1 text-[13px] font-semibold text-[#9a4a38]"
+              >
                 流向 {{ selectedFlow || '全部' }}
               </span>
-              <span class="rounded-full bg-slate-900/5 px-3 py-1 text-[11px] font-semibold text-slate-600">
+              <span
+                class="rounded-full border border-[#e76f51]/18 bg-[#e76f51]/08 px-3 py-1 text-[13px] font-semibold text-[#9a4a38]"
+              >
                 模式 {{ modeLabel }}
               </span>
-              <span class="rounded-full bg-slate-900/5 px-3 py-1 text-[11px] font-semibold text-slate-600">
+              <span
+                class="rounded-full border border-[#e76f51]/18 bg-[#e76f51]/08 px-3 py-1 text-[13px] font-semibold text-[#9a4a38]"
+              >
                 工具 {{ toolModeLabel }}
               </span>
               <span
                 v-if="activeGroupFilter"
-                class="rounded-full bg-amber-200/40 px-3 py-1 text-[11px] font-semibold text-amber-900"
+                class="rounded-full border border-[#e76f51]/28 bg-[#e76f51]/16 px-3 py-1 text-[13px] font-semibold text-[#7a2f22]"
               >
                 组立 {{ activeGroupFilter }}
               </span>
@@ -75,7 +85,7 @@
               <Button
                 variant="outline"
                 size="icon"
-                class="h-9 w-9 border-slate-300/80 bg-white/70 text-slate-700 hover:bg-white"
+                class="h-9 w-9 border-[#e76f51]/28 bg-white/85 text-[#9a4a38] hover:border-[#e76f51]/45 hover:bg-[#e76f51]/08"
                 @click="toggleFullscreen"
                 :title="isFullscreen ? '退出全屏' : '全屏'"
               >
@@ -84,7 +94,7 @@
               <Button
                 variant="outline"
                 size="icon"
-                class="h-9 w-9 border-slate-300/80 bg-white/70 text-slate-700 hover:bg-white"
+                class="h-9 w-9 border-[#e76f51]/28 bg-white/85 text-[#9a4a38] hover:border-[#e76f51]/45 hover:bg-[#e76f51]/08"
                 @click="toggleRightCollapsed"
                 :title="rightCollapsed ? '展开右侧面板' : '收起右侧面板'"
               >
@@ -175,10 +185,10 @@
 </template>
 
 <script setup>
-import { ChevronLeft, ChevronRight, Maximize2, Minimize2 } from 'lucide-vue-next';
-import { showError, showSuccess } from '@/utils/utils';
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { Button, Card, CardContent, CardHeader } from '@/components/ui';
+import { showError, showSuccess } from '@/utils/utils';
+import { ChevronLeft, ChevronRight, Maximize2, Minimize2 } from 'lucide-vue-next';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import LeftBarV2 from './components/LeftBarV2.vue';
 import { M101P } from './components/M101P.js';
 import { M102P } from './components/M102P.js';
